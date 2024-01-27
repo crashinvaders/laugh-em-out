@@ -18,6 +18,7 @@ import com.esotericsoftware.spine.SkeletonRenderer
 import com.github.quillraven.fleks.configureWorld
 import com.crashinvaders.laughemout.App
 import com.crashinvaders.laughemout.game.controllers.JokeBuilderUiController
+import com.crashinvaders.laughemout.game.controllers.JokeGameManager
 import com.crashinvaders.laughemout.game.debug.DebugInputProcessor
 import com.crashinvaders.laughemout.game.engine.OnResizeEvent
 import com.crashinvaders.laughemout.game.engine.components.Info
@@ -45,7 +46,7 @@ class GameScreen : KtxScreen,
 
     val b2dWorld = com.crashinvaders.laughemout.game.engine.systems.PhysWorldSystem.createWorld().alsoRegisterDisposable()
 
-    val clearColor = Color(0.05f, 0.05f, 0.10f, 1.00f)
+    val clearColor = Color.valueOf("544470")
 
     val debugFont = FreeTypeFontGenerator(Gdx.files.internal("fonts/JetBrainsMonoNL-Regular.ttf"))
         .generateFont {
@@ -85,13 +86,13 @@ class GameScreen : KtxScreen,
             add(EntityActionSystem())
 
             //region Pre-engine game controllers
-            add(JokeBuilderUiController())
+            add(JokeBuilderUiController().also { it.enabled = false })
             //endregion
 
             //region Engine core
             // Physics
             add(TransformToPhysMapperSystem())
-            add(com.crashinvaders.laughemout.game.engine.systems.PhysWorldSystem())
+            add(PhysWorldSystem())
             add(PhysToTransformMapperSystem())
             add(PhysContactSubscriptionSystem())
 
@@ -174,6 +175,10 @@ class GameScreen : KtxScreen,
 //            it += DrawableDimensions(4f, 1f)
 //            it += DrawableOrigin()
 //        }
+    }
+
+    init {
+        JokeGameManager(fleksWorld).alsoRegisterDisposable()
     }
 
     override fun show() {

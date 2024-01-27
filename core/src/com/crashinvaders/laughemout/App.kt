@@ -10,6 +10,7 @@ import com.crashinvaders.common.OrderedInputMultiplexer
 import com.github.tommyettinger.textra.KnownFonts
 import com.crashinvaders.laughemout.common.audio.GameMusicController
 import com.crashinvaders.laughemout.game.GameScreen
+import com.esotericsoftware.spine.utils.SkeletonActor
 import ktx.app.KtxGame
 import ktx.app.KtxInputAdapter
 import ktx.app.KtxScreen
@@ -99,7 +100,9 @@ class App(val params: Params) : KtxGame<KtxScreen>() {
 
     private fun loadAssets(assets: AssetManager) {
         assets.load<BitmapFont>("fonts/pixola-cursiva.fnt")
+
         assets.load<TextureAtlas>("atlases/ui.atlas")
+        assets.load<TextureAtlas>("skeletons/characters.atlas")
 
         assets.finishLoading()
 

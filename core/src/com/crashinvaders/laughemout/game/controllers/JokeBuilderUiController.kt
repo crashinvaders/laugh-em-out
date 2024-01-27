@@ -85,7 +85,9 @@ class JokeBuilderUiController : IteratingSystem(family { all(
 
         camSystem = world.system<MainCameraStateSystem>()
 
-        onEnable()
+        if (isEnabled) {
+            onEnable()
+        }
     }
 
     override fun onEnable() {

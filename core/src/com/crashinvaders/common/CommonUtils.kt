@@ -1,5 +1,7 @@
 package com.crashinvaders.common;
 
+import com.badlogic.gdx.math.MathUtils
+
 object CommonUtils {
     /** This method actually replicate Integer.compare() to support Android API less than 19 */
     @JvmStatic
@@ -15,4 +17,9 @@ object CommonUtils {
     @JvmStatic
     fun compare(x: Boolean, y: Boolean): Int =
         if (x == y) 0 else (if (x) 1 else -1)
+
+    @JvmStatic
+    fun <T> Array<T>.random(): T {
+        return this[MathUtils.random(0, size - 1)]
+    }
 }

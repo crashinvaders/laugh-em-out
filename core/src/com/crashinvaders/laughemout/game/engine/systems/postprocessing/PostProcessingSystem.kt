@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.glutils.HdpiUtils
 import com.badlogic.gdx.utils.SnapshotArray
 import com.crashinvaders.common.ceilStep
 import com.crashinvaders.common.useIndexed
+import com.crashinvaders.laughemout.game.PPU
 import com.github.quillraven.fleks.IntervalSystem
 import com.github.quillraven.fleks.World.Companion.inject
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
@@ -27,8 +28,6 @@ class PostProcessingSystem : IntervalSystem() {
     val captureEndSubsystem = object : IntervalSystem() {
         override fun onTick() = onEndCapture()
     }
-
-    var ppu = 32f
 
     private val frameBufferPool = FrameBufferPool()
 
@@ -166,8 +165,8 @@ class PostProcessingSystem : IntervalSystem() {
     private fun syncWithMainCam() {
         val camera = mainCamera
 
-        val exactWidth: Float = camera.viewportWidth * ppu
-        val exactHeight: Float = camera.viewportHeight * ppu
+        val exactWidth: Float = camera.viewportWidth * PPU
+        val exactHeight: Float = camera.viewportHeight * PPU
         val fbWidth: Int = ceilStep(exactWidth, 2)
         val fbHeight: Int = ceilStep(exactHeight, 2)
 

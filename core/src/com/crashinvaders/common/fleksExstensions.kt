@@ -1,8 +1,6 @@
 package com.crashinvaders.common
 
-import com.github.quillraven.fleks.Entity
-import com.github.quillraven.fleks.Family
-import com.github.quillraven.fleks.IntervalSystem
+import com.github.quillraven.fleks.*
 
 typealias FleksWorld = com.github.quillraven.fleks.World
 
@@ -19,4 +17,13 @@ inline fun Family.firstOrNull(crossinline condition: Family.(Entity) -> Boolean)
         }
     }
     return result
+}
+
+abstract class EntityComponent<T> : Component<T> {
+
+    lateinit var entity: Entity private set
+
+    override fun World.onAdd(entity: Entity) {
+        this@EntityComponent.entity = entity
+    }
 }
