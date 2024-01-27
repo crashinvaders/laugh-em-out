@@ -19,7 +19,7 @@ class DrawableOrder(
     var isDirty: Boolean = true
 
     override fun compareTo(other: DrawableOrder): Int =
-        other.order.compareTo(order)
+        order.compareTo(other.order)
 
     override fun type() = DrawableOrder
 

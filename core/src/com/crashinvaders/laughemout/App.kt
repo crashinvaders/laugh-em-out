@@ -102,6 +102,7 @@ class App(val params: Params) : KtxGame<KtxScreen>() {
         assets.load<BitmapFont>("fonts/pixola-cursiva.fnt")
 
         assets.load<TextureAtlas>("atlases/ui.atlas")
+        assets.load<TextureAtlas>("atlases/env.atlas")
         assets.load<TextureAtlas>("skeletons/characters.atlas")
 
         assets.finishLoading()

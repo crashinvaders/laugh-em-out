@@ -475,10 +475,10 @@ class JokeBuilderUiController : IteratingSystem(family { all(
         private val tmpVec2 = Vector2()
 
         private const val DRAW_ORDER_BASE = GameDrawOrder.JOKE_BUILDER_UI_BASE
-        private const val DRAW_ORDER_CARD_DRAGGED =   -10 + DRAW_ORDER_BASE
-        private const val DRAW_ORDER_CARD_REGULAR =   -5  + DRAW_ORDER_BASE
-        private const val DRAW_ORDER_JOKE_IT_BUTTON = -1  + DRAW_ORDER_BASE
-        private const val DRAW_ORDER_PLACEHOLDER =    +5  + DRAW_ORDER_BASE
-        private const val DRAW_ORDER_MISC =           +10 + DRAW_ORDER_BASE
+        private const val DRAW_ORDER_MISC =           -10 + DRAW_ORDER_BASE
+        private const val DRAW_ORDER_PLACEHOLDER =    -5  + DRAW_ORDER_BASE
+        private const val DRAW_ORDER_JOKE_IT_BUTTON = +1  + DRAW_ORDER_BASE
+        private const val DRAW_ORDER_CARD_REGULAR =   +5  + DRAW_ORDER_BASE
+        private const val DRAW_ORDER_CARD_DRAGGED =   +10 + DRAW_ORDER_BASE
     }
 }

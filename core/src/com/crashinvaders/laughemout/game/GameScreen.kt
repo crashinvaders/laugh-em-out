@@ -86,7 +86,7 @@ class GameScreen : KtxScreen,
             add(EntityActionSystem())
 
             //region Pre-engine game controllers
-            add(JokeBuilderUiController().also { it.enabled = false })
+            add(JokeBuilderUiController().apply { enabled = false })
             //endregion
 
             //region Engine core
@@ -101,7 +101,7 @@ class GameScreen : KtxScreen,
             add(MainCameraStateSystem(object : ExtendViewport(12f, 8f) {
                 override fun apply(centerCamera: Boolean) = Unit // We don't need the Viewport to update its camera.
             }))
-            add(com.crashinvaders.laughemout.game.engine.systems.WorldCameraSystem())
+            add(WorldCameraSystem())
 
             // [Pre Render] Interpolation
             add(SodInterpolationPreRenderSystem())
@@ -112,7 +112,7 @@ class GameScreen : KtxScreen,
             add(postProcessingSystem.captureEndSubsystem)
             add(postProcessingSystem)
             add(PhysDebugRenderSystem())
-            add(TransformDebugRenderSystem())
+            add(TransformDebugRenderSystem().apply { enabled = false })
 
             // [Post Render] Interpolations
             add(SodInterpolationPostRenderSystem())

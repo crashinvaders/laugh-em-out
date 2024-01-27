@@ -3,6 +3,7 @@ package com.crashinvaders.laughemout.game.controllers
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.MathUtils.randomBoolean
+import com.badlogic.gdx.math.Vector2
 import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.laughemout.game.engine.components.Info
 import com.crashinvaders.laughemout.game.engine.components.SkeletonContainer
@@ -12,9 +13,14 @@ import com.esotericsoftware.spine.*
 import com.esotericsoftware.spine.utils.SkeletonActor
 import com.github.quillraven.fleks.Entity
 import com.crashinvaders.common.CommonUtils.random
+import com.crashinvaders.laughemout.game.UPP
 import com.crashinvaders.laughemout.game.components.AudienceMember
 
 object AudienceMemberHelper {
+
+    private const val ANIM_TRACK_HEIGHT_LEVEL = 100
+
+    private val tmpVec2 = Vector2()
 
     fun create(world: FleksWorld, x: Float, y: Float): Entity {
         val skelRenderer = world.inject<SkeletonRenderer>()
@@ -61,6 +67,17 @@ object AudienceMemberHelper {
         return entity
     }
 
+    fun evalSpawnPosition(index: Int): Vector2 {
+        val startX = 45f * UPP
+        val startY = -24f * UPP
+        val stepX = 26f * UPP
+        val backRowShiftY = 16 * UPP
+        val isFrontRow = index % 2 == 0
+        val x = startX + stepX * index
+        val y = startY + if (isFrontRow) 0f else backRowShiftY
+        return tmpVec2.set(x, y)
+    }
+
     private fun generatedAppearance(world: FleksWorld): AudienceMember {
         val race: Race = Race.values().random()
         val gender: Gender = Gender.values().random()
@@ -95,6 +112,13 @@ object AudienceMemberHelper {
                 Mouth.Beard0 -> "${cAudMemb.mouth.imgName}${cAudMemb.hairColor.imgSuffix}"
                 else -> "${cAudMemb.mouth.imgName}"
             })
+
+            val animState = cSkelContainer.animState
+            when(cAudMemb.heightLevel) {
+                HeightLevel.Short -> animState.setAnimation(ANIM_TRACK_HEIGHT_LEVEL, "height/low0", false)
+                HeightLevel.Tall -> animState.setAnimation(ANIM_TRACK_HEIGHT_LEVEL, "height/high0", false)
+                else -> Unit
+            }
         }
     }
 
