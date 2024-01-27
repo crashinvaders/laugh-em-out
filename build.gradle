@@ -1,0 +1,71 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'https://s01.oss.sonatype.org' }
+        gradlePluginPortal()
+        mavenLocal()
+        google()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "com.android.tools.build:gradle:$androidPluginVersion"
+    }
+}
+
+allprojects {
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
+
+    // This allows you to "Build and run using IntelliJ IDEA", an option in IDEA's Settings.
+    idea {
+        module {
+            outputDir file('build/classes/java/main')
+            testOutputDir file('build/classes/java/test')
+        }
+    }
+}
+
+configure(subprojects/* - project(':android')*/) {
+    apply plugin: 'java-library'
+    apply plugin: 'kotlin'
+
+    targetCompatibility = 11
+    sourceCompatibility = 11
+
+    sourceSets {
+        main.java.srcDirs += ['src']
+        main.kotlin.srcDirs += ['src']
+        main.resources.srcDirs += ['resources']
+    }
+
+    compileJava {
+        options.incremental = true
+    }
+
+    compileKotlin {
+        compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+    }
+
+    kotlin {
+        jvmToolchain(11)
+    }
+}
+
+subprojects {
+    version = '0.0.0'
+    ext.appName = 'laugh-em-out'
+    repositories {
+        mavenCentral()
+        maven { url 'https://s01.oss.sonatype.org' }
+        // You may want to remove the following line if you have errors downloading dependencies.
+        mavenLocal()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://teavm.org/maven/repository/' }
+    }
+}
+
+eclipse.project.name = 'laugh-em-out' + '-parent'
