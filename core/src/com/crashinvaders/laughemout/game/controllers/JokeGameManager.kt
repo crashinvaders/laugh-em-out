@@ -14,6 +14,7 @@ import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActor
 import com.crashinvaders.laughemout.game.components.Comedian
 import com.crashinvaders.laughemout.game.engine.components.*
 import com.crashinvaders.laughemout.game.engine.components.render.*
+import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
 import com.esotericsoftware.spine.*
 import com.esotericsoftware.spine.utils.SkeletonActor
 import com.github.quillraven.fleks.Entity
@@ -42,10 +43,12 @@ class JokeGameManager(private val world: FleksWorld) :
                 val audienceMemberCount = 5
                 for (i in 0 until audienceMemberCount) {
                     val (x, y) = AudienceMemberHelper.evalSpawnPosition(i)
-                    val entity = AudienceMemberHelper.create(world, x, y)
+                    val entity = AudienceMemberHelper.create(world, x, y, i)
                     audienceMembers.add(entity)
                 }
             }
+
+            system<MainCameraStateSystem>().cameraEntity[Transform].setWorldPosition(60f * UPP, 10f * UPP)
         }
     }
 

@@ -11,6 +11,7 @@ class Comedian : EntityComponent<Comedian>() {
 }
 
 class AudienceMember(
+    val placementIndex: Int,
     val race: AudienceMemberHelper.Race,
     val gender: AudienceMemberHelper.Gender,
     val hairStyle: AudienceMemberHelper.HairStyle?,
@@ -24,7 +25,7 @@ class AudienceMember(
 
     ) : EntityComponent<AudienceMember>() {
 
-    var emotionLevel: AudienceMemberHelper.EmotionLevel = AudienceMemberHelper.EmotionLevel.Neutral
+    var emoLevel: Int = 0
 
     override fun type() = AudienceMember
     companion object : ComponentType<AudienceMember>()

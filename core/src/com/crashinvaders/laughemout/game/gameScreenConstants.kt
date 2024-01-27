@@ -15,6 +15,8 @@ object GameInputOrder {
 object GameDrawOrder {
     const val MAP_LAYERS_BACK = -1000
 
+    const val UI_EMO_METER = -200
+
     const val ENVIRONMENT_BACK = -100
 
     const val COMEDIAN = 0

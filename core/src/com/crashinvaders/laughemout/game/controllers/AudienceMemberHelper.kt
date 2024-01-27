@@ -2,6 +2,7 @@ package com.crashinvaders.laughemout.game.controllers
 
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.MathUtils.randomBoolean
 import com.badlogic.gdx.math.Vector2
 import com.crashinvaders.common.FleksWorld
@@ -13,8 +14,10 @@ import com.esotericsoftware.spine.*
 import com.esotericsoftware.spine.utils.SkeletonActor
 import com.github.quillraven.fleks.Entity
 import com.crashinvaders.common.CommonUtils.random
+import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
 import com.crashinvaders.laughemout.game.components.AudienceMember
+import ktx.app.gdxError
 
 object AudienceMemberHelper {
 
@@ -22,15 +25,14 @@ object AudienceMemberHelper {
 
     private val tmpVec2 = Vector2()
 
-    fun create(world: FleksWorld, x: Float, y: Float): Entity {
+    fun create(world: FleksWorld, x: Float, y: Float, placementIndex: Int): Entity {
         val skelRenderer = world.inject<SkeletonRenderer>()
         val assets = world.inject<AssetManager>()
         val atlasCharacters = assets.get<TextureAtlas>("skeletons/characters.atlas")
 
         val skelData = SkeletonBinary(atlasCharacters)
-            .apply { scale = com.crashinvaders.laughemout.game.UPP }
+            .apply { scale = UPP }
             .readSkeletonData(com.badlogic.gdx.Gdx.files.internal("skeletons/audience-char.skel"))
-//        skelData.defaultSkin = skelData.skins[0]
 
         val skeleton = Skeleton(skelData)
         skeleton.rootBone.scaleX = -1f
@@ -38,29 +40,31 @@ object AudienceMemberHelper {
         val skelActor = SkeletonActor(skelRenderer, skeleton, animState)
 
         animState.setAnimation(0, "test-idle", true)
-        animState.update(com.badlogic.gdx.math.MathUtils.random() * 10f)
+        animState.update(MathUtils.random() * 10f)
 
         val entity = world.entity {
             it += Info("AudienceMember")
-            it += generatedAppearance(world)
+            it += generatedAppearance(world, placementIndex)
             it += Transform().apply {
                 localPositionX = x
                 localPositionY = y
-                localScaleX = -1f // Flip horizontally.
             }
 
             it += SkeletonContainer(skeleton, animState)
 
             it += ActorContainer(skelActor)
-            it += DrawableOrder(order = com.crashinvaders.laughemout.game.GameDrawOrder.COMEDIAN)
+            it += DrawableOrder(order = if (isFrontRow(placementIndex)) GameDrawOrder.AUDIENCE_FRONT_ROW else GameDrawOrder.AUDIENCE_BACK_ROW)
             it += DrawableTint()
             it += DrawableVisibility()
             it += DrawableDimensions(0f)
             it += DrawableOrigin(com.badlogic.gdx.utils.Align.bottom)
-
-//                it += SodInterpolation(4f, 0.4f, -0.5f)
-//                it += TransformDebugRenderTag
         }
+
+        with(world) {
+            entity[AudienceMember].emoLevel = MathUtils.random(-3, 3)
+        }
+
+        EmoMeterHelper.create(world, entity)
 
         setUpSkeleton(world, entity)
 
@@ -72,13 +76,17 @@ object AudienceMemberHelper {
         val startY = -24f * UPP
         val stepX = 26f * UPP
         val backRowShiftY = 16 * UPP
-        val isFrontRow = index % 2 == 0
+        val isFrontRow = isFrontRow(index)
         val x = startX + stepX * index
         val y = startY + if (isFrontRow) 0f else backRowShiftY
         return tmpVec2.set(x, y)
     }
 
-    private fun generatedAppearance(world: FleksWorld): AudienceMember {
+    fun isFrontRow(index: Int): Boolean {
+        return index % 2 == 0
+    }
+
+    private fun generatedAppearance(world: FleksWorld, placementIndex: Int): AudienceMember {
         val race: Race = Race.values().random()
         val gender: Gender = Gender.values().random()
         val hat: Hat? = if (randomBoolean(0.7f)) null else Hat.values().random()
@@ -92,7 +100,7 @@ object AudienceMemberHelper {
         val neck: Neck? = if (randomBoolean(0.8f)) null else Neck.values().random()
         val mouth: Mouth? = if (randomBoolean(0.9f)) null else Mouth.values().filter { it.targetGender == null || it.targetGender == gender }.random()
 
-        return AudienceMember(race, gender, hairStyle, hairColor, heightLevel, bodyStyle, glasses, hat, neck, mouth)
+        return AudienceMember(placementIndex, race, gender, hairStyle, hairColor, heightLevel, bodyStyle, glasses, hat, neck, mouth)
     }
 
     private fun setUpSkeleton(world: FleksWorld, audMemb: Entity) {
@@ -100,10 +108,11 @@ object AudienceMemberHelper {
             val cSkelContainer = audMemb[SkeletonContainer]
             val cAudMemb = audMemb[AudienceMember]
 
-            val skeleton = cSkelContainer.skeleton
+            val emoLevel = evalEmotionLevelType(cAudMemb.emoLevel)
 
+            val skeleton = cSkelContainer.skeleton
             skeleton.setAttachment("char-body", cAudMemb.bodyStyle.imgName)
-            skeleton.setAttachment("char-head", "char-head${cAudMemb.race.imgSuffix}${cAudMemb.emotionLevel.imgSuffix}")
+            skeleton.setAttachment("char-head", "char-head${cAudMemb.race.imgSuffix}${emoLevel.imgSuffix}")
             skeleton.setAttachment("char-hair", if (cAudMemb.hairStyle == null) null else "${cAudMemb.hairStyle.imgName}${cAudMemb.hairColor.imgSuffix}")
             skeleton.setAttachment("char-hat", if (cAudMemb.hat == null) null else "${cAudMemb.hat.imgName}")
             skeleton.setAttachment("char-glasses", if (cAudMemb.glasses == null) null else "${cAudMemb.glasses.imgName}")
@@ -119,6 +128,18 @@ object AudienceMemberHelper {
                 HeightLevel.Tall -> animState.setAnimation(ANIM_TRACK_HEIGHT_LEVEL, "height/high0", false)
                 else -> Unit
             }
+        }
+    }
+
+    private fun evalEmotionLevelType(emotionLevelVal: Int): EmotionLevel {
+        return when {
+            emotionLevelVal <= -3 -> EmotionLevel.Angry
+            emotionLevelVal <= -1 -> EmotionLevel.Dislike
+            emotionLevelVal == 0 -> EmotionLevel.Neutral
+            emotionLevelVal == 1 -> EmotionLevel.Like
+            emotionLevelVal == 2 -> EmotionLevel.Enjoy
+            emotionLevelVal >= 3 -> EmotionLevel.Rofl
+            else -> gdxError("Unexpected emotion level value: $emotionLevelVal")
         }
     }
 
