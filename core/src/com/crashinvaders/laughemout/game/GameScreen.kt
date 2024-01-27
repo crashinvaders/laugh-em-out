@@ -72,6 +72,8 @@ class GameScreen : KtxScreen,
             add("clearColor", clearColor)
             add("debugFont", debugFont)
             add("ui", assets.get<TextureAtlas>("atlases/ui.atlas"))
+            add("env", assets.get<TextureAtlas>("atlases/env.atlas"))
+            add("characters", assets.get<TextureAtlas>("skeletons/characters.atlas"))
             add("bmPixolaCurva", assets.get<BitmapFont>("fonts/pixola-cursiva.fnt"))
             add("pixolaCurva", Font(assets.get<BitmapFont>("fonts/pixola-cursiva.fnt")).also {
                 val fontScale = UPP * it.originalCellWidth

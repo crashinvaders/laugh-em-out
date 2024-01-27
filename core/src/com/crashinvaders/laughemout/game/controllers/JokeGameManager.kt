@@ -27,8 +27,8 @@ class JokeGameManager(private val world: FleksWorld) :
 
     private val skelRenderer = world.inject<SkeletonRenderer>()
     private val assets = world.inject<AssetManager>()
-    private val atlasCharacters = assets.get<TextureAtlas>("skeletons/characters.atlas")
-    private val atlasEnv = assets.get<TextureAtlas>("atlases/env.atlas")
+    private val atlasCharacters = world.inject<TextureAtlas>("characters")
+    private val atlasEnv = world.inject<TextureAtlas>("env")
 
     private val comedian: Entity
     private val audienceMembers = GdxArray<Entity>()

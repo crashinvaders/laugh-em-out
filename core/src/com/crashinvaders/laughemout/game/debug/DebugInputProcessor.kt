@@ -2,20 +2,44 @@ package com.crashinvaders.laughemout.game.debug
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
+import com.badlogic.gdx.scenes.scene2d.ui.Image
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.Disposable
 import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.common.toggle
-import com.crashinvaders.laughemout.App
-import com.crashinvaders.laughemout.common.audio.GameMusicController
+import com.crashinvaders.laughemout.game.GameDrawOrder
+import com.crashinvaders.laughemout.game.UPP
+import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActor
+import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
+import com.crashinvaders.laughemout.game.controllers.SpeechBubbleHelper
+import com.crashinvaders.laughemout.game.controllers.SpeechBubbleSize
 import com.crashinvaders.laughemout.game.debug.controllers.DebugController
 import com.crashinvaders.laughemout.game.debug.controllers.FreeCameraDebugController
 import com.crashinvaders.laughemout.game.debug.controllers.tests.*
+import com.crashinvaders.laughemout.game.engine.components.Info
+import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
+import com.crashinvaders.laughemout.game.engine.components.Transform
+import com.crashinvaders.laughemout.game.engine.components.TransformDebugRenderTag
+import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.*
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.DelayAction
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.RunnableAction
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.SequenceAction
 import com.crashinvaders.laughemout.game.engine.systems.postprocessing.PostProcessingSystem
 import com.crashinvaders.laughemout.game.hud.GameHudSystem
+import com.github.quillraven.fleks.Entity
+import com.github.tommyettinger.textra.Font
+import com.github.tommyettinger.textra.TypingLabel
 import ktx.app.KtxInputAdapter
 import ktx.collections.gdxMapOf
 import ktx.collections.set
+import ktx.math.component1
+import ktx.math.component2
 import kotlin.reflect.KClass
 
 class DebugInputProcessor(private val fleksWorld: FleksWorld) : KtxInputAdapter, Disposable {
@@ -111,8 +135,17 @@ class DebugInputProcessor(private val fleksWorld: FleksWorld) : KtxInputAdapter,
 //            Keys.NUM_0 -> {
 //                App.Inst.gameMusic.stopMusic()
 //            }
+
+            Keys.A -> {
+                val (x, y) = mouseWorldPos()
+                SpeechBubbleHelper.createSpeechBubble(fleksWorld, "Pew pew\nshakalaka\n pew pew meow", x, y, SpeechBubbleSize.Large, 3f)
+            }
         }
-        return false
+        return true
+    }
+
+    private fun mouseWorldPos(): Vector3 {
+        return fleksWorld.system<MainCameraStateSystem>().screenToWorld(Gdx.input.x, Gdx.input.y)
     }
 
     private inline fun <reified T : DebugController> toggleDebugController(controllerCreator: () -> T) {

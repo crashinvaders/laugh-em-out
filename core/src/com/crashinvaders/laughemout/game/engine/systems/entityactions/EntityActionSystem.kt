@@ -10,7 +10,7 @@ import ktx.collections.getOrPut
 
 class EntityActionSystem : IntervalSystem() {
 
-    private val activeActions = GdxArrayMap<Entity, SnapshotArray<com.crashinvaders.laughemout.game.engine.systems.entityactions.Action>>()
+    private val activeActions = GdxArrayMap<Entity, SnapshotArray<Action>>()
 
     private var isUpdating = false
 
@@ -51,10 +51,10 @@ class EntityActionSystem : IntervalSystem() {
     }
 
     /** Run an action without it's being bound to an entity. */
-    fun addAction(action: com.crashinvaders.laughemout.game.engine.systems.entityactions.Action) =
+    fun addAction(action: Action) =
         addAction(Entity.NONE, action)
 
-    fun addAction(entity: Entity, action: com.crashinvaders.laughemout.game.engine.systems.entityactions.Action) {
+    fun addAction(entity: Entity, action: Action) {
         if (isUpdating) {
             Gdx.app.postRunnable { addAction(entity, action) }
             return
