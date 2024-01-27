@@ -292,6 +292,25 @@ class Transform : Component<Transform> {
             return w2lProj
         }
 
+    fun setParent(newParent: Transform?, keepWorldPosition: Boolean) {
+        if (parent == newParent) {
+            return
+        }
+
+        if (!keepWorldPosition) {
+            parent = newParent
+            return
+        }
+
+        val oldPosX = worldPositionX
+        val oldPosY = worldPositionY
+        val oldScaleX = worldScaleX
+        val oldScaleY = worldScaleY
+        val oldRotation = worldRotation
+        parent = newParent
+        setWorld(oldPosX, oldPosY, oldRotation, oldScaleX, oldScaleY)
+    }
+
     private fun markOwnTransformDirty() {
         if (!updateDirtyFlags) {
             return

@@ -15,6 +15,7 @@ import com.crashinvaders.laughemout.game.engine.components.*
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import ktx.actors.minusAssign
 import ktx.actors.plusAssign
+import ktx.log.debug
 import ktx.math.component1
 import ktx.math.component2
 
@@ -39,6 +40,8 @@ class DrawableRenderSystem : IteratingSystem(
     private val viewport = ScreenViewport()
 
     val stage = Stage(viewport, world.inject<PolygonSpriteBatch>())
+
+    private var isPendingActorSort: Boolean = false
 
     init {
         stage.root.debugAll()
@@ -78,11 +81,11 @@ class DrawableRenderSystem : IteratingSystem(
         val actor = entity[ActorContainer].actor
         actor.userObject = entity
         stage += actor
-        stage.actors.sort { actor0, actor1 ->
-            val order0 = (actor0.userObject as Entity)[DrawableOrder].order
-            val order1 = (actor1.userObject as Entity)[DrawableOrder].order
-            order0.compareTo(order1)
-        }
+//        stage.actors.sort { actor0, actor1 ->
+//            val order0 = (actor0.userObject as Entity)[DrawableOrder].order
+//            val order1 = (actor1.userObject as Entity)[DrawableOrder].order
+//            order0.compareTo(order1)
+//        }
     }
 
     override fun onRemoveEntity(entity: Entity) {
@@ -91,13 +94,31 @@ class DrawableRenderSystem : IteratingSystem(
 
     override fun onTick() {
         super.onTick()
+
+        if (isPendingActorSort) {
+            isPendingActorSort = false
+            stage.actors.sort { a0, a1 ->
+                (a0.userObject as Entity)[DrawableOrder].compareTo((a1.userObject as Entity)[DrawableOrder])
+            }
+        }
+
         stage.act(deltaTime)
         stage.draw()
     }
 
     override fun onTickEntity(entity: Entity) {
-        if (!entity[DrawableVisibility].isVisible) {
+        val actor = entity[ActorContainer].actor
+        val visible = entity[DrawableVisibility].isVisible
+        actor.isVisible = visible
+
+        if (!visible) {
             return
+        }
+
+        val drawableOrder = entity[DrawableOrder]
+        if (drawableOrder.isDirty) {
+            drawableOrder.isDirty = false
+            isPendingActorSort = true
         }
 
         val origin = entity[DrawableOrigin]
@@ -118,7 +139,6 @@ class DrawableRenderSystem : IteratingSystem(
         val originX = origin.x * width
         val originY = origin.y * height
 
-        val actor = entity[ActorContainer].actor
         actor.setSize(width, height)
         actor.setPosition(posX + shiftX, posY + shiftY)
         actor.setScale(scaleX, scaleY)

@@ -1,7 +1,9 @@
 package com.crashinvaders.laughemout.game.engine.systems
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Camera
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.crashinvaders.common.CommonUtils
@@ -151,7 +153,11 @@ class MainCameraStateSystem(
         }
     }
 
+    fun screenToWorld(screenX: Int, screenY: Int): Vector3 =
+        camera.unproject(tmpVec.set(screenX.toFloat(), screenY.toFloat(), 0f))
+
     companion object {
+        private val tmpVec = Vector3()
         private val sharedCamState = CamState()
 
         private val processorComparator = Comparator<CamProcessor> { p0, p1 ->

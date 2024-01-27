@@ -1,0 +1,15 @@
+ui.png
+size:256,64
+repeat:none
+btn-joke-it-down
+bounds:73,34,55,21
+btn-joke-it-up
+bounds:130,34,55,21
+joke-subj-frame
+bounds:2,26,69,29
+joke-subj-placeholder
+bounds:2,2,64,22
+speech-bubble-frame
+bounds:187,27,38,28
+split:29,4,4,15
+pad:3,3,3,14

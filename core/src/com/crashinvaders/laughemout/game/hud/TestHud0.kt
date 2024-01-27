@@ -112,7 +112,7 @@ class TestHud0(
             root.add(container)
         }
 
-        entityLabel()
+//        entityLabel()
 //        stageLabel()
     }
 }

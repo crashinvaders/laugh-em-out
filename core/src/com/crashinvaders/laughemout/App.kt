@@ -4,6 +4,7 @@ import com.badlogic.gdx.*
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.crashinvaders.common.OrderedInputMultiplexer
 import com.github.tommyettinger.textra.KnownFonts
@@ -98,6 +99,7 @@ class App(val params: Params) : KtxGame<KtxScreen>() {
 
     private fun loadAssets(assets: AssetManager) {
         assets.load<BitmapFont>("fonts/pixola-cursiva.fnt")
+        assets.load<TextureAtlas>("atlases/ui.atlas")
 
         assets.finishLoading()
 

@@ -7,11 +7,19 @@ import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 
 class DrawableOrder(
-    var order: Int = 0
+    order: Int = 0
 ) : Component<DrawableOrder>, Comparable<DrawableOrder> {
 
+    var order: Int = order
+        set(value) {
+            isDirty = true
+            field = value
+        }
+
+    var isDirty: Boolean = true
+
     override fun compareTo(other: DrawableOrder): Int =
-        order.compareTo(other.order)
+        other.order.compareTo(order)
 
     override fun type() = DrawableOrder
 
@@ -38,6 +46,8 @@ class DrawableDimensions(
 ) : Component<DrawableDimensions> {
     override fun type() = DrawableDimensions
     companion object : ComponentType<DrawableDimensions>()
+
+    constructor() : this(0f, 0f)
 
     constructor(size: Float) : this(size, size)
 }

@@ -3,7 +3,9 @@ package com.crashinvaders.laughemout.game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.ui.Image
@@ -15,6 +17,7 @@ import com.crashinvaders.common.events.EventBus
 import com.esotericsoftware.spine.SkeletonRenderer
 import com.github.quillraven.fleks.configureWorld
 import com.crashinvaders.laughemout.App
+import com.crashinvaders.laughemout.game.controllers.JokeBuilderUiController
 import com.crashinvaders.laughemout.game.debug.DebugInputProcessor
 import com.crashinvaders.laughemout.game.engine.OnResizeEvent
 import com.crashinvaders.laughemout.game.engine.components.Info
@@ -25,6 +28,7 @@ import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActi
 import com.crashinvaders.laughemout.game.engine.systems.postprocessing.PostProcessingSystem
 import com.crashinvaders.laughemout.game.engine.systems.postprocessing.effects.ColorIndexPostEffect
 import com.crashinvaders.laughemout.game.hud.GameHudSystem
+import com.github.tommyettinger.textra.Font
 import ktx.app.KtxScreen
 import ktx.app.clearScreen
 import ktx.freetype.generateFont
@@ -55,8 +59,10 @@ class GameScreen : KtxScreen,
     private val inputMultiplexer = OrderedInputMultiplexer()
 
     private val fleksWorld = configureWorld {
+        val assets = App.Inst.assets
+
         injectables {
-            add(App.Inst.assets)
+            add(assets)
             add(eventBus)
             add(shapeRenderer)
             add(batch)
@@ -64,6 +70,12 @@ class GameScreen : KtxScreen,
             add(inputMultiplexer)
             add("clearColor", clearColor)
             add("debugFont", debugFont)
+            add("ui", assets.get<TextureAtlas>("atlases/ui.atlas"))
+            add("bmPixolaCurva", assets.get<BitmapFont>("fonts/pixola-cursiva.fnt"))
+            add("pixolaCurva", Font(assets.get<BitmapFont>("fonts/pixola-cursiva.fnt")).also {
+                val fontScale = UPP * it.originalCellWidth
+                it.scaleTo(fontScale, fontScale)
+            }.alsoRegisterDisposable())
             add(SkeletonRenderer())
         }
 
@@ -73,7 +85,7 @@ class GameScreen : KtxScreen,
             add(EntityActionSystem())
 
             //region Pre-engine game controllers
-
+            add(JokeBuilderUiController())
             //endregion
 
             //region Engine core
@@ -85,7 +97,7 @@ class GameScreen : KtxScreen,
 
             // Update cameras
 //            add(MainCameraStateSystem(ScreenViewport().apply { unitsPerPixel = 1f/32f }))
-            add(MainCameraStateSystem(object : ExtendViewport(8f, 4f) {
+            add(MainCameraStateSystem(object : ExtendViewport(12f, 8f) {
                 override fun apply(centerCamera: Boolean) = Unit // We don't need the Viewport to update its camera.
             }))
             add(com.crashinvaders.laughemout.game.engine.systems.WorldCameraSystem())
@@ -137,31 +149,31 @@ class GameScreen : KtxScreen,
             )
         }
 
-        fleksWorld.entity {
-            it += Info("Palette")
-            it += Transform()
-
-            it += ActorContainer(Image(paletteTexture))
-            it += DrawableOrder()
-            it += DrawableTint()
-            it += DrawableVisibility()
-            it += DrawableDimensions(8f, 1f)
-            it += DrawableOrigin()
-        }
-
-        fleksWorld.entity {
-            it += Info("Reference")
-            it += Transform().apply {
-                localPositionY = -1f;
-            }
-
-            it += ActorContainer(Image(referenceTexture))
-            it += DrawableOrder()
-            it += DrawableTint()
-            it += DrawableVisibility()
-            it += DrawableDimensions(4f, 1f)
-            it += DrawableOrigin()
-        }
+//        fleksWorld.entity {
+//            it += Info("Palette")
+//            it += Transform()
+//
+//            it += ActorContainer(Image(paletteTexture))
+//            it += DrawableOrder()
+//            it += DrawableTint()
+//            it += DrawableVisibility()
+//            it += DrawableDimensions(8f, 1f)
+//            it += DrawableOrigin()
+//        }
+//
+//        fleksWorld.entity {
+//            it += Info("Reference")
+//            it += Transform().apply {
+//                localPositionY = -1f;
+//            }
+//
+//            it += ActorContainer(Image(referenceTexture))
+//            it += DrawableOrder()
+//            it += DrawableTint()
+//            it += DrawableVisibility()
+//            it += DrawableDimensions(4f, 1f)
+//            it += DrawableOrigin()
+//        }
     }
 
     override fun show() {
