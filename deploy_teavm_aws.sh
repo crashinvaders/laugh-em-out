@@ -1,0 +1,1 @@
+aws s3 sync ./teavm/build/dist/webapp s3://crashinvaders.com/laughemout/ --profile crashinvaders --metadata-directive REPLACE --acl public-read --cache-control max-age=604800,public
