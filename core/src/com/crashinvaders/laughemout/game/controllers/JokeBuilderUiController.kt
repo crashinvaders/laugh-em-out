@@ -160,7 +160,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
 
         if (uiController != null) {
             val (x, y) = camSystem.screenToWorld(Gdx.input.x, Gdx.input.y)
-            val focusOnJoke = y < -40f * UPP
+            val focusOnJoke = y < -20f * UPP
             uiController!!.camProcessor.y = if (focusOnJoke) CAM_Y_JOKE else CAM_Y_STAGE
         }
     }
