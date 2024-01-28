@@ -14,9 +14,11 @@ import com.crashinvaders.laughemout.game.CameraProcessorOrder
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
 import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActorPixels
+import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
 import com.crashinvaders.laughemout.game.common.camera.Sod3CameraProcessor
 import com.crashinvaders.laughemout.game.components.AudienceMember
 import com.crashinvaders.laughemout.game.engine.components.Info
+import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
 import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
@@ -28,6 +30,7 @@ import com.esotericsoftware.spine.SkeletonRenderer
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IntervalSystem
 import com.github.tommyettinger.textra.Font
+import com.github.tommyettinger.textra.TextraLabel
 import com.github.tommyettinger.textra.TypingLabel
 import ktx.ai.add
 import ktx.ai.repeat
@@ -54,22 +57,17 @@ class JokeGameManager : IntervalSystem(),
         y = 10f * UPP
     }
 
-    private val bBoard = BTreeBlackBoard(world)
+    private val bBoard = BTreeBlackBoard(world, 3)
     private val bTree: BehaviorTree<BTreeBlackBoard> = BehaviorTree()
 
     override fun onInit() {
         super.onInit()
 
         createEnvironment(world)
+        bBoard.eScoreLabel = createScoreLabel(world)
+        updateScoreLabel(world, bBoard.eScoreLabel, bBoard.scoreCount)
 
-        bBoard.comedian = ComedianHelper.createComedian(world, 0f, 0f)
-
-        val audienceMemberCount = 5
-        for (i in 0 until audienceMemberCount) {
-            val (x, y) = AudienceMemberHelper.evalSpawnPosition(i)
-            val entity = AudienceMemberHelper.create(world, x, y, i)
-            bBoard.audienceMembers.add(entity)
-        }
+        bBoard.eComedian = ComedianHelper.createComedian(world, 0f, 0f)
 
         world.system<MainCameraStateSystem>().addProcessor(camProcessor)
 
@@ -79,17 +77,25 @@ class JokeGameManager : IntervalSystem(),
             repeat {
                 resetOnCompletion {
                     sequence {
-                        //TODO Intro.
-                        waitLeaf(2f)
+                        runnable {
+                            bBoard.maxAudienceCount = when {
+                                bBoard.jokeCount < 1 -> 3
+                                bBoard.jokeCount < 3 -> 4
+                                else -> 5
+                            }
+                        }
+                        waitLeaf(1f)
+                        add(SpawnAudienceTask(world))
+                        waitLeaf(1f)
                         runnable {
                             if (bBoard.jokeCount == 0) {
                                 return@runnable
                             }
                             val jokeDuration = when {
-                                bBoard.jokeCount < 2 -> JokeTimerDuration.Sec25
-                                bBoard.jokeCount > 4 -> JokeTimerDuration.Sec20
-                                bBoard.jokeCount < 6 -> JokeTimerDuration.Sec15
-                                bBoard.jokeCount < 10 -> JokeTimerDuration.Sec10
+                                bBoard.jokeCount < 3 -> JokeTimerDuration.Sec25
+                                bBoard.jokeCount > 5 -> JokeTimerDuration.Sec20
+                                bBoard.jokeCount < 7 -> JokeTimerDuration.Sec15
+                                bBoard.jokeCount < 11 -> JokeTimerDuration.Sec10
                                 else -> JokeTimerDuration.Sec7
                             }
                             bBoard.eJokeTimer = JokeTimerHelper.createTimer(
@@ -113,8 +119,8 @@ class JokeGameManager : IntervalSystem(),
 
                             SpeechBubbleHelper.createSpeechBubble(
                                 world, "...",
-                                bBoard.comedian[Transform].worldPositionX,
-                                bBoard.comedian[Transform].worldPositionY + 56f * UPP,
+                                bBoard.eComedian[Transform].worldPositionX,
+                                bBoard.eComedian[Transform].worldPositionY + 56f * UPP,
                                 SpeechBubbleSize.Small, 2f
                             )
 
@@ -124,9 +130,28 @@ class JokeGameManager : IntervalSystem(),
 
                         add(AffectAudienceTask(world))
 
-                        waitLeaf(2f)
+                        runnable {
+                            // Activate score label for the first time.
+                            bBoard.eScoreLabel[DrawableVisibility].also {
+                                if (!it.isVisible) {
+                                    it.isVisible = true
+                                    animateScoreLabelPulse(world, bBoard.eScoreLabel)
+                                }
+                            }
+                        }
+                        add(AudienceRotationTask(world))
+
+                        waitLeaf(1f)
 
                         runnable {
+                            // Activate score label for the first time.
+                            bBoard.eScoreLabel[DrawableVisibility].also { 
+                                if (!it.isVisible) {
+                                    it.isVisible
+                                    animateScoreLabelPulse(world, bBoard.eScoreLabel)
+                                }
+                            }
+
                             if (bBoard.completedJokeView != null) {
                                 world -= bBoard.completedJokeView!!
                                 bBoard.completedJokeView = null
@@ -165,27 +190,6 @@ class JokeGameManager : IntervalSystem(),
         }
     }
 
-    fun createResultJokeView(world: FleksWorld, data: JokeStructureData): Entity {
-        val font = world.inject<Font>("pixolaCurva")
-
-        return world.entity {
-            it += Info("ComedyStage")
-            it += Transform().apply {
-                localPositionX = -60f * UPP
-                localPositionY = -54f * UPP
-            }
-
-            val text = "[#c8d7eb][#ffedd4]${data.subjectPre.text.replace('\n', ' ')}[] ${data.connector.text.replace('\n', ' ')} [#ffedd4]${data.subjectPost.text.replace('\n', ' ')}[]"
-            val actor = TypingLabel(text, font)
-            it += ActorContainer(actor)
-            it += DrawableOrder(GameDrawOrder.COMPLETED_JOKE_VIEW)
-            it += DrawableTint()
-            it += DrawableVisibility()
-            it += DrawableDimensions().fromActorPixels(actor)
-            it += DrawableOrigin(Align.center)
-        }
-    }
-
     override fun onTick() {
         bTree.step()
     }
@@ -206,6 +210,22 @@ class JokeGameManager : IntervalSystem(),
             val actor = Image(atlasEnv.findRegion("stage0"))
             it += ActorContainer(actor)
             it += DrawableOrder(GameDrawOrder.ENVIRONMENT_BACK)
+            it += DrawableTint()
+            it += DrawableVisibility()
+            it += DrawableDimensions().fromActorPixels(actor)
+            it += DrawableOrigin(Align.bottomLeft)
+        }
+
+        world.entity {
+            it += Info("GameTitle")
+            it += Transform().apply {
+                localPositionX = +15f * UPP
+                localPositionY = +25f * UPP
+            }
+
+            val actor = Image(atlasEnv.findRegion("title-leo0"))
+            it += ActorContainer(actor)
+            it += DrawableOrder(GameDrawOrder.ENVIRONMENT_BACK - 5)
             it += DrawableTint()
             it += DrawableVisibility()
             it += DrawableDimensions().fromActorPixels(actor)
@@ -310,35 +330,128 @@ class JokeGameManager : IntervalSystem(),
             } else {
                 AudienceMemberHelper.animateJokeReactionNeg(world, audMemb.entity)
             }
+            AudienceMemberHelper.updateFaceEmotion(world, audMemb.entity)
+        }
+
+        fun createResultJokeView(world: FleksWorld, data: JokeStructureData): Entity {
+            val font = world.inject<Font>("pixolaCurva")
+
+            return world.entity {
+                it += Info("ComedyStage")
+                it += Transform().apply {
+                    localPositionX = -60f * UPP
+                    localPositionY = -54f * UPP
+                }
+
+                val text = "[#c8d7eb][#ffedd4]${data.subjectPre.text.replace('\n', ' ')}[] ${data.connector.text.replace('\n', ' ')} [#ffedd4]${data.subjectPost.text.replace('\n', ' ')}[]"
+                val actor = TypingLabel(text, font)
+                it += ActorContainer(actor)
+                it += DrawableOrder(GameDrawOrder.COMPLETED_JOKE_VIEW)
+                it += DrawableTint()
+                it += DrawableVisibility()
+                it += DrawableDimensions().fromActorPixels(actor)
+                it += DrawableOrigin(Align.center)
+            }
+        }
+
+        fun createScoreLabel(world: FleksWorld): Entity {
+            val font = world.inject<Font>("pixolaCurva")
+
+            return world.entity {
+                it += Info("ComedyStage")
+                it += Transform().apply {
+                    localPositionX = -60f * UPP
+                    localPositionY = 64f * UPP
+                }
+
+                val actor = TextraLabel("", font)
+                it += ActorContainer(actor)
+                it += DrawableOrder(GameDrawOrder.UI_SCORE_LABEL)
+                it += DrawableTint()
+                it += DrawableVisibility(false)
+                it += DrawableDimensions().fromActorPixels(actor)
+                it += DrawableOrigin(Align.center)
+
+                it += SodInterpolation(6f, 0.6f, -0.5f)
+            }
+        }
+
+        fun updateScoreLabel(world: FleksWorld, eScoreLabel: Entity, scoreCount: Int) {
+            with(world) {
+                val label = eScoreLabel[ActorContainer].actor as TextraLabel
+                label.setText("[#95a4b6]Score: [#ffedd4][125%]${scoreCount}")
+            }
+        }
+
+        fun animateScoreLabelPulse(world: FleksWorld, eScoreLabel: Entity) {
+            with(world) {
+                eScoreLabel[SodInterpolation].kickVisually()
+            }
+        }
+
+        fun nextAvailableAudiencePlacementIndex(world: FleksWorld, audMembers: GdxArray<Entity>): Int {
+            var foundIndex: Int
+            with(world) {
+                var index = 0
+                while (true) {
+                    var isVacant = true
+                    for (i in 0 until audMembers.size) {
+                        if (audMembers[i][AudienceMember].placementIndex == index) {
+                            index++
+                            isVacant = false
+                            break
+                        }
+                    }
+                    if (isVacant) {
+                        foundIndex = index
+                        break
+                    }
+                }
+            }
+            return foundIndex
         }
     }
 
-    private class IntroStateTask(val world: FleksWorld): LeafTask<BTreeBlackBoard>() {
+    private class SpawnAudienceTask(val world: FleksWorld): LeafTask<BTreeBlackBoard>() {
 
         private val actionSystem = world.system<EntityActionSystem>()
 
-        private var isCompleted = false
-
-        private val actionHost = world.entity()
+        var isCompleted = false
+            private set
 
         override fun start() {
             super.start()
 
-            actionSystem.addAction(actionHost, SequenceAction(
-                RunnableAction {
+            with(world) {
+                val bBoard = `object`
 
-                },
-                DelayAction(2f),
-                RunnableAction {
-                    debug { "Done!" }
+                val membersToSpawn = bBoard.maxAudienceCount - bBoard.audienceMembers.size
+                if (membersToSpawn <= 0) {
                     isCompleted = true
+                    return
                 }
-            ))
+
+                val sequenceAction = SequenceAction()
+
+                for (i in 0 until membersToSpawn) {
+                    sequenceAction.addAction(RunnableAction {
+                        val index = nextAvailableAudiencePlacementIndex(world, bBoard.audienceMembers)
+                        val (x, y) = AudienceMemberHelper.evalSpawnPosition(index)
+                        val entity = AudienceMemberHelper.create(world, x, y, index)
+                        bBoard.audienceMembers.add(entity)
+                    })
+                    sequenceAction.addAction(DelayAction(0.5f))
+                }
+                sequenceAction.addAction(RunnableAction {
+                    isCompleted = true
+                })
+                actionSystem.addAction(getObject().eComedian, sequenceAction)
+            }
         }
 
-        override fun end() {
-            super.end()
-            world -= actionHost
+        override fun resetTask() {
+            super.resetTask()
+            isCompleted = false
         }
 
         override fun execute(): Status {
@@ -403,65 +516,6 @@ class JokeGameManager : IntervalSystem(),
         }
     }
 
-    private class JokeBuildTimerTask(val world: FleksWorld): LeafTask<BTreeBlackBoard>() {
-
-        var isCompleted = false
-            private set
-
-        override fun start() {
-            super.start()
-
-            val bBoard = `object`
-
-            bBoard.eJokeTimer = JokeTimerHelper.createTimer(world, 60f * UPP, -47f * UPP, JokeTimerDuration.Sec10) {
-
-            }
-
-            val subjectCount = 3
-            val subjects: GdxArray<JokeSubjectData>
-
-            with(world) {
-                val audienceMembers = `object`.audienceMembers.map { it[AudienceMember] }
-
-                val subjectsAll = JokeGameDataHelper.jokeSubjects
-                val subjectsFiltered = subjectsAll.filter { subject ->
-                    audienceMembers.any { audMemb -> checkSubjectIntersection(audMemb, subject) }
-                }.toGdxSet()
-
-                while (subjectsFiltered.size < subjectCount) {
-                    subjectsFiltered.add(subjectsAll.random())
-                }
-                subjects = subjectsFiltered.toGdxArray()
-                subjects.shuffle()
-                while (subjects.size > subjectCount) {
-                    subjects.pop()
-                }
-            }
-
-            world.system<JokeBuilderUiController>().show(world, JokeBuilderData(subjects,
-                JokeConnectorData("drive\nbetter\nthan", 1, -1))
-            ) {
-                debug { "Complete joke: ${it.subjectPre.text.replace('\n', ' ')} ${it.connector.text.replace('\n', ' ')} ${it.subjectPost.text.replace('\n', ' ')}" }
-
-                getObject().completedJoke = it
-                isCompleted = true
-            }
-        }
-
-        override fun resetTask() {
-            super.resetTask()
-            isCompleted = false
-        }
-
-        override fun execute(): Status {
-            return if (isCompleted) Status.SUCCEEDED else Status.RUNNING
-        }
-
-        override fun copyTo(p0: Task<BTreeBlackBoard>?): Task<BTreeBlackBoard> {
-            TODO("Not yet implemented")
-        }
-    }
-
     private class AffectAudienceTask(val world: FleksWorld): LeafTask<BTreeBlackBoard>() {
 
         private val actionSystem = world.system<EntityActionSystem>()
@@ -488,6 +542,7 @@ class JokeGameManager : IntervalSystem(),
                 if (affectionDelta == 0) {
                     sequenceAction.addAction(RunnableAction {
                         AudienceMemberHelper.animateJokeReactionNeut(world, audMemb.entity)
+                        AudienceMemberHelper.updateFaceEmotion(world, audMemb.entity)
                     })
                     sequenceAction.addAction(DelayAction(0.5f))
                     return@forEachIndexed
@@ -497,25 +552,6 @@ class JokeGameManager : IntervalSystem(),
 //                    val emoLevel = MathUtils.clamp(audMemb.emoLevel + affectionDelta, -3, +3)
                     sequenceAction.addAction(RunnableAction {
                         changeAudMemberEmoLevel(world, audMemb, affectionDelta)
-//                        audMemb.emoLevel = emoLevel
-//                        audMemb.emoMeter.also {
-//                            it.emoLevel = emoLevel
-//                            EmoMeterHelper.animateValueChange(world, it.entity)
-//                            EmoMeterHelper.animateToken(
-//                                world, it.entity, when {
-//                                    emoLevel >= 3 -> TokenType.Star
-//                                    emoLevel <= -3 -> TokenType.Cancel
-//                                    affectionDelta > 0 -> TokenType.Like
-//                                    affectionDelta < 0 -> TokenType.Dislike
-//                                    else -> gdxError("Unexpected case")
-//                                }
-//                            )
-//                        }
-//                        if (affectionDelta > 0) {
-//                            AudienceMemberHelper.animateJokeReactionPos(world, audMemb.entity)
-//                        } else {
-//                            AudienceMemberHelper.animateJokeReactionNeg(world, audMemb.entity)
-//                        }
                     })
                 }
                 sequenceAction.addAction(DelayAction(1.0f))
@@ -524,8 +560,68 @@ class JokeGameManager : IntervalSystem(),
             sequenceAction.addAction(RunnableAction {
                 isCompleted = true
             })
+            actionSystem.addAction(getObject().eComedian, sequenceAction)
+        }
 
-            actionSystem.addAction(getObject().comedian, sequenceAction)
+        override fun resetTask() {
+            super.resetTask()
+            isCompleted = false
+        }
+
+        override fun execute(): Status {
+            return if (isCompleted) Status.SUCCEEDED else Status.RUNNING
+        }
+
+        override fun copyTo(p0: Task<BTreeBlackBoard>?): Task<BTreeBlackBoard> {
+            TODO("Not yet implemented")
+        }
+    }
+
+    private class AudienceRotationTask(val world: FleksWorld): LeafTask<BTreeBlackBoard>() {
+
+        private val actionSystem = world.system<EntityActionSystem>()
+
+        var isCompleted = false
+            private set
+
+        override fun start() {
+            super.start()
+
+            with(world) {
+                val bBoard = `object`
+                val sequenceAction = SequenceAction()
+
+                val removedPlacementIndices = GdxIntArray()
+
+                val completedMembers = bBoard.audienceMembers.filter { it[AudienceMember].emoLevel == 3 }.toGdxArray()
+                completedMembers.forEach {
+                    removedPlacementIndices.add(it[AudienceMember].placementIndex)
+
+                    sequenceAction.addAction(RunnableAction {
+                        bBoard.audienceMembers.removeValue(it, true)
+                        bBoard.scoreCount++
+                        updateScoreLabel(world, bBoard.eScoreLabel, bBoard.scoreCount)
+                        animateScoreLabelPulse(world, bBoard.eScoreLabel)
+                        world -= it
+                    })
+                    sequenceAction.addAction(DelayAction(1f))
+                }
+
+                for (i in 0 until removedPlacementIndices.size) {
+                    val placementIndex = removedPlacementIndices[i]
+                    sequenceAction.addAction(RunnableAction {
+                        val (x, y) = AudienceMemberHelper.evalSpawnPosition(placementIndex)
+                        val eAudMemb = AudienceMemberHelper.create(world, x, y, placementIndex)
+                        bBoard.audienceMembers.add(eAudMemb)
+                    })
+                    sequenceAction.addAction(DelayAction(1f))
+                }
+
+                sequenceAction.addAction(RunnableAction {
+                    isCompleted = true
+                })
+                actionSystem.addAction(getObject().eComedian, sequenceAction)
+            }
         }
 
         override fun resetTask() {
@@ -549,11 +645,14 @@ class JokeGameManager : IntervalSystem(),
         var affectionSum: Int = 0
     }
 
-    private class BTreeBlackBoard(val world: FleksWorld) {
+    private class BTreeBlackBoard(val world: FleksWorld, maxAudienceCount: Int) {
 
         val audienceMembers = GdxArray<Entity>()
-        lateinit var comedian: Entity
+        lateinit var eComedian: Entity
+        lateinit var eScoreLabel: Entity
         var jokeCount = 0
+        var scoreCount = 0
+        var maxAudienceCount: Int = maxAudienceCount
 
         var eJokeTimer: Entity? = null
         var completedJoke: JokeStructureData? = null

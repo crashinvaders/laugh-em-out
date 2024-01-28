@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.MathUtils.randomBoolean
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.laughemout.game.engine.components.Info
 import com.crashinvaders.laughemout.game.engine.components.SkeletonContainer
@@ -16,7 +17,9 @@ import com.github.quillraven.fleks.Entity
 import com.crashinvaders.common.CommonUtils.random
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
+import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
 import com.crashinvaders.laughemout.game.components.AudienceMember
+import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
 import ktx.app.gdxError
 import ktx.collections.gdxArrayOf
 
@@ -43,8 +46,8 @@ object AudienceMemberHelper {
         val animState = AnimationState(AnimationStateData(skelData))
         val skelActor = SkeletonActor(skelRenderer, skeleton, animState)
 
-        animState.setAnimation(TRACK_GENERAL, animationNamesIdle.random(), true)
-        animState.update(MathUtils.random() * 10f)
+        animState.setAnimation(TRACK_GENERAL, "appear0", false)
+        animState.addAnimation(TRACK_GENERAL, animationNamesIdle.random(), true, 0f)
 
         lateinit var cAudMember: AudienceMember
 
@@ -63,13 +66,17 @@ object AudienceMemberHelper {
             it += DrawableTint()
             it += DrawableVisibility()
             it += DrawableDimensions(0f)
-            it += DrawableOrigin(com.badlogic.gdx.utils.Align.bottom)
+            it += DrawableOrigin(Align.bottom)
+
+            it += SodInterpolation(6f, 0.6f, -0.5f).apply {
+                kickVisually(rotate = false)
+            }
 
             cAudMember = it[AudienceMember]
         }
 
         with(world) {
-//            entity[AudienceMember].emoLevel = MathUtils.random(-1, +1)
+            entity[AudienceMember].emoLevel = MathUtils.random(0, +2)
 
             val eEmoMeter = EmoMeterHelper.create(world, entity)
             cAudMember.emoMeter = eEmoMeter[EmoMeter]

@@ -23,6 +23,8 @@ object GameDrawOrder {
     const val AUDIENCE_BACK_ROW = 10
     const val AUDIENCE_FRONT_ROW = 11
 
+    const val UI_SCORE_LABEL = 40
+
     const val UI_SPEECH_BUBBLE = 50
 
     const val ENVIRONMENT_FRONT = 100
