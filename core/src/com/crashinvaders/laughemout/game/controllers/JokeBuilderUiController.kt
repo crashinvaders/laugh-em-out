@@ -507,7 +507,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                 }
             }
 
-            val rosterSize = 4
+            val rosterSize = data.subjects.size
             val rosterItemWidth = 70f * UPP
             for (i in 0 until rosterSize) {
                 val x = -0.5f * (rosterSize * rosterItemWidth) + i * rosterItemWidth + rosterItemWidth * 0.5f

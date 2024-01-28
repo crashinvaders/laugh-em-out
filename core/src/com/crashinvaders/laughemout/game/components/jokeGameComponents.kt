@@ -46,6 +46,10 @@ class AudienceMember(
         return hat != null
     }
 
+    fun isBald(): Boolean {
+        return hairStyle == null
+    }
+
     override fun type() = AudienceMember
     companion object : ComponentType<AudienceMember>()
 }

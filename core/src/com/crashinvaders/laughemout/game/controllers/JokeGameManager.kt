@@ -217,7 +217,7 @@ class JokeGameManager : IntervalSystem(),
             return (jokeSubject.race == audMemb.race) ||
                     (jokeSubject.gender == audMemb.gender) ||
                     (jokeSubject.hairStyle != null && jokeSubject.hairStyle == audMemb.hairStyle) ||
-                    (jokeSubject.hairColor == audMemb.hairColor) ||
+                    (jokeSubject.hairColor == audMemb.hairColor && audMemb.hairStyle != null) ||
                     (jokeSubject.heightLevel == audMemb.heightLevel) ||
                     (jokeSubject.bodyStyle == audMemb.bodyStyle) ||
                     (jokeSubject.glasses != null && jokeSubject.glasses == audMemb.glasses) ||
@@ -228,6 +228,7 @@ class JokeGameManager : IntervalSystem(),
                     (jokeSubject.isWearingShades && audMemb.isWearingShades()) ||
                     (jokeSubject.isWearingHat && audMemb.isWearingHat()) ||
                     (jokeSubject.isWearingGlasses && audMemb.isWearingGlasses()) ||
+                    (jokeSubject.isBald && audMemb.isBald()) ||
                     (jokeSubject.isSmiling && audMemb.emoLevel >= +1) ||
                     (jokeSubject.isFrowning && audMemb.emoLevel <= -1)
         }
@@ -292,8 +293,11 @@ class JokeGameManager : IntervalSystem(),
                 while (subjectsFiltered.size < subjectCount) {
                     subjectsFiltered.add(subjectsAll.random())
                 }
-                subjects = subjectsFiltered.take(subjectCount).toGdxArray()
+                subjects = subjectsFiltered.toGdxArray()
                 subjects.shuffle()
+                while (subjects.size > subjectCount) {
+                    subjects.pop()
+                }
             }
 
             world.system<JokeBuilderUiController>().show(world, JokeBuilderData(subjects,
@@ -342,6 +346,15 @@ class JokeGameManager : IntervalSystem(),
 //                }
 
                 val affectionDelta = affection.affectionSum
+
+                if (affectionDelta == 0) {
+                    sequenceAction.addAction(RunnableAction {
+                        AudienceMemberHelper.animateJokeReactionNeut(world, audMemb.entity)
+                    })
+                    sequenceAction.addAction(DelayAction(0.5f))
+                    return@forEachIndexed
+                }
+
                 if (affectionDelta != 0) {
                     val emoLevel = MathUtils.clamp(audMemb.emoLevel + affectionDelta, -3, +3)
                     sequenceAction.addAction(RunnableAction {

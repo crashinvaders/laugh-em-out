@@ -138,7 +138,8 @@ class GameScreen : KtxScreen,
 
     // Test effect.
     init {
-        val paletteTexture = Texture(Gdx.files.internal("textures/colorful-cage24-colormap16.png")).alsoRegisterDisposable()
+//        val paletteTexture = Texture(Gdx.files.internal("textures/colorful-cage24-colormap16.png")).alsoRegisterDisposable()
+        val paletteTexture = Texture(Gdx.files.internal("textures/palette-lto-colormap16.png")).alsoRegisterDisposable()
         val referenceTexture = Texture(Gdx.files.internal("textures/color-map-reference16.png")).alsoRegisterDisposable()
 
         fleksWorld.system<PostProcessingSystem>().apply {

@@ -31,6 +31,7 @@ data class JokeSubjectData(
     val isWearingShades: Boolean = false,
     val isWearingGlasses: Boolean = false,
     val isWearingHat: Boolean = false,
+    val isBald: Boolean = false,
     val isSmiling: Boolean = false,
     val isFrowning: Boolean = false,
 )
@@ -54,6 +55,7 @@ object JokeGameDataHelper {
         JokeSubjectData("BLONDS", hairColor = AudienceMemberHelper.HairColor.Blonde),
         JokeSubjectData("GINGERS", hairColor = AudienceMemberHelper.HairColor.Ginger),
         JokeSubjectData("BLUE\nHEADS", hairColor = AudienceMemberHelper.HairColor.Painted),
+        JokeSubjectData("BALD\nPEOPLE", isBald = true),
 
         JokeSubjectData("TALL\nPEOPLE", heightLevel = AudienceMemberHelper.HeightLevel.Tall),
         JokeSubjectData("SHORT\nPEOPLE", heightLevel = AudienceMemberHelper.HeightLevel.Short),

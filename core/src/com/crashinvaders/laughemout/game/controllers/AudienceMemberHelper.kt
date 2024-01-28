@@ -18,11 +18,14 @@ import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
 import com.crashinvaders.laughemout.game.components.AudienceMember
 import ktx.app.gdxError
+import ktx.collections.gdxArrayOf
 
 object AudienceMemberHelper {
 
     private const val TRACK_GENERAL = 0
     private const val TRACK_HEIGHT_LEVEL = 100
+
+    private val animationNamesIdle = gdxArrayOf("idle/posing0", "idle/subtle0", "idle/sway0")
 
     private val tmpVec2 = Vector2()
 
@@ -40,7 +43,7 @@ object AudienceMemberHelper {
         val animState = AnimationState(AnimationStateData(skelData))
         val skelActor = SkeletonActor(skelRenderer, skeleton, animState)
 
-        animState.setAnimation(TRACK_GENERAL, "test-idle", true)
+        animState.setAnimation(TRACK_GENERAL, animationNamesIdle.random(), true)
         animState.update(MathUtils.random() * 10f)
 
         lateinit var cAudMember: AudienceMember
@@ -158,8 +161,8 @@ object AudienceMemberHelper {
             val cSkeleton = entity[SkeletonContainer]
 
             cSkeleton.animState.apply {
-                setAnimation(TRACK_GENERAL, "reaction-positive0", false)
-                addAnimation(TRACK_GENERAL, "test-idle", true, 0f)
+                setAnimation(TRACK_GENERAL, "reactions/positive0", false)
+                addAnimation(TRACK_GENERAL, animationNamesIdle.random(), true, 0f)
             }
         }
     }
@@ -170,8 +173,20 @@ object AudienceMemberHelper {
             val cSkeleton = entity[SkeletonContainer]
 
             cSkeleton.animState.apply {
-                setAnimation(TRACK_GENERAL, "reaction-negative0", false)
-                addAnimation(TRACK_GENERAL, "test-idle", true, 0f)
+                setAnimation(TRACK_GENERAL, "reactions/negative0", false)
+                addAnimation(TRACK_GENERAL, animationNamesIdle.random(), true, 0f)
+            }
+        }
+    }
+
+    fun animateJokeReactionNeut(world: FleksWorld, entity: Entity) {
+        with(world) {
+            val cAudMemb = entity[AudienceMember]
+            val cSkeleton = entity[SkeletonContainer]
+
+            cSkeleton.animState.apply {
+                setAnimation(TRACK_GENERAL, "reactions/neutral0", false)
+                addAnimation(TRACK_GENERAL, animationNamesIdle.random(), true, 0f)
             }
         }
     }
@@ -239,8 +254,8 @@ object AudienceMemberHelper {
     }
 
     enum class Mouth(val imgName: String, val hideEmotions: Boolean = false, val isFancy: Boolean = false, val targetGender: Gender? = null) {
-        Beard0("face-beard0", hideEmotions = true),
-        FaceMask0("face-mask0", hideEmotions = true, targetGender = Gender.Male),
+        Beard0("face-beard0", hideEmotions = true, targetGender = Gender.Male),
+        FaceMask0("face-mask0", hideEmotions = true),
     }
 
     enum class Race(val imgSuffix: String) {

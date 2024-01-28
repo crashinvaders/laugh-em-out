@@ -67,6 +67,10 @@ object EmoMeterHelper {
 
 //                it += SodInterpolation(4f, 0.4f, -0.5f)
 //                it += TransformDebugRenderTag
+
+            if (cAmAudMember.mouth != null && cAmAudMember.mouth.hideEmotions) {
+                it[EmoMeter].isUnknown = true
+            }
         }
 
 //        with(world) {
