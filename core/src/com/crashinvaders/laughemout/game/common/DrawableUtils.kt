@@ -17,9 +17,15 @@ object DrawableUtils {
     private val tmpVec2 = Vector2()
     private val tmpRect = Rectangle()
 
-    fun DrawableDimensions.fromActor(actor: Actor): DrawableDimensions {
+    fun DrawableDimensions.fromActorPixels(actor: Actor): DrawableDimensions {
         this.width = actor.width * UPP
         this.height = actor.height * UPP
+        return this
+    }
+
+    fun DrawableDimensions.fromActorUnits(actor: Actor): DrawableDimensions {
+        this.width = actor.width
+        this.height = actor.height
         return this
     }
 

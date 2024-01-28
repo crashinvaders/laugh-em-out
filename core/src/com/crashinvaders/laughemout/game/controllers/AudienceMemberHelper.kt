@@ -212,14 +212,14 @@ object AudienceMemberHelper {
         F4(Gender.Female, "char-body-f4"),
     }
 
-    enum class Glasses(val imgName: String, val isFancy: Boolean = false) {
-        Dredd0("glasses-dredd0"),
-        Dredd1("glasses-dredd1"),
+    enum class Glasses(val imgName: String, val isFancy: Boolean = false, val isShades: Boolean = false) {
+        Dredd0("glasses-dredd0", isShades = true),
+        Dredd1("glasses-dredd1", isShades = true),
         Goggles0("glasses-goggles0"),
         Goggles1("glasses-goggles1"),
-        Shades0("glasses-shades0"),
-        Shades1("glasses-shades1"),
-        Shades2("glasses-shades2"),
+        Shades0("glasses-shades0", isShades = true),
+        Shades1("glasses-shades1", isShades = true),
+        Shades2("glasses-shades2", isShades = true),
     }
 
     enum class Hat(val imgName: String, val isFancy: Boolean = false) {

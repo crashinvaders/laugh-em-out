@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
-import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActor
+import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActorPixels
 import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
 import com.crashinvaders.laughemout.game.engine.components.Info
 import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
@@ -51,8 +51,7 @@ object SpeechBubbleHelper {
                     alignment = Align.center
                 }
 
-                val imgBubble = Image(atlas.findRegion("speech-bubble-frame${size.imgSuffix}")).apply {
-                }
+                val imgBubble = Image(atlas.findRegion("speech-bubble-frame${size.imgSuffix}"))
                 val bubbleWidth = imgBubble.prefWidth * UPP
                 val bubbleHeight = imgBubble.prefHeight * UPP
                 imgBubble.setSize(bubbleWidth, bubbleHeight)
@@ -73,7 +72,7 @@ object SpeechBubbleHelper {
             it += DrawableOrder(GameDrawOrder.UI_SPEECH_BUBBLE)
             it += DrawableTint()
             it += DrawableVisibility()
-            it += DrawableDimensions().fromActor(actor)
+            it += DrawableDimensions().fromActorPixels(actor)
             it += DrawableOrigin(Align.bottom)
 
             it += SodInterpolation(6f, 0.6f, -0.5f).apply {

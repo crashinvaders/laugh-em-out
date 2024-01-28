@@ -30,6 +30,22 @@ class AudienceMember(
 
     lateinit var emoMeter: EmoMeter
 
+    fun isFancyLooking(): Boolean {
+        return hat?.isFancy == true || glasses?.isFancy == true || neck?.isFancy == true
+    }
+
+    fun isWearingShades(): Boolean {
+        return glasses?.isShades == true
+    }
+
+    fun isWearingGlasses(): Boolean {
+        return glasses?.isShades == false
+    }
+
+    fun isWearingHat(): Boolean {
+        return hat != null
+    }
+
     override fun type() = AudienceMember
     companion object : ComponentType<AudienceMember>()
 }

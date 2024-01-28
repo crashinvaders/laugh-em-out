@@ -12,7 +12,7 @@ import com.crashinvaders.common.*
 import com.crashinvaders.laughemout.game.CameraProcessorOrder
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
-import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActor
+import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActorPixels
 import com.crashinvaders.laughemout.game.common.camera.Sod3CameraProcessor
 import com.crashinvaders.laughemout.game.components.AudienceMember
 import com.crashinvaders.laughemout.game.engine.components.Info
@@ -129,7 +129,7 @@ class JokeGameManager : IntervalSystem(),
             it += DrawableOrder(GameDrawOrder.COMPLETED_JOKE_VIEW)
             it += DrawableTint()
             it += DrawableVisibility()
-            it += DrawableDimensions().fromActor(actor)
+            it += DrawableDimensions().fromActorPixels(actor)
             it += DrawableOrigin(Align.center)
         }
     }
@@ -156,7 +156,7 @@ class JokeGameManager : IntervalSystem(),
             it += DrawableOrder(GameDrawOrder.ENVIRONMENT_BACK)
             it += DrawableTint()
             it += DrawableVisibility()
-            it += DrawableDimensions().fromActor(actor)
+            it += DrawableDimensions().fromActorPixels(actor)
             it += DrawableOrigin(Align.bottomLeft)
         }
 
@@ -172,7 +172,7 @@ class JokeGameManager : IntervalSystem(),
             it += DrawableOrder(GameDrawOrder.ENVIRONMENT_BACK - 10)
             it += DrawableTint()
             it += DrawableVisibility()
-            it += DrawableDimensions().fromActor(actor)
+            it += DrawableDimensions().fromActorPixels(actor)
             it += DrawableOrigin(Align.bottomLeft)
         }
     }
@@ -214,16 +214,22 @@ class JokeGameManager : IntervalSystem(),
         }
 
         private fun checkSubjectIntersection(audMemb: AudienceMember, jokeSubject: JokeSubjectData): Boolean {
-            return (audMemb.race == jokeSubject.race) ||
-                    (audMemb.gender == jokeSubject.gender) ||
-                    (audMemb.hairStyle != null && audMemb.hairStyle == jokeSubject.hairStyle) ||
-                    (audMemb.hairColor == jokeSubject.hairColor) ||
-                    (audMemb.heightLevel == jokeSubject.heightLevel) ||
-                    (audMemb.bodyStyle == jokeSubject.bodyStyle) ||
-                    (audMemb.glasses != null && audMemb.glasses == jokeSubject.glasses) ||
-                    (audMemb.hat != null && audMemb.hat == jokeSubject.hat) ||
-                    (audMemb.neck != null && audMemb.neck == jokeSubject.neck) ||
-                    (audMemb.mouth != null && audMemb.mouth == jokeSubject.mouth)
+            return (jokeSubject.race == audMemb.race) ||
+                    (jokeSubject.gender == audMemb.gender) ||
+                    (jokeSubject.hairStyle != null && jokeSubject.hairStyle == audMemb.hairStyle) ||
+                    (jokeSubject.hairColor == audMemb.hairColor) ||
+                    (jokeSubject.heightLevel == audMemb.heightLevel) ||
+                    (jokeSubject.bodyStyle == audMemb.bodyStyle) ||
+                    (jokeSubject.glasses != null && jokeSubject.glasses == audMemb.glasses) ||
+                    (jokeSubject.hat != null && jokeSubject.hat == audMemb.hat) ||
+                    (jokeSubject.neck != null && jokeSubject.neck == audMemb.neck) ||
+                    (jokeSubject.mouth != null && jokeSubject.mouth == audMemb.mouth) ||
+                    (jokeSubject.isFancyLooking && audMemb.isFancyLooking()) ||
+                    (jokeSubject.isWearingShades && audMemb.isWearingShades()) ||
+                    (jokeSubject.isWearingHat && audMemb.isWearingHat()) ||
+                    (jokeSubject.isWearingGlasses && audMemb.isWearingGlasses()) ||
+                    (jokeSubject.isSmiling && audMemb.emoLevel >= +1) ||
+                    (jokeSubject.isFrowning && audMemb.emoLevel <= -1)
         }
     }
 
@@ -272,12 +278,25 @@ class JokeGameManager : IntervalSystem(),
         override fun start() {
             super.start()
 
-            world.system<JokeBuilderUiController>().show(world, JokeBuilderData(
-                gdxArrayOf(
-                    JokeSubjectData("BLACK\nPEOPLE", race = AudienceMemberHelper.Race.Black),
-                    JokeSubjectData("BRUNETTES", hairColor = AudienceMemberHelper.HairColor.Brunette),
-                    JokeSubjectData("TALL\nPEOPLE", heightLevel = AudienceMemberHelper.HeightLevel.Tall),
-                ),
+            val subjectCount = 3
+            val subjects: GdxArray<JokeSubjectData>
+
+            with(world) {
+                val audienceMembers = `object`.audienceMembers.map { it[AudienceMember] }
+
+                val subjectsAll = JokeGameDataHelper.jokeSubjects
+                val subjectsFiltered = subjectsAll.filter { subject ->
+                    audienceMembers.any { audMemb -> checkSubjectIntersection(audMemb, subject) }
+                }.toGdxSet()
+
+                while (subjectsFiltered.size < subjectCount) {
+                    subjectsFiltered.add(subjectsAll.random())
+                }
+                subjects = subjectsFiltered.take(subjectCount).toGdxArray()
+                subjects.shuffle()
+            }
+
+            world.system<JokeBuilderUiController>().show(world, JokeBuilderData(subjects,
                 JokeConnectorData("drive\nbetter\nthan", 1, -1))
             ) {
                 debug { "Complete joke: ${it.subjectPre.text.replace('\n', ' ')} ${it.connector.text.replace('\n', ' ')} ${it.subjectPost.text.replace('\n', ' ')}" }

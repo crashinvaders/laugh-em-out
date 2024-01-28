@@ -4,9 +4,9 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Button
-import com.badlogic.gdx.scenes.scene2d.ui.Container
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
@@ -17,7 +17,8 @@ import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.GameInputOrder
 import com.crashinvaders.laughemout.game.UPP
 import com.crashinvaders.laughemout.game.common.DrawableUtils
-import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActor
+import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActorPixels
+import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActorUnits
 import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
 import com.crashinvaders.laughemout.game.common.camera.Sod3CameraProcessor
 import com.crashinvaders.laughemout.game.components.JokeSubjectCard
@@ -131,6 +132,16 @@ class JokeBuilderUiController : IteratingSystem(family { all(
         if (uiController != null) {
             uiController!!.dispose()
             uiController= null
+        }
+    }
+
+    override fun onTick() {
+        super.onTick()
+
+        if (uiController != null) {
+            val (x, y) = camSystem.screenToWorld(Gdx.input.x, Gdx.input.y)
+            val focusOnJoke = y < -40f * UPP
+            uiController!!.camProcessor.y = if (focusOnJoke) CAM_Y_JOKE else CAM_Y_STAGE
         }
     }
 
@@ -289,9 +300,11 @@ class JokeBuilderUiController : IteratingSystem(family { all(
 
         val onJokeItButtonClick = BlankSignal()
 
-        val camProcessor = Sod3CameraProcessor(4f, 0.8f, 0f, CameraProcessorOrder.JOKE_BUILDER, readCamValuesWhenAdded = false).apply {
-            x = 60f * UPP
-            y = -65f * UPP
+        val camProcessor = Sod3CameraProcessor(4f, 0.8f, 0f, CameraProcessorOrder.JOKE_BUILDER,
+            overridePrevState = true,
+            readCamValuesWhenAdded = false).apply {
+            x = CAM_X
+            y = CAM_Y_JOKE
         }
 
         var isHiding = false
@@ -325,7 +338,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                 it += DrawableOrder(DRAW_ORDER_MISC)
                 it += DrawableTint()
                 it += DrawableVisibility(true)
-                it += DrawableDimensions().fromActor(actor)
+                it += DrawableDimensions().fromActorPixels(actor)
                 it += DrawableOrigin(Align.center)
 
                 it += SodInterpolation(6f, 0.6f, -0.5f).apply {
@@ -354,7 +367,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                 it += DrawableOrder(DRAW_ORDER_JOKE_IT_BUTTON)
                 it += DrawableTint()
                 it += DrawableVisibility(false)
-                it += DrawableDimensions().fromActor(actor)
+                it += DrawableDimensions().fromActorPixels(actor)
                 it += DrawableOrigin(Align.center)
 
                 it += SodInterpolation(6f, 0.6f, -0.5f).apply {
@@ -380,7 +393,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                 it += DrawableOrder(DRAW_ORDER_MISC)
                 it += DrawableTint()
                 it += DrawableVisibility()
-                it += DrawableDimensions().fromActor(actor)
+                it += DrawableDimensions().fromActorPixels(actor)
                 it += DrawableOrigin(Align.center)
 
                 it += SodInterpolation(6f, 0.6f, -0.5f).apply {
@@ -403,7 +416,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                 it += DrawableOrder(DRAW_ORDER_PLACEHOLDER)
                 it += DrawableTint()
                 it += DrawableVisibility()
-                it += DrawableDimensions().fromActor(actor)
+                it += DrawableDimensions().fromActorPixels(actor)
                 it += DrawableOrigin(Align.center)
 
                 it += SodInterpolation(6f, 0.6f, -0.5f).apply {
@@ -426,7 +439,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                 it += DrawableOrder(DRAW_ORDER_PLACEHOLDER)
                 it += DrawableTint()
                 it += DrawableVisibility()
-                it += DrawableDimensions().fromActor(actor)
+                it += DrawableDimensions().fromActorPixels(actor)
                 it += DrawableOrigin(Align.center)
 
                 it += SodInterpolation(6f, 0.6f, -0.5f).apply {
@@ -459,25 +472,32 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                     }
 
                     val actor = let {
-                        val label = TextraLabel("[#ffedd4]${subjectData.text}", font).apply {
+                        val imgFrame = Image(atlas.findRegion("joke-subj-frame"))
+                        val frameWidth = imgFrame.prefWidth * UPP
+                        val frameHeight = imgFrame.prefHeight * UPP
+                        imgFrame.setSize(frameWidth, frameHeight)
 
+                        val label = TextraLabel("[SHAKE][#ffedd4]${subjectData.text}", font).apply {
                             alignment = Align.center
                         }
-                        Container(label).apply {
-                            background = TextureRegionDrawable(atlas.findRegion("joke-subj-frame"))
-//                        setBackground(TextureRegionDrawable(atlas.findRegion("joke-subj-frame")), true)
+
+                        Group().apply {
+                            width = frameWidth
+                            height = frameHeight
                             isTransform = true
-                            fill()
-                            center()
-                            pack()
-                            debug()
+
+                            addActor(imgFrame)
+                            addActor(label)
+
+                            val labelShiftY = 1f * UPP
+                            label.setPosition(getX(Align.center), getY(Align.center) + labelShiftY, Align.center)
                         }
                     }
                     it += ActorContainer(actor)
                     it += DrawableOrder(DRAW_ORDER_CARD_REGULAR)
                     it += DrawableTint()
                     it += DrawableVisibility()
-                    it += DrawableDimensions().fromActor(actor)
+                    it += DrawableDimensions().fromActorUnits(actor)
                     it += DrawableOrigin(Align.center)
 
                     it += SodInterpolation(6f, 0.6f, -0.5f).apply {
@@ -539,5 +559,9 @@ class JokeBuilderUiController : IteratingSystem(family { all(
         private const val DRAW_ORDER_JOKE_IT_BUTTON = +1  + DRAW_ORDER_BASE
         private const val DRAW_ORDER_CARD_REGULAR =   +5  + DRAW_ORDER_BASE
         private const val DRAW_ORDER_CARD_DRAGGED =   +10 + DRAW_ORDER_BASE
+
+        private const val CAM_X = 60f * UPP
+        private const val CAM_Y_JOKE = -65f * UPP
+        private const val CAM_Y_STAGE = -25f * UPP
     }
 }
