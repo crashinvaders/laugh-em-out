@@ -4,6 +4,9 @@ import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.crashinvaders.common.OrderedInputMultiplexer
+import com.crashinvaders.common.events.Event
+import com.crashinvaders.common.events.EventBus
+import com.crashinvaders.common.events.EventHandler
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.FamilyOnAdd
 import com.github.quillraven.fleks.FamilyOnRemove
@@ -11,6 +14,7 @@ import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.collection.compareEntityBy
 import com.crashinvaders.laughemout.game.GameInputOrder
+import com.crashinvaders.laughemout.game.engine.OnResizeEvent
 import com.crashinvaders.laughemout.game.engine.components.*
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import ktx.actors.minusAssign
@@ -35,7 +39,8 @@ class DrawableRenderSystem : IteratingSystem(
 ),
     FamilyOnAdd,
     FamilyOnRemove,
-    OnWorldInitializedHandler {
+    OnWorldInitializedHandler,
+    EventHandler {
 
     private val viewport = ScreenViewport()
 
@@ -70,11 +75,17 @@ class DrawableRenderSystem : IteratingSystem(
     override fun onEnable() {
         super.onEnable()
         world.inject<OrderedInputMultiplexer>().addProcessor(stage, GameInputOrder.DRAWABLES)
+
+        val eventBus: EventBus = world.inject()
+        eventBus.addHandler<OnResizeEvent>(this)
     }
 
     override fun onDisable() {
         super.onDisable()
         world.inject<OrderedInputMultiplexer>().removeProcessor(stage)
+
+        val eventBus: EventBus = world.inject()
+        eventBus.removeHandler<OnResizeEvent>(this)
     }
 
     override fun onAddEntity(entity: Entity) {
@@ -145,5 +156,13 @@ class DrawableRenderSystem : IteratingSystem(
         actor.setOrigin(originX, originY)
         actor.rotation = rotation
         actor.color = tint.color
+    }
+
+    override fun onEvent(event: Event) {
+        when (event) {
+            is OnResizeEvent -> {
+                stage.viewport.update(event.screenWidth, event.screenHeight, true)
+            }
+        }
     }
 }

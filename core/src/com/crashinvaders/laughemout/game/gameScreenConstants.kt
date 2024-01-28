@@ -29,6 +29,7 @@ object GameDrawOrder {
 
     const val MAP_LAYERS_FRONT = 1000
 
+    const val JOKE_TIMER = 1900
     const val JOKE_BUILDER_UI_BASE = 2000
     const val COMPLETED_JOKE_VIEW = 2100
 }

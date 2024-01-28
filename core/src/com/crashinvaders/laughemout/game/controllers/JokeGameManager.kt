@@ -1,5 +1,6 @@
 package com.crashinvaders.laughemout.game.controllers
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ai.btree.BehaviorTree
 import com.badlogic.gdx.ai.btree.LeafTask
 import com.badlogic.gdx.ai.btree.Task
@@ -74,43 +75,94 @@ class JokeGameManager : IntervalSystem(),
 
         bTree.apply {
             setObject(bBoard)
-            var counter = 0
 
-            repeat { resetOnCompletion { sequence {
-                waitLeaf(2f)
-                add(JokeBuilderStateTask(world))
-                runnable {
-                    val completedJoke = bBoard.completedJoke!!
+            repeat {
+                resetOnCompletion {
+                    sequence {
+                        //TODO Intro.
+                        waitLeaf(2f)
+                        runnable {
+                            if (bBoard.jokeCount == 0) {
+                                return@runnable
+                            }
+                            val jokeDuration = when {
+                                bBoard.jokeCount < 2 -> JokeTimerDuration.Sec25
+                                bBoard.jokeCount > 4 -> JokeTimerDuration.Sec20
+                                bBoard.jokeCount < 6 -> JokeTimerDuration.Sec15
+                                bBoard.jokeCount < 10 -> JokeTimerDuration.Sec10
+                                else -> JokeTimerDuration.Sec7
+                            }
+                            bBoard.eJokeTimer = JokeTimerHelper.createTimer(
+                                world, 60f * UPP, -47f * UPP, jokeDuration
+                            ) {
+                                Gdx.app.postRunnable { onJokeBuilderTimeUp() }
+                            }
+                        }
+                        add(JokeBuilderStateTask(world))
+                        runnable {
+                            if (bBoard.eJokeTimer != null) {
+                                if (bBoard.eJokeTimer!! in world) {
+                                    world -= bBoard.eJokeTimer!!
+                                }
+                                bBoard.eJokeTimer = null
+                            }
 
-                    bBoard.completedJokeView = createResultJokeView(world, completedJoke)
+                            val completedJoke = bBoard.completedJoke!!
 
-                    SpeechBubbleHelper.createSpeechBubble(
-                        world, "...",
-                        bBoard.comedian[Transform].worldPositionX,
-                        bBoard.comedian[Transform].worldPositionY + 56f * UPP,
-                        SpeechBubbleSize.Small, 2f
-                    )
+                            bBoard.completedJokeView = createResultJokeView(world, completedJoke)
 
-                    evalJokeAffections(world, bBoard)
-                }
-                waitLeaf(2f)
+                            SpeechBubbleHelper.createSpeechBubble(
+                                world, "...",
+                                bBoard.comedian[Transform].worldPositionX,
+                                bBoard.comedian[Transform].worldPositionY + 56f * UPP,
+                                SpeechBubbleSize.Small, 2f
+                            )
 
-                add(AffectAudienceTask(world))
+                            evalJokeAffections(world, bBoard)
+                        }
+                        waitLeaf(2f)
 
-                waitLeaf(2f)
+                        add(AffectAudienceTask(world))
 
-                runnable {
-                    if (bBoard.completedJokeView != null) {
-                        world -= bBoard.completedJokeView!!
-                        bBoard.completedJokeView = null
+                        waitLeaf(2f)
+
+                        runnable {
+                            if (bBoard.completedJokeView != null) {
+                                world -= bBoard.completedJokeView!!
+                                bBoard.completedJokeView = null
+                            }
+                        }
+
+                        runnable {
+                            bBoard.jokeCount++
+                            bBoard.resetRound()
+                        }
                     }
                 }
-
-                runnable {
-                    bBoard.reset()
-                }
             }
-        } } }
+        }
+    }
+
+    private fun onJokeBuilderTimeUp() {
+        // Destroy the timer at first.
+        if (bBoard.eJokeTimer != null) {
+            if (bBoard.eJokeTimer!! in world) {
+                world -= bBoard.eJokeTimer!!
+            }
+            bBoard.eJokeTimer = null
+        }
+
+        val wasFinalized = world.system<JokeBuilderUiController>().tryFinalize()
+        if (wasFinalized) {
+            return
+        }
+
+        val candidates = bBoard.audienceMembers.filter { it[AudienceMember].emoLevel > -2f }.toGdxArray()
+        candidates.shuffle()
+        val audMemb = candidates.firstOrNull()
+        if (audMemb != null) {
+            changeAudMemberEmoLevel(world, audMemb[AudienceMember], -1)
+        }
     }
 
     fun createResultJokeView(world: FleksWorld, data: JokeStructureData): Entity {
@@ -232,6 +284,33 @@ class JokeGameManager : IntervalSystem(),
                     (jokeSubject.isSmiling && audMemb.emoLevel >= +1) ||
                     (jokeSubject.isFrowning && audMemb.emoLevel <= -1)
         }
+
+        fun changeAudMemberEmoLevel(world: FleksWorld, audMemb: AudienceMember, emoLevelDelta: Int) {
+            if (emoLevelDelta == 0) {
+                return
+            }
+
+            val emoLevel = MathUtils.clamp(audMemb.emoLevel + emoLevelDelta, -3, +3)
+            audMemb.emoLevel = emoLevel
+            audMemb.emoMeter.also {
+                it.emoLevel = emoLevel
+                EmoMeterHelper.animateValueChange(world, it.entity)
+                EmoMeterHelper.animateToken(
+                    world, it.entity, when {
+                        emoLevel >= 3 -> TokenType.Star
+                        emoLevel <= -3 -> TokenType.Cancel
+                        emoLevelDelta > 0 -> TokenType.Like
+                        emoLevelDelta < 0 -> TokenType.Dislike
+                        else -> gdxError("Unexpected case")
+                    }
+                )
+            }
+            if (emoLevelDelta > 0) {
+                AudienceMemberHelper.animateJokeReactionPos(world, audMemb.entity)
+            } else {
+                AudienceMemberHelper.animateJokeReactionNeg(world, audMemb.entity)
+            }
+        }
     }
 
     private class IntroStateTask(val world: FleksWorld): LeafTask<BTreeBlackBoard>() {
@@ -278,6 +357,65 @@ class JokeGameManager : IntervalSystem(),
 
         override fun start() {
             super.start()
+
+            val subjectCount = 3
+            val subjects: GdxArray<JokeSubjectData>
+
+            with(world) {
+                val audienceMembers = `object`.audienceMembers.map { it[AudienceMember] }
+
+                val subjectsAll = JokeGameDataHelper.jokeSubjects
+                val subjectsFiltered = subjectsAll.filter { subject ->
+                    audienceMembers.any { audMemb -> checkSubjectIntersection(audMemb, subject) }
+                }.toGdxSet()
+
+                while (subjectsFiltered.size < subjectCount) {
+                    subjectsFiltered.add(subjectsAll.random())
+                }
+                subjects = subjectsFiltered.toGdxArray()
+                subjects.shuffle()
+                while (subjects.size > subjectCount) {
+                    subjects.pop()
+                }
+            }
+
+            val jokeConnector = JokeGameDataHelper.jokeConnectors.random()
+
+            world.system<JokeBuilderUiController>().show(world, JokeBuilderData(subjects, jokeConnector)) {
+                debug { "Complete joke: ${it.subjectPre.text.replace('\n', ' ')} ${it.connector.text.replace('\n', ' ')} ${it.subjectPost.text.replace('\n', ' ')}" }
+
+                getObject().completedJoke = it
+                isCompleted = true
+            }
+        }
+
+        override fun resetTask() {
+            super.resetTask()
+            isCompleted = false
+        }
+
+        override fun execute(): Status {
+            return if (isCompleted) Status.SUCCEEDED else Status.RUNNING
+        }
+
+        override fun copyTo(p0: Task<BTreeBlackBoard>?): Task<BTreeBlackBoard> {
+            TODO("Not yet implemented")
+        }
+    }
+
+    private class JokeBuildTimerTask(val world: FleksWorld): LeafTask<BTreeBlackBoard>() {
+
+        var isCompleted = false
+            private set
+
+        override fun start() {
+            super.start()
+
+            val bBoard = `object`
+
+            bBoard.eJokeTimer = JokeTimerHelper.createTimer(world, 60f * UPP, -47f * UPP, JokeTimerDuration.Sec10) {
+
+            }
 
             val subjectCount = 3
             val subjects: GdxArray<JokeSubjectData>
@@ -356,28 +494,28 @@ class JokeGameManager : IntervalSystem(),
                 }
 
                 if (affectionDelta != 0) {
-                    val emoLevel = MathUtils.clamp(audMemb.emoLevel + affectionDelta, -3, +3)
+//                    val emoLevel = MathUtils.clamp(audMemb.emoLevel + affectionDelta, -3, +3)
                     sequenceAction.addAction(RunnableAction {
-                        audMemb.emoLevel = emoLevel
-                        audMemb.emoMeter.also {
-                            it.emoLevel = emoLevel
-                            EmoMeterHelper.animateValueChange(world, it.entity)
-                            EmoMeterHelper.animateToken(
-                                world, it.entity, when {
-                                    emoLevel >= 3 -> TokenType.Star
-                                    emoLevel <= -3 -> TokenType.Cancel
-                                    affectionDelta > 0 -> TokenType.Like
-                                    affectionDelta < 0 -> TokenType.Dislike
-                                    else -> gdxError("Unexpected case")
-                                }
-                            )
-
-                            if (affectionDelta > 0) {
-                                AudienceMemberHelper.animateJokeReactionPos(world, audMemb.entity)
-                            } else {
-                                AudienceMemberHelper.animateJokeReactionNeg(world, audMemb.entity)
-                            }
-                        }
+                        changeAudMemberEmoLevel(world, audMemb, affectionDelta)
+//                        audMemb.emoLevel = emoLevel
+//                        audMemb.emoMeter.also {
+//                            it.emoLevel = emoLevel
+//                            EmoMeterHelper.animateValueChange(world, it.entity)
+//                            EmoMeterHelper.animateToken(
+//                                world, it.entity, when {
+//                                    emoLevel >= 3 -> TokenType.Star
+//                                    emoLevel <= -3 -> TokenType.Cancel
+//                                    affectionDelta > 0 -> TokenType.Like
+//                                    affectionDelta < 0 -> TokenType.Dislike
+//                                    else -> gdxError("Unexpected case")
+//                                }
+//                            )
+//                        }
+//                        if (affectionDelta > 0) {
+//                            AudienceMemberHelper.animateJokeReactionPos(world, audMemb.entity)
+//                        } else {
+//                            AudienceMemberHelper.animateJokeReactionNeg(world, audMemb.entity)
+//                        }
                     })
                 }
                 sequenceAction.addAction(DelayAction(1.0f))
@@ -415,12 +553,15 @@ class JokeGameManager : IntervalSystem(),
 
         val audienceMembers = GdxArray<Entity>()
         lateinit var comedian: Entity
+        var jokeCount = 0
 
+        var eJokeTimer: Entity? = null
         var completedJoke: JokeStructureData? = null
         var completedJokeView: Entity? = null
         var jokeAffections = GdxMap<AudienceMember, AudienceJokeAffectionEntry>()
 
-        fun reset() {
+        fun resetRound() {
+            eJokeTimer = null
             completedJoke = null
             completedJokeView = null
 

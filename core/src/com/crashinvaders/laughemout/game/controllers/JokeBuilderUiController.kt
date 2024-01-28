@@ -94,26 +94,46 @@ class JokeBuilderUiController : IteratingSystem(family { all(
 
         enabled = true
 
-        uiController = UiController(world, data).also {
+        uiController = UiController(world, data, onResult).also {
             it.onJokeItButtonClick += {
                 if (uiController != null) {
-                    val resultJoke: JokeStructureData
-                    with(world) {
-                        val subjPre = uiController!!.ePlaceholderL[JokeSubjectCardPlaceholder].attachedCard!!.data
-                        val subjPost = uiController!!.ePlaceholderR[JokeSubjectCardPlaceholder].attachedCard!!.data
-                        val jokeConnector = uiController!!.data.connector
-                        resultJoke = JokeStructureData(subjPre, subjPost, jokeConnector)
-                    }
-
-                    uiController!!.hideAndDispose()
-                    uiController = null
-
-                    enabled = false
-
-                    onResult(resultJoke)
+                    finalizeAndReportResult()
                 }
             }
         }
+    }
+
+    fun tryFinalize(): Boolean {
+        if (uiController == null) {
+            return false
+        }
+
+        val subjPre = uiController!!.ePlaceholderL[JokeSubjectCardPlaceholder].attachedCard
+        val subjPost = uiController!!.ePlaceholderR[JokeSubjectCardPlaceholder].attachedCard
+        if (subjPre == null || subjPost == null) {
+            return false
+        }
+
+        finalizeAndReportResult()
+        return true
+    }
+
+    private fun finalizeAndReportResult() {
+        val resultJoke: JokeStructureData
+        with(world) {
+            val subjPre = uiController!!.ePlaceholderL[JokeSubjectCardPlaceholder].attachedCard!!.data
+            val subjPost = uiController!!.ePlaceholderR[JokeSubjectCardPlaceholder].attachedCard!!.data
+            val jokeConnector = uiController!!.data.connector
+            resultJoke = JokeStructureData(subjPre, subjPost, jokeConnector)
+        }
+
+        val onResult = uiController!!.resultListener
+        uiController!!.hideAndDispose()
+        uiController = null
+
+        enabled = false
+
+        onResult(resultJoke)
     }
 
     override fun onEnable() {
@@ -289,7 +309,11 @@ class JokeBuilderUiController : IteratingSystem(family { all(
         }
     }
 
-    private class UiController(val world: FleksWorld, val data: JokeBuilderData): Disposable {
+    private class UiController(
+        val world: FleksWorld,
+        val data: JokeBuilderData,
+        val resultListener: (JokeStructureData) -> Unit
+    ): Disposable {
 
         val eRoot: Entity
         val ePlaceholderL: Entity
@@ -407,7 +431,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                 it += JokeSubjectCardPlaceholder()
                 it += Transform().apply {
                     parent = eRoot[Transform]
-                    localPositionX = -56f * UPP
+                    localPositionX = -60f * UPP
                     localPositionY = 0f
                 }
 
@@ -430,7 +454,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                 it += JokeSubjectCardPlaceholder()
                 it += Transform().apply {
                     parent = eRoot[Transform]
-                    localPositionX = 56f * UPP
+                    localPositionX = 60f * UPP
                     localPositionY = 0f
                 }
 

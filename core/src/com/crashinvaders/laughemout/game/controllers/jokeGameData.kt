@@ -72,4 +72,19 @@ object JokeGameDataHelper {
         JokeSubjectData("PEOPLE\nWITH\nSHADES", isWearingShades = true),
         JokeSubjectData("FANCY\nPEOPLE", isFancyLooking = true),
     )
+
+    val jokeConnectors = gdxArrayOf<JokeConnectorData>(
+        JokeConnectorData("cannot\nstand", -1, +1),
+        JokeConnectorData("fall\nshort\nfor", -1, +1),
+        JokeConnectorData("don't\nunderstand", -1, +1),
+        JokeConnectorData("think\ntoo much\nabout", -1, +1),
+        JokeConnectorData("feel\ncool\nunlike", +1, -1),
+        JokeConnectorData("drive\nbetter\nthan", +1, -1),
+        JokeConnectorData("dress\nprettier\nthan", +1, -1),
+        JokeConnectorData("jump\nhigher\nthan", +1, -1),
+        JokeConnectorData("fart\nlouder\nthan", -1, +1),
+        JokeConnectorData("joke\nfunnier\nthan", +1, -1),
+        JokeConnectorData("have\nfun\nwith", +1, +1),
+        JokeConnectorData("be\nrude\nlike", -1, -1),
+    )
 }
