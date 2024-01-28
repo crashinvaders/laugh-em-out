@@ -74,9 +74,9 @@ object JokeGameDataHelper {
     )
 
     val jokeConnectors = gdxArrayOf<JokeConnectorData>(
-        JokeConnectorData("cannot\nstand", -1, +1),
         JokeConnectorData("fall\nshort\nfor", -1, +1),
-        JokeConnectorData("don't\nunderstand", -1, +1),
+        JokeConnectorData("never\nunderstand", -1, +1),
+        JokeConnectorData("under-\nestimate", -1, +1),
         JokeConnectorData("think\ntoo much\nabout", -1, +1),
         JokeConnectorData("feel\ncool\nunlike", +1, -1),
         JokeConnectorData("drive\nbetter\nthan", +1, -1),

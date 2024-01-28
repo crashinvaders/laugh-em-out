@@ -98,6 +98,14 @@ class App(val params: Params) : KtxGame<KtxScreen>() {
         }
     }
 
+    fun restart() {
+        // Restart the game.
+        Gdx.app.postRunnable {
+            dispose()
+            create()
+        }
+    }
+
     private fun loadAssets(assets: AssetManager) {
         assets.load<BitmapFont>("fonts/pixola-cursiva.fnt")
 

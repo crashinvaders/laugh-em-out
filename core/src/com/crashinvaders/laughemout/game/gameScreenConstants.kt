@@ -34,6 +34,9 @@ object GameDrawOrder {
     const val JOKE_TIMER = 1900
     const val JOKE_BUILDER_UI_BASE = 2000
     const val COMPLETED_JOKE_VIEW = 2100
+
+    const val UI_GAME_OVER_MAIN = 5000
+    const val UI_GAME_OVER_SCORE = 5005
 }
 
 object CameraProcessorOrder {
@@ -41,6 +44,8 @@ object CameraProcessorOrder {
     const val JOKE_MANAGER = 0
 
     const val JOKE_BUILDER = 100
+
+    const val GAME_OVER = 400
 
     const val DEBUG_FREE = Int.MAX_VALUE
 }

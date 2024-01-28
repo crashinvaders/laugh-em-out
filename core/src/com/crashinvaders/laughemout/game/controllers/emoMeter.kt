@@ -45,8 +45,6 @@ object EmoMeterHelper {
         val animState = AnimationState(AnimationStateData(skelData))
         val skelActor = SkeletonActor(skelRenderer, skeleton, animState)
 
-        animState.update(MathUtils.random() * 10f)
-
         val entity = world.entity {
             it += Info("AudienceMember")
             it += EmoMeter(cAmAudMember, cAmAudMember.emoLevel)

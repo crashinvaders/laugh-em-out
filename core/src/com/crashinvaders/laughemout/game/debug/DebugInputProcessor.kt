@@ -2,10 +2,13 @@ package com.crashinvaders.laughemout.game.debug
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.Disposable
 import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.common.toggle
+import com.crashinvaders.laughemout.App
+import com.crashinvaders.laughemout.game.controllers.GameOverHelper
 import com.crashinvaders.laughemout.game.controllers.SpeechBubbleHelper
 import com.crashinvaders.laughemout.game.controllers.SpeechBubbleSize
 import com.crashinvaders.laughemout.game.debug.controllers.DebugController
@@ -118,6 +121,14 @@ class DebugInputProcessor(private val fleksWorld: FleksWorld) : KtxInputAdapter,
             Keys.A -> {
                 val (x, y) = mouseWorldPos()
                 SpeechBubbleHelper.createSpeechBubble(fleksWorld, "Pew pew\nshakalaka\n pew pew meow", x, y, SpeechBubbleSize.Large, 3f)
+                return true
+            }
+
+            Keys.M -> {
+                GameOverHelper.showGameOver(fleksWorld, MathUtils.random(0, 11)) {
+                    App.Inst.restart()
+                }
+                return true
             }
         }
         return true

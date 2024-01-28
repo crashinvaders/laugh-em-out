@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.*
+import com.crashinvaders.laughemout.App
 import com.crashinvaders.laughemout.game.CameraProcessorOrder
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
@@ -22,6 +23,7 @@ import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
 import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
+import com.crashinvaders.laughemout.game.engine.systems.OnWorldInitializedHandler
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.DelayAction
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.RunnableAction
@@ -43,14 +45,14 @@ import ktx.math.component1
 import ktx.math.component2
 
 class JokeGameManager : IntervalSystem(),
-    OrderedDisposableRegistry by OrderedDisposableContainer() {
+    OrderedDisposableRegistry by OrderedDisposableContainer(), OnWorldInitializedHandler {
 
     private val skelRenderer = world.inject<SkeletonRenderer>()
     private val assets = world.inject<AssetManager>()
     private val atlasCharacters = world.inject<TextureAtlas>("characters")
     private val atlasEnv = world.inject<TextureAtlas>("env")
 
-    private val camProcessor = Sod3CameraProcessor(4f, 0.8f, 0f,
+    private val camProcessor = Sod3CameraProcessor(2f, 0.8f, 0f,
         CameraProcessorOrder.JOKE_MANAGER,
         readCamValuesWhenAdded = false).apply {
         x = 60f * UPP
@@ -60,7 +62,7 @@ class JokeGameManager : IntervalSystem(),
     private val bBoard = BTreeBlackBoard(world, 3)
     private val bTree: BehaviorTree<BTreeBlackBoard> = BehaviorTree()
 
-    override fun onInit() {
+    override fun onWorldInitialized() {
         super.onInit()
 
         createEnvironment(world)
@@ -69,7 +71,15 @@ class JokeGameManager : IntervalSystem(),
 
         bBoard.eComedian = ComedianHelper.createComedian(world, 0f, 0f)
 
-        world.system<MainCameraStateSystem>().addProcessor(camProcessor)
+        world.system<MainCameraStateSystem>().apply {
+            cameraEntity[Transform].apply {
+                localPositionX = 0f * UPP
+                localPositionY = 20f * UPP
+//                localScaleX = 0.75f
+//                localScaleY = 0.75f
+            }
+            addProcessor(camProcessor)
+        }
 
         bTree.apply {
             setObject(bBoard)
@@ -142,6 +152,18 @@ class JokeGameManager : IntervalSystem(),
                         add(AudienceRotationTask(world))
 
                         waitLeaf(1f)
+
+                        add(CustomTask<BTreeBlackBoard>(
+                            onStart = {
+                                val isGameOver = `object`.audienceMembers.any { it[AudienceMember].emoLevel <= -3 }
+                                if (isGameOver) {
+                                    `object`.isGameOver = true
+                                    `object`.eScoreLabel[DrawableVisibility].isVisible = false
+                                    GameOverHelper.showGameOver(world, `object`.scoreCount) { App.Inst.restart() }
+                                }
+                            },
+                            onExecute = { if (`object`.isGameOver) Task.Status.RUNNING else Task.Status.SUCCEEDED }
+                        ))
 
                         runnable {
                             // Activate score label for the first time.
@@ -653,6 +675,7 @@ class JokeGameManager : IntervalSystem(),
         var jokeCount = 0
         var scoreCount = 0
         var maxAudienceCount: Int = maxAudienceCount
+        var isGameOver = false
 
         var eJokeTimer: Entity? = null
         var completedJoke: JokeStructureData? = null
