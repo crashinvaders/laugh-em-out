@@ -299,8 +299,6 @@ class JokeBuilderUiController : IteratingSystem(family { all(
             return@let hasEmptyJokeSubjects
         }
 
-        debug { "isJokeReady: $isJokeReady" }
-
         uiController!!.apply {
             eTitle[DrawableVisibility].isVisible = !isJokeReady
             eTitle[SodInterpolation].kickVisually()

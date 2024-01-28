@@ -1,10 +1,12 @@
 package com.crashinvaders.laughemout.game.controllers
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.MathUtils.randomBoolean
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.laughemout.game.engine.components.Info
@@ -20,6 +22,11 @@ import com.crashinvaders.laughemout.game.UPP
 import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
 import com.crashinvaders.laughemout.game.components.AudienceMember
 import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.DelayAction
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.DelegateAction
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.RunnableAction
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.SequenceAction
 import ktx.app.gdxError
 import ktx.collections.gdxArrayOf
 
@@ -76,7 +83,7 @@ object AudienceMemberHelper {
         }
 
         with(world) {
-            entity[AudienceMember].emoLevel = MathUtils.random(0, +2)
+            entity[AudienceMember].emoLevel = MathUtils.random(-1, +1)
 
             val eEmoMeter = EmoMeterHelper.create(world, entity)
             cAudMember.emoMeter = eEmoMeter[EmoMeter]
@@ -195,6 +202,21 @@ object AudienceMemberHelper {
                 setAnimation(TRACK_GENERAL, "reactions/neutral0", false)
                 addAnimation(TRACK_GENERAL, animationNamesIdle.random(), true, 0f)
             }
+        }
+    }
+
+    fun animateDisappearAndDestroy(world: FleksWorld, entity: Entity) {
+        with(world) {
+            val cAudMemb = entity[AudienceMember]
+            val cSkeleton = entity[SkeletonContainer]
+
+            cSkeleton.animState.apply {
+                setAnimation(TRACK_GENERAL, "roll-away0", false)
+            }
+            world.system<EntityActionSystem>().addAction(entity, SequenceAction(
+                DelayAction(1.5f),
+                RunnableAction { Gdx.app.postRunnable { world -= entity } }
+            ))
         }
     }
 

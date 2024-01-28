@@ -624,20 +624,21 @@ class JokeGameManager : IntervalSystem(),
                         bBoard.scoreCount++
                         updateScoreLabel(world, bBoard.eScoreLabel, bBoard.scoreCount)
                         animateScoreLabelPulse(world, bBoard.eScoreLabel)
-                        world -= it
+
+                        AudienceMemberHelper.animateDisappearAndDestroy(world, it)
                     })
                     sequenceAction.addAction(DelayAction(1f))
                 }
 
-                for (i in 0 until removedPlacementIndices.size) {
-                    val placementIndex = removedPlacementIndices[i]
-                    sequenceAction.addAction(RunnableAction {
-                        val (x, y) = AudienceMemberHelper.evalSpawnPosition(placementIndex)
-                        val eAudMemb = AudienceMemberHelper.create(world, x, y, placementIndex)
-                        bBoard.audienceMembers.add(eAudMemb)
-                    })
-                    sequenceAction.addAction(DelayAction(1f))
-                }
+//                for (i in 0 until removedPlacementIndices.size) {
+//                    val placementIndex = removedPlacementIndices[i]
+//                    sequenceAction.addAction(RunnableAction {
+//                        val (x, y) = AudienceMemberHelper.evalSpawnPosition(placementIndex)
+//                        val eAudMemb = AudienceMemberHelper.create(world, x, y, placementIndex)
+//                        bBoard.audienceMembers.add(eAudMemb)
+//                    })
+//                    sequenceAction.addAction(DelayAction(1f))
+//                }
 
                 sequenceAction.addAction(RunnableAction {
                     isCompleted = true
