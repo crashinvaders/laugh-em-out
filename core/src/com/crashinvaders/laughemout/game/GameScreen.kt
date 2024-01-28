@@ -1,6 +1,7 @@
 package com.crashinvaders.laughemout.game
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.ai.GdxAI
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
@@ -8,27 +9,24 @@ import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.crashinvaders.common.OrderedDisposableContainer
 import com.crashinvaders.common.OrderedDisposableRegistry
 import com.crashinvaders.common.OrderedInputMultiplexer
 import com.crashinvaders.common.events.EventBus
-import com.esotericsoftware.spine.SkeletonRenderer
-import com.github.quillraven.fleks.configureWorld
 import com.crashinvaders.laughemout.App
 import com.crashinvaders.laughemout.game.controllers.JokeBuilderUiController
 import com.crashinvaders.laughemout.game.controllers.JokeGameManager
 import com.crashinvaders.laughemout.game.debug.DebugInputProcessor
 import com.crashinvaders.laughemout.game.engine.OnResizeEvent
-import com.crashinvaders.laughemout.game.engine.components.Info
-import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.*
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
 import com.crashinvaders.laughemout.game.engine.systems.postprocessing.PostProcessingSystem
 import com.crashinvaders.laughemout.game.engine.systems.postprocessing.effects.ColorIndexPostEffect
 import com.crashinvaders.laughemout.game.hud.GameHudSystem
+import com.esotericsoftware.spine.SkeletonRenderer
+import com.github.quillraven.fleks.configureWorld
 import com.github.tommyettinger.textra.Font
 import ktx.app.KtxScreen
 import ktx.app.clearScreen
@@ -88,7 +86,6 @@ class GameScreen : KtxScreen,
             add(EntityActionSystem())
 
             //region Pre-engine game controllers
-            add(JokeBuilderUiController().apply { enabled = false })
             //endregion
 
             //region Engine core
@@ -121,7 +118,11 @@ class GameScreen : KtxScreen,
             //endregion
 
             //region Post-engine game controllers
+
             add(GameHudSystem())
+
+            add(JokeBuilderUiController().apply { enabled = false })
+            add(JokeGameManager())
             //endregion
         }
     }.also {
@@ -179,10 +180,6 @@ class GameScreen : KtxScreen,
 //        }
     }
 
-    init {
-        JokeGameManager(fleksWorld).alsoRegisterDisposable()
-    }
-
     override fun show() {
         super.show()
 
@@ -222,6 +219,8 @@ class GameScreen : KtxScreen,
 
     override fun render(delta: Float) {
         clearScreen(clearColor.r, clearColor.g, clearColor.b, clearColor.a, clearDepth = false)
+
+        GdxAI.getTimepiece().update(delta)
 
         fleksWorld.update(delta)
     }

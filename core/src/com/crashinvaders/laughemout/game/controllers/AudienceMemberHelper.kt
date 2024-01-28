@@ -21,7 +21,8 @@ import ktx.app.gdxError
 
 object AudienceMemberHelper {
 
-    private const val ANIM_TRACK_HEIGHT_LEVEL = 100
+    private const val TRACK_GENERAL = 0
+    private const val TRACK_HEIGHT_LEVEL = 100
 
     private val tmpVec2 = Vector2()
 
@@ -39,8 +40,10 @@ object AudienceMemberHelper {
         val animState = AnimationState(AnimationStateData(skelData))
         val skelActor = SkeletonActor(skelRenderer, skeleton, animState)
 
-        animState.setAnimation(0, "test-idle", true)
+        animState.setAnimation(TRACK_GENERAL, "test-idle", true)
         animState.update(MathUtils.random() * 10f)
+
+        lateinit var cAudMember: AudienceMember
 
         val entity = world.entity {
             it += Info("AudienceMember")
@@ -58,13 +61,16 @@ object AudienceMemberHelper {
             it += DrawableVisibility()
             it += DrawableDimensions(0f)
             it += DrawableOrigin(com.badlogic.gdx.utils.Align.bottom)
+
+            cAudMember = it[AudienceMember]
         }
 
         with(world) {
-            entity[AudienceMember].emoLevel = MathUtils.random(-3, 3)
-        }
+//            entity[AudienceMember].emoLevel = MathUtils.random(-1, +1)
 
-        EmoMeterHelper.create(world, entity)
+            val eEmoMeter = EmoMeterHelper.create(world, entity)
+            cAudMember.emoMeter = eEmoMeter[EmoMeter]
+        }
 
         setUpSkeleton(world, entity)
 
@@ -90,7 +96,10 @@ object AudienceMemberHelper {
         val race: Race = Race.values().random()
         val gender: Gender = Gender.values().random()
         val hat: Hat? = if (randomBoolean(0.7f)) null else Hat.values().random()
-        val hairStyle: HairStyle? = if (hat != null) HairStyle.Hair0 else
+        val hairStyle: HairStyle? = if (hat != null) when (gender) {
+            Gender.Male -> HairStyle.Hair0
+            Gender.Female -> HairStyle.Hair7
+        } else
             if (randomBoolean(0.1f)) null else
                 HairStyle.values().filter { it.targetGender == null || it.targetGender == gender }.random()
         val hairColor: HairColor = HairColor.values().random()
@@ -105,8 +114,8 @@ object AudienceMemberHelper {
 
     private fun setUpSkeleton(world: FleksWorld, audMemb: Entity) {
         with(world) {
-            val cSkelContainer = audMemb[SkeletonContainer]
             val cAudMemb = audMemb[AudienceMember]
+            val cSkelContainer = audMemb[SkeletonContainer]
 
             val emoLevel = evalEmotionLevelType(cAudMemb.emoLevel)
 
@@ -124,8 +133,8 @@ object AudienceMemberHelper {
 
             val animState = cSkelContainer.animState
             when(cAudMemb.heightLevel) {
-                HeightLevel.Short -> animState.setAnimation(ANIM_TRACK_HEIGHT_LEVEL, "height/low0", false)
-                HeightLevel.Tall -> animState.setAnimation(ANIM_TRACK_HEIGHT_LEVEL, "height/high0", false)
+                HeightLevel.Short -> animState.setAnimation(TRACK_HEIGHT_LEVEL, "height/low0", false)
+                HeightLevel.Tall -> animState.setAnimation(TRACK_HEIGHT_LEVEL, "height/high0", false)
                 else -> Unit
             }
         }
@@ -140,6 +149,41 @@ object AudienceMemberHelper {
             emotionLevelVal == 2 -> EmotionLevel.Enjoy
             emotionLevelVal >= 3 -> EmotionLevel.Rofl
             else -> gdxError("Unexpected emotion level value: $emotionLevelVal")
+        }
+    }
+
+    fun animateJokeReactionPos(world: FleksWorld, entity: Entity) {
+        with(world) {
+            val cAudMemb = entity[AudienceMember]
+            val cSkeleton = entity[SkeletonContainer]
+
+            cSkeleton.animState.apply {
+                setAnimation(TRACK_GENERAL, "reaction-positive0", false)
+                addAnimation(TRACK_GENERAL, "test-idle", true, 0f)
+            }
+        }
+    }
+
+    fun animateJokeReactionNeg(world: FleksWorld, entity: Entity) {
+        with(world) {
+            val cAudMemb = entity[AudienceMember]
+            val cSkeleton = entity[SkeletonContainer]
+
+            cSkeleton.animState.apply {
+                setAnimation(TRACK_GENERAL, "reaction-negative0", false)
+                addAnimation(TRACK_GENERAL, "test-idle", true, 0f)
+            }
+        }
+    }
+
+    fun updateFaceEmotion(world: FleksWorld, entity: Entity) {
+        with(world) {
+            val cAudMemb = entity[AudienceMember]
+            val cSkelContainer = entity[SkeletonContainer]
+
+            val emoType = evalEmotionLevelType(cAudMemb.emoLevel)
+            val skeleton = cSkelContainer.skeleton
+            skeleton.setAttachment("char-head", "char-head${cAudMemb.race.imgSuffix}${emoType.imgSuffix}")
         }
     }
 
@@ -218,6 +262,7 @@ object AudienceMemberHelper {
         Hair4("hair4"),
         Hair5("hair5", targetGender = Gender.Female),
         Hair6("hair6"),
+        Hair7("hair7", targetGender = Gender.Female),
     }
 
     enum class HairColor(val imgSuffix: String) {

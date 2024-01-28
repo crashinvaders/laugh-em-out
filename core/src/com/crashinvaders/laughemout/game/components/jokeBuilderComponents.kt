@@ -1,11 +1,12 @@
 package com.crashinvaders.laughemout.game.components
 
+import com.crashinvaders.laughemout.game.controllers.JokeSubjectData
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 
-class JokeSubjectCard : Component<JokeSubjectCard> {
+class JokeSubjectCard(val data: JokeSubjectData) : Component<JokeSubjectCard> {
 
     lateinit var entity: Entity private set
 

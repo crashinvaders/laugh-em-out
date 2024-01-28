@@ -1,40 +1,43 @@
 package com.crashinvaders.laughemout.game.controllers
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Button
 import com.badlogic.gdx.scenes.scene2d.ui.Container
 import com.badlogic.gdx.scenes.scene2d.ui.Image
-import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.Disposable
 import com.crashinvaders.common.*
+import com.crashinvaders.laughemout.game.CameraProcessorOrder
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.GameInputOrder
 import com.crashinvaders.laughemout.game.UPP
 import com.crashinvaders.laughemout.game.common.DrawableUtils
+import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActor
+import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
+import com.crashinvaders.laughemout.game.common.camera.Sod3CameraProcessor
+import com.crashinvaders.laughemout.game.components.JokeSubjectCard
+import com.crashinvaders.laughemout.game.components.JokeSubjectCardPlaceholder
+import com.crashinvaders.laughemout.game.components.JokeSubjectCardRosterPlacement
 import com.crashinvaders.laughemout.game.engine.components.Info
 import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
 import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.components.TransformDebugRenderTag
 import com.crashinvaders.laughemout.game.engine.components.render.*
-import com.github.quillraven.fleks.Entity
-import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActor;
-import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
-import com.crashinvaders.laughemout.game.components.JokeSubjectCard
-import com.crashinvaders.laughemout.game.components.JokeSubjectCardPlaceholder
-import com.crashinvaders.laughemout.game.components.JokeSubjectCardRosterPlacement
-import com.crashinvaders.laughemout.game.engine.systems.DrawableRenderSystem
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.DelayAction
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.RunnableAction
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.SequenceAction
+import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.Family
 import com.github.quillraven.fleks.FamilyOnAdd
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
-import com.github.quillraven.fleks.collection.EntityComparator
 import com.github.tommyettinger.textra.Font
 import com.github.tommyettinger.textra.TextraLabel
 import com.github.tommyettinger.textra.TypingLabel
@@ -52,12 +55,6 @@ class JokeBuilderUiController : IteratingSystem(family { all(
     DrawableDimensions,
 ) }), FamilyOnAdd, KtxInputAdapter {
 
-//    private val subjCardFamily: Family = world.family { all(
-//        JokeSubjectCard,
-//        Transform,
-//        DrawableOrigin,
-//        DrawableDimensions,
-//    ) }
     private val subjCardPlaceholderFamily: Family = world.family { all(
         JokeSubjectCardPlaceholder,
         Transform,
@@ -90,15 +87,37 @@ class JokeBuilderUiController : IteratingSystem(family { all(
         }
     }
 
+    fun show(world: FleksWorld, data: JokeBuilderData, onResult: (JokeStructureData) -> Unit) {
+        if (uiController != null)
+            gdxError("Another UI controller is already displayed.")
+
+        enabled = true
+
+        uiController = UiController(world, data).also {
+            it.onJokeItButtonClick += {
+                if (uiController != null) {
+                    val resultJoke: JokeStructureData
+                    with(world) {
+                        val subjPre = uiController!!.ePlaceholderL[JokeSubjectCardPlaceholder].attachedCard!!.data
+                        val subjPost = uiController!!.ePlaceholderR[JokeSubjectCardPlaceholder].attachedCard!!.data
+                        val jokeConnector = uiController!!.data.connector
+                        resultJoke = JokeStructureData(subjPre, subjPost, jokeConnector)
+                    }
+
+                    uiController!!.hideAndDispose()
+                    uiController = null
+
+                    enabled = false
+
+                    onResult(resultJoke)
+                }
+            }
+        }
+    }
+
     override fun onEnable() {
         super.onEnable()
         isEnabled = true
-
-        uiController = UiController(world).also {
-            it.onJokeItButtonClick += {
-                debug { "Click" }
-            }
-        }
 
         world.inject<OrderedInputMultiplexer>().addProcessor(this, GameInputOrder.JOKE_BUILDER_UI)
     }
@@ -124,6 +143,10 @@ class JokeBuilderUiController : IteratingSystem(family { all(
     }
 
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
+        if (uiController == null) {
+            return false
+        }
+
         val (x, y) = camSystem.screenToWorld(screenX, screenY)
 
         eDraggingSubjCard = family.firstOrNull {
@@ -255,7 +278,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
         }
     }
 
-    private class UiController(val world: FleksWorld): Disposable {
+    private class UiController(val world: FleksWorld, val data: JokeBuilderData): Disposable {
 
         val eRoot: Entity
         val ePlaceholderL: Entity
@@ -266,6 +289,13 @@ class JokeBuilderUiController : IteratingSystem(family { all(
 
         val onJokeItButtonClick = BlankSignal()
 
+        val camProcessor = Sod3CameraProcessor(4f, 0.8f, 0f, CameraProcessorOrder.JOKE_BUILDER, readCamValuesWhenAdded = false).apply {
+            x = 60f * UPP
+            y = -65f * UPP
+        }
+
+        var isHiding = false
+
         init {
             val font = world.inject<Font>("pixolaCurva")
             val bmFont = world.inject<BitmapFont>("bmPixolaCurva")
@@ -273,7 +303,10 @@ class JokeBuilderUiController : IteratingSystem(family { all(
 
             eRoot = world.entity {
                 it += Info("JokeBuilderRoot")
-                it += Transform()
+                it += Transform().apply {
+                    localPositionX = +60f * UPP
+                    localPositionY = -80f * UPP
+                }
             }
 
             eTitle = world.entity {
@@ -338,7 +371,8 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                     localPositionY = 0f
                 }
 
-                val actor = TypingLabel("drive\nbetter\nthan", font).apply {
+//                val actor = TypingLabel("drive\nbetter\nthan", font).apply {
+                val actor = TypingLabel("[#ffedd4]${data.connector.text}", font).apply {
                     alignment = Align.center
                     pack()
                 }
@@ -414,10 +448,10 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                 }
             }
 
-            fun createCard(task: String) {
+            fun createCard(subjectData: JokeSubjectData) {
                 world.entity {
                     it += Info("JokeSubjCard")
-                    it += JokeSubjectCard()
+                    it += JokeSubjectCard(subjectData)
                     it += Transform().apply {
                         parent = eRoot[Transform]
                         localPositionX = 0f
@@ -425,7 +459,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                     }
 
                     val actor = let {
-                        val label = TextraLabel("[#ffedd4]$task", font).apply {
+                        val label = TextraLabel("[#ffedd4]${subjectData.text}", font).apply {
 
                             alignment = Align.center
                         }
@@ -461,13 +495,38 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                 createRosterPlacement(i, x, y)
             }
 
-            createCard("BLACK\nPEOPLE")
-            createCard("BRUNETTES")
-            createCard("TALL\nPEOPLE")
+            if (data.subjects.size > 4)
+                gdxError("Too many subject options. Max value is 4")
+
+            data.subjects.forEach {
+                createCard(it)
+            }
+
+            world.system<MainCameraStateSystem>().addProcessor(camProcessor)
         }
 
         override fun dispose() {
+            world.system<MainCameraStateSystem>().removeProcessor(camProcessor)
             world -= eRoot
+        }
+
+        fun hideAndDispose() {
+            if (isHiding) return
+            isHiding = true
+
+            with(world) {
+                eRoot.configure { it += SodInterpolation(6f, 0.6f, -0.5f) }
+                Gdx.app.postRunnable {
+                    eRoot[Transform].localScaleX = 0f
+                    eRoot[Transform].localScaleY = 0f
+                }
+            }
+            world.system<EntityActionSystem>().addAction(eRoot, SequenceAction(
+                DelayAction(0.5f),
+                RunnableAction {
+                    Gdx.app.postRunnable { dispose() }
+                }
+            ))
         }
     }
 

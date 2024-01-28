@@ -30,8 +30,14 @@ object GameDrawOrder {
     const val MAP_LAYERS_FRONT = 1000
 
     const val JOKE_BUILDER_UI_BASE = 2000
+    const val COMPLETED_JOKE_VIEW = 2100
 }
 
 object CameraProcessorOrder {
+
+    const val JOKE_MANAGER = 0
+
+    const val JOKE_BUILDER = 100
+
     const val DEBUG_FREE = Int.MAX_VALUE
 }

@@ -2,6 +2,7 @@ package com.crashinvaders.laughemout.game.components
 
 import com.crashinvaders.common.EntityComponent
 import com.crashinvaders.laughemout.game.controllers.AudienceMemberHelper
+import com.crashinvaders.laughemout.game.controllers.EmoMeter
 import com.github.quillraven.fleks.ComponentType
 
 class Comedian : EntityComponent<Comedian>() {
@@ -26,6 +27,8 @@ class AudienceMember(
     ) : EntityComponent<AudienceMember>() {
 
     var emoLevel: Int = 0
+
+    lateinit var emoMeter: EmoMeter
 
     override fun type() = AudienceMember
     companion object : ComponentType<AudienceMember>()

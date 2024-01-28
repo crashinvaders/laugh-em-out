@@ -10,6 +10,7 @@ open class Sod2CameraProcessor(
     val r: Float,
     private val order: Int = 0,
     private val overridePrevState: Boolean = true,
+    private val readCamValuesWhenAdded: Boolean = true
 ): MainCameraStateSystem.CamProcessor {
 
     private val sod = SecondOrderDynamics2D().also {
@@ -19,19 +20,26 @@ open class Sod2CameraProcessor(
     var x: Float = 0f
     var y: Float = 0f
 
+    var isDisabled = false
+
     override fun getOrder(): Int = order
 
     override fun isOverrideState(): Boolean = overridePrevState
 
     override fun onAdded(camState: MainCameraStateSystem.CamState) {
-        x = camState.x
-        y = camState.y
+        if (readCamValuesWhenAdded) {
+            x = camState.x
+            y = camState.y
+        }
         sod.moveInstant(x, y)
     }
 
     override fun onRemoved(camState: MainCameraStateSystem.CamState) = Unit
 
     override fun process(camState: MainCameraStateSystem.CamState, deltaTime: Float) {
+        if (isDisabled) {
+            return
+        }
         sod.posX = camState.x
         sod.posY = camState.y
         sod.update(deltaTime, x, y)
@@ -46,6 +54,7 @@ open class Sod3CameraProcessor(
     r: Float,
     private val order: Int = 0,
     private val overridePrevState: Boolean = true,
+    private val readCamValuesWhenAdded: Boolean = true
 ): MainCameraStateSystem.CamProcessor {
 
     protected val sod = SecondOrderDynamicsArray(3).also {
@@ -57,14 +66,18 @@ open class Sod3CameraProcessor(
     var y: Float = 0f
     var scale: Float = 1f
 
+    var isDisabled = false
+
     override fun getOrder(): Int = order
 
     override fun isOverrideState(): Boolean = overridePrevState
 
     override fun onAdded(camState: MainCameraStateSystem.CamState) {
-        x = camState.x
-        y = camState.y
-        scale = camState.scale
+        if (readCamValuesWhenAdded) {
+            x = camState.x
+            y = camState.y
+            scale = camState.scale
+        }
 
         sodValues[0] = x
         sodValues[1] = y
@@ -75,6 +88,10 @@ open class Sod3CameraProcessor(
     override fun onRemoved(camState: MainCameraStateSystem.CamState) = Unit
 
     override fun process(camState: MainCameraStateSystem.CamState, deltaTime: Float) {
+        if (isDisabled) {
+            return
+        }
+
         sod.setPos(0, camState.x)
         sod.setPos(1, camState.y)
         sod.setPos(2, camState.scale)

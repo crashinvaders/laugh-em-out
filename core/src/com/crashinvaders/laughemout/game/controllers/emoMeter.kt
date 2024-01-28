@@ -49,7 +49,7 @@ object EmoMeterHelper {
 
         val entity = world.entity {
             it += Info("AudienceMember")
-            it += EmoMeter(cAmAudMember)
+            it += EmoMeter(cAmAudMember, cAmAudMember.emoLevel)
             it += Transform().apply {
                 parent = cAmTransform
                 localPositionX = 0f
@@ -69,12 +69,12 @@ object EmoMeterHelper {
 //                it += TransformDebugRenderTag
         }
 
-        with(world) {
-            entity[EmoMeter].emoValue = MathUtils.random(-3, 3)
-        }
+//        with(world) {
+//            entity[EmoMeter].emoLevel = MathUtils.random(-3, 3)
+//        }
 
         animateValueChange(world, entity)
-        animateToken(world, entity, TokenType.values().random())
+//        animateToken(world, entity, TokenType.values().random())
 
         return entity
     }
@@ -90,7 +90,7 @@ object EmoMeterHelper {
 //        if (!cEmoMeter.isDirty) return
 //        cEmoMeter.isDirty = false
 
-        val emoValue = cEmoMeter.emoValue
+        val emoValue = cEmoMeter.emoLevel
         val imgNameFrame: String = when {
             cEmoMeter.isUnknown -> "unknown"
             emoValue <= -3 -> "neg3"
@@ -125,7 +125,10 @@ object EmoMeterHelper {
     }
 }
 
-class EmoMeter(val audMemb: AudienceMember) : EntityComponent<EmoMeter>() {
+class EmoMeter(
+    val audMemb: AudienceMember,
+    emoLevel: Int,
+) : EntityComponent<EmoMeter>() {
 
     var isDirty: Boolean = false
 
@@ -138,7 +141,7 @@ class EmoMeter(val audMemb: AudienceMember) : EntityComponent<EmoMeter>() {
             isDirty = true
         }
 
-    var emoValue: Int = 0
+    var emoLevel: Int = emoLevel
         set(value) {
             if (value == field) {
                 return
