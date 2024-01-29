@@ -38,18 +38,18 @@ class SequenceAction() : ParallelAction() {
 
     override fun act(delta: Float): Boolean {
         if (index >= actions.size) return true
-        val assignedPool = this.pool
-        this.pool = null // Ensure this action can't be returned to the pool inside the delegate action.
-        try {
+//        val assignedPool = this.pool
+//        this.pool = null // Ensure this action can't be returned to the pool inside the delegate action.
+//        try {
             if (actions[index].act(delta)) {
                 if (!isAttached) return true // This action was removed.
                 index++
                 if (index >= actions.size) return true
             }
             return false
-        } finally {
-            this.pool = assignedPool
-        }
+//        } finally {
+//            this.pool = assignedPool
+//        }
     }
 
     override fun restart() {

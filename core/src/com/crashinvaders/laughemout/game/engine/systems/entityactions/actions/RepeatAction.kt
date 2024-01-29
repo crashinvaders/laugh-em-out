@@ -22,6 +22,7 @@ class RepeatAction() : DelegateAction() {
         if (executeCount == repeatTimes) return true
         if (action!!.act(delta)) {
             if (isCompleted) return true
+            if (!isAttached) return true // This action was removed.
             if (repeatTimes > 0) executeCount++
             if (executeCount == repeatTimes) return true
             action!!.restart()

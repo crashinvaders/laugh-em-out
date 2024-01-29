@@ -20,13 +20,13 @@ abstract class DelegateAction() : Action(), ParentAction {
     }
 
     override fun act(delta: Float): Boolean {
-        val assignedPool = this.pool
-        this.pool = null // Ensure this action can't be returned to the pool inside the delegate action.
-        try {
+//        val assignedPool = this.pool
+//        this.pool = null // Ensure this action can't be returned to the pool inside the delegate action.
+//        try {
             return delegate(delta)
-        } finally {
-            this.pool = assignedPool
-        }
+//        } finally {
+//            this.pool = assignedPool
+//        }
     }
 
     override fun addedToSystem(world: FleksWorld, entity: Entity) {

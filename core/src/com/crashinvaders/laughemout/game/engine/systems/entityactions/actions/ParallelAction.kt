@@ -50,9 +50,9 @@ open class ParallelAction() : Action(), ParentAction {
 
         isCompleted = true
 
-        val assignedPool = this.pool
-        this.pool = null // Ensure this action can't be returned to the pool inside the delegate action.
-        try {
+//        val assignedPool = this.pool
+//        this.pool = null // Ensure this action can't be returned to the pool inside the delegate action.
+//        try {
             val actions: Array<Action> = actions
             var i = 0
             val n = actions.size
@@ -67,9 +67,9 @@ open class ParallelAction() : Action(), ParentAction {
                 i++
             }
             return isCompleted
-        } finally {
-            this.pool = assignedPool
-        }
+//        } finally {
+//            this.pool = assignedPool
+//        }
     }
 
     override fun addAction(action: Action) {

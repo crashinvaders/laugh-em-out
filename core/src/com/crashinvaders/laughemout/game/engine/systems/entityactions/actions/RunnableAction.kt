@@ -25,13 +25,13 @@ class RunnableAction() : Action() {
 
     /** Called to run the runnable.  */
     private fun run() {
-        val assignedPool = this.pool
-        this.pool = null // Ensure this action can't be returned to the pool inside the delegate action.
-        try {
+//        val assignedPool = this.pool
+//        this.pool = null // Ensure this action can't be returned to the pool inside the delegate action.
+//        try {
             runnable!!(this)
-        } finally {
-            this.pool = assignedPool
-        }
+//        } finally {
+//            this.pool = assignedPool
+//        }
     }
 
     override fun restart() {

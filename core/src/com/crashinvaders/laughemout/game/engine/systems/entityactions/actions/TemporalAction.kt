@@ -28,9 +28,9 @@ abstract class TemporalAction() : Action() {
             return true
         }
 
-        val assignedPool = this.pool
-        this.pool = null // Ensure this action can't be returned to the pool inside the delegate action.
-        try {
+//        val assignedPool = this.pool
+//        this.pool = null // Ensure this action can't be returned to the pool inside the delegate action.
+//        try {
             if (!began) {
                 begin()
                 began = true
@@ -45,9 +45,9 @@ abstract class TemporalAction() : Action() {
             update(if (isReverse) 1 - percent else percent)
             if (complete) end()
             return complete
-        } finally {
-            this.pool = assignedPool
-        }
+//        } finally {
+//            this.pool = assignedPool
+//        }
     }
 
     /** Called the first time [.act] is called. This is a good place to query the [actor&#39;s][.actor] starting
