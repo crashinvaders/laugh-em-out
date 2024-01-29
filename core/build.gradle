@@ -35,5 +35,5 @@ dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 //    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
 
-    api "com.github.tommyettinger:textratypist:0.10.0"
+    api "com.github.tommyettinger:textratypist:$textratypistVersion"
 }
