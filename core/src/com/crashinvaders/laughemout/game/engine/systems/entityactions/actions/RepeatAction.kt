@@ -3,22 +3,28 @@ package com.crashinvaders.laughemout.game.engine.systems.entityactions.actions
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.Action
 
 /** Repeats an action a number of times or forever.  */
-class RepeatAction(
-    action: com.crashinvaders.laughemout.game.engine.systems.entityactions.Action,
-    val repeatTimes: Int = FOREVER
-) : DelegateAction(action) {
+class RepeatAction() : DelegateAction() {
+
+    var repeatTimes: Int = FOREVER
 
     private var executeCount = 0
-
     private var isCompleted = false
+
+    //TODO Replace both of this constructors with
+    // constructor(repeatTimes: Int = FOREVER, action: Action) : this() {
+    constructor(action: Action) : this(FOREVER, action)
+    constructor(repeatTimes: Int, action: Action) : this() {
+        this.action = action
+        this.repeatTimes = repeatTimes
+    }
 
     override fun delegate(delta: Float): Boolean {
         if (executeCount == repeatTimes) return true
-        if (action.act(delta)) {
+        if (action!!.act(delta)) {
             if (isCompleted) return true
             if (repeatTimes > 0) executeCount++
             if (executeCount == repeatTimes) return true
-            action.restart()
+            action!!.restart()
         }
         return false
     }
@@ -29,9 +35,14 @@ class RepeatAction(
     }
 
     override fun restart() {
-        super.restart()
         executeCount = 0
         isCompleted = false
+        super.restart()
+    }
+
+    override fun reset() {
+        repeatTimes = FOREVER
+        super.reset()
     }
 
     companion object {

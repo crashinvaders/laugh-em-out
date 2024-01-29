@@ -1,9 +1,9 @@
 package com.crashinvaders.common.events
 
 import com.badlogic.gdx.utils.SnapshotArray
-import com.crashinvaders.common.KtxPool
 import com.crashinvaders.common.use
 import ktx.app.gdxError
+import ktx.assets.pool
 import ktx.collections.component1
 import ktx.collections.component2
 import ktx.collections.gdxMapOf
@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
 
 class EventBus {
 
-    private val eventHandlerArrayPool = KtxPool<SnapshotArray<EventHandler>> { SnapshotArray() }
+    private val eventHandlerArrayPool = pool { SnapshotArray<EventHandler>() }
 
     private val handlerMap = gdxMapOf<KClass<out Event>, SnapshotArray<EventHandler>>()
 

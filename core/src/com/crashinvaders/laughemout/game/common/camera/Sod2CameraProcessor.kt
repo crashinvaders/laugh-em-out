@@ -2,6 +2,7 @@ package com.crashinvaders.laughemout.game.common.camera
 
 import com.crashinvaders.common.sod.SecondOrderDynamics2D
 import com.crashinvaders.common.sod.SecondOrderDynamicsArray
+import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
 
 open class Sod2CameraProcessor(
@@ -26,25 +27,25 @@ open class Sod2CameraProcessor(
 
     override fun isOverrideState(): Boolean = overridePrevState
 
-    override fun onAdded(camState: MainCameraStateSystem.CamState) {
+    override fun onAdded(camTransform: Transform.Snapshot) {
         if (readCamValuesWhenAdded) {
-            x = camState.x
-            y = camState.y
+            x = camTransform.positionX
+            y = camTransform.positionY
         }
         sod.moveInstant(x, y)
     }
 
-    override fun onRemoved(camState: MainCameraStateSystem.CamState) = Unit
+    override fun onRemoved(camTransform: Transform.Snapshot) = Unit
 
-    override fun process(camState: MainCameraStateSystem.CamState, deltaTime: Float) {
+    override fun process(camTransform: Transform.Snapshot, deltaTime: Float) {
         if (isDisabled) {
             return
         }
-        sod.posX = camState.x
-        sod.posY = camState.y
+        sod.posX = camTransform.positionX
+        sod.posY = camTransform.positionY
         sod.update(deltaTime, x, y)
-        camState.x = sod.posX
-        camState.y = sod.posY
+        camTransform.positionX = sod.posX
+        camTransform.positionY = sod.posY
     }
 }
 
@@ -72,11 +73,11 @@ open class Sod3CameraProcessor(
 
     override fun isOverrideState(): Boolean = overridePrevState
 
-    override fun onAdded(camState: MainCameraStateSystem.CamState) {
+    override fun onAdded(camTransform: Transform.Snapshot) {
         if (readCamValuesWhenAdded) {
-            x = camState.x
-            y = camState.y
-            scale = camState.scale
+            x = camTransform.positionX
+            y = camTransform.positionY
+            scale = camTransform.scaleX
         }
 
         sodValues[0] = x
@@ -85,24 +86,25 @@ open class Sod3CameraProcessor(
         sod.moveInstant(sodValues)
     }
 
-    override fun onRemoved(camState: MainCameraStateSystem.CamState) = Unit
+    override fun onRemoved(camTransform: Transform.Snapshot) = Unit
 
-    override fun process(camState: MainCameraStateSystem.CamState, deltaTime: Float) {
+    override fun process(camTransform: Transform.Snapshot, deltaTime: Float) {
         if (isDisabled) {
             return
         }
 
-        sod.setPos(0, camState.x)
-        sod.setPos(1, camState.y)
-        sod.setPos(2, camState.scale)
+        sod.setPos(0, camTransform.positionX)
+        sod.setPos(1, camTransform.positionY)
+        sod.setPos(2, camTransform.scaleX)
 
         sodValues[0] = x
         sodValues[1] = y
         sodValues[2] = scale
         sod.update(deltaTime, sodValues)
 
-        camState.x = sod.getPos(0)
-        camState.y = sod.getPos(1)
-        camState.scale = sod.getPos(2)
+        camTransform.positionX = sod.getPos(0)
+        camTransform.positionY = sod.getPos(1)
+        camTransform.scaleX = sod.getPos(2)
+        camTransform.scaleY = sod.getPos(2)
     }
 }

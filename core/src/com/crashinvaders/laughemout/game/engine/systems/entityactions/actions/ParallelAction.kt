@@ -2,41 +2,40 @@ package com.crashinvaders.laughemout.game.engine.systems.entityactions.actions
 
 import com.badlogic.gdx.utils.Array
 import com.crashinvaders.common.FleksWorld
-import com.github.quillraven.fleks.Entity
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.Action
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.ParentAction
+import com.github.quillraven.fleks.Entity
 import ktx.collections.gdxArrayOf
 
-open class ParallelAction : Action {
+open class ParallelAction() : Action(), ParentAction {
 
     val actions: Array<Action> = gdxArrayOf(initialCapacity = 4)
 
     private var isCompleted = false
 
-    constructor()
-
-    constructor(action1: Action) {
+    constructor(action1: Action) : this() {
         addAction(action1)
     }
 
-    constructor(action1: Action, action2: Action) {
+    constructor(action1: Action, action2: Action) : this() {
         addAction(action1)
         addAction(action2)
     }
 
-    constructor(action1: Action, action2: Action, action3: Action) {
+    constructor(action1: Action, action2: Action, action3: Action) : this() {
         addAction(action1)
         addAction(action2)
         addAction(action3)
     }
 
-    constructor(action1: Action, action2: Action, action3: Action, action4: Action) {
+    constructor(action1: Action, action2: Action, action3: Action, action4: Action) : this() {
         addAction(action1)
         addAction(action2)
         addAction(action3)
         addAction(action4)
     }
 
-    constructor(action1: Action, action2: Action, action3: Action, action4: Action, action5: Action) {
+    constructor(action1: Action, action2: Action, action3: Action, action4: Action, action5: Action) : this() {
         addAction(action1)
         addAction(action2)
         addAction(action3)
@@ -45,45 +44,37 @@ open class ParallelAction : Action {
     }
 
     override fun act(delta: Float): Boolean {
-        if (isCompleted) return true
+        if (isCompleted) {
+            return true
+        }
+
         isCompleted = true
-        //        Pool pool = getPool();
-//        setPool(null); // Ensure this action can't be returned to the pool while executing.
-//        try {
-        val actions: Array<Action> = actions
-        var i = 0
-        val n = actions.size
-        while (i < n && isAttached) {
-            val currentAction: Action = actions[i]
-            if (currentAction.isAttached && !currentAction.act(delta)) isCompleted = false
-            if (!isAttached) return true // This action was removed.
-            i++
-        }
-        return isCompleted
-        //        } finally {
-//            setPool(pool);
-//        }
-    }
 
-    override fun restart() {
-        isCompleted = false
-        val actions: Array<Action> = actions
-        var i = 0
-        val n = actions.size
-        while (i < n) {
-            actions[i].restart()
-            i++
+        val assignedPool = this.pool
+        this.pool = null // Ensure this action can't be returned to the pool inside the delegate action.
+        try {
+            val actions: Array<Action> = actions
+            var i = 0
+            val n = actions.size
+            while (i < n && isAttached) {
+                val currentAction: Action = actions[i]
+                if (currentAction.isAttached && !currentAction.act(delta)) {
+                    isCompleted = false
+                }
+                if (!isAttached) {
+                    return true // This action was removed.
+                }
+                i++
+            }
+            return isCompleted
+        } finally {
+            this.pool = assignedPool
         }
     }
 
-    override fun reset() {
-        super.reset()
-        actions.clear()
-    }
-
-    fun addAction(action: Action) {
+    override fun addAction(action: Action) {
         actions.add(action)
-        if (isAttached) action.addedToSystem(world, entity)
+        if (isAttached) action.addedToSystem(world!!, entity!!)
     }
 
     override fun addedToSystem(world: FleksWorld, entity: Entity) {
@@ -108,13 +99,22 @@ open class ParallelAction : Action {
         super.removedFromSystem()
     }
 
-    //    @Override
-    //    public void setEntity (Entity entity) {
-    //        Array<Action> actions = this.actions;
-    //        for (int i = 0, n = actions.size; i < n; i++)
-    //            actions.get(i).setEntity(entity);
-    //        super.setEntity(entity);
-    //    }
+    override fun restart() {
+        isCompleted = false
+        val actions: Array<Action> = actions
+        var i = 0
+        val n = actions.size
+        while (i < n) {
+            actions[i].restart()
+            i++
+        }
+        super.restart()
+    }
+
+    override fun reset() {
+        super.reset()
+        actions.clear()
+    }
 
     override fun toString(): String {
         val buffer = StringBuilder(64)

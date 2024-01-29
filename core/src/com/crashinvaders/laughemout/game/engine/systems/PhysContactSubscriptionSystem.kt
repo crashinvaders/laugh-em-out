@@ -5,17 +5,17 @@ import com.badlogic.gdx.physics.box2d.*
 import com.badlogic.gdx.utils.ArrayMap
 import com.badlogic.gdx.utils.Pool
 import com.badlogic.gdx.utils.SnapshotArray
-import com.crashinvaders.common.KtxPool
 import com.crashinvaders.common.use
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.Family
 import com.github.quillraven.fleks.IntervalSystem
+import ktx.assets.pool
 import ktx.collections.GdxArray
 import ktx.collections.getOrPut
 
 class PhysContactSubscriptionSystem : IntervalSystem(), ContactListener {
 
-    private val contactInfoPool = KtxPool { ContactInfo() }
+    private val contactInfoPool = pool { ContactInfo() }
 
     private val familyListeners = ArrayMap<Family, SnapshotArray<EntityContactListener>>()
 

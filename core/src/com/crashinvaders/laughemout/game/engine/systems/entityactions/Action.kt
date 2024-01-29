@@ -4,44 +4,45 @@ import com.badlogic.gdx.utils.Pool
 import com.badlogic.gdx.utils.Pool.Poolable
 import com.crashinvaders.common.FleksWorld
 import com.github.quillraven.fleks.Entity
-
+import ktx.app.gdxError
 
 abstract class Action : Poolable {
 
-    protected lateinit var world: FleksWorld
+    private var _world: FleksWorld? = null
+    val world: FleksWorld get() = _world!!
+//    var world: FleksWorld? = null
+//        protected set
 
     /** The entity this action is attached to, or null if it is not attached.  */
-    lateinit var entity: Entity
-        public get
-        protected set
+    private var _entity: Entity? = null
+    val entity: Entity get() = _entity!!
+//    var entity: Entity? = null
+//        protected set
 
-    /** @return null if the action is not attached to system.
-     */
     /** Indicates whether entity is attached to processing system.  */
     var isAttached = false
         public get
         protected set
 
-//    /** Sets the pool that the action will be returned to when removed from the actor.
-//     * @param pool May be null.
-//     * @see .addedToSystem
-//     */
-//    var pool: Pool<Action>? = null
+    /** Sets the pool that the action will be returned to when removed from the actor.
+     * @see addedToSystem
+     */
+    var pool: Pool<Any>? = null
 
     /** Action added to precessing system  */
     open fun addedToSystem(world: FleksWorld, entity: Entity) {
         isAttached = true
-        this.world = world
-        this.entity = entity
+        this._world = world
+        this._entity = entity
     }
 
     /** Action removed from precessing system  */
     open fun removedFromSystem() {
         isAttached = false
-//        if (pool != null) {
-//            pool!!.free(this)
-//            pool = null
-//        }
+        if (pool != null) {
+            pool!!.free(this)
+            pool = null
+        }
     }
     //TODO move parts of that javadoc to addedToSystem/removedFromSystem
     /** Sets the actor this action is attached to. This also sets the [target][.setTarget] actor if it is null. This
@@ -69,19 +70,23 @@ abstract class Action : Poolable {
     //    }
 
     override fun reset() {
-//        world = null
-//        entity = null
-//        pool = null
+        _world = null
+        _entity = null
+        pool = null
         restart()
     }
 
     /** Sets the state of the action so it can be run again.  */
-    open fun restart() {}
+    open fun restart() = Unit
 
     /** Updates the action based on time.
      * @param delta Time in seconds since the last frame.
      * @return true if the action is done. This method may continue to be called after the action is done.
      */
     abstract fun act(delta: Float): Boolean
+
+//    open fun addAction(action: Action) {
+//        gdxError("The ${this::class.simpleName} cannot have children actions.")
+//    }
 }
 

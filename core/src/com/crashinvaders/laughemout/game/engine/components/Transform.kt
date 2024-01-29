@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.SnapshotArray
 import com.crashinvaders.common.*
 import com.github.quillraven.fleks.*
+import ktx.assets.pool
 import ktx.collections.GdxArray
 
 class Transform : Component<Transform> {
@@ -404,7 +405,53 @@ class Transform : Component<Transform> {
     companion object : ComponentType<Transform>() {
         private val projIdt = Affine2()
 
-        private val entitySnapshotArrayPool = KtxPool<SnapshotArray<Entity>> { SnapshotArray() }
+        private val entitySnapshotArrayPool = pool { SnapshotArray<Entity>() }
+    }
+
+    data class Snapshot(
+        var positionX: Float,
+        var positionY: Float,
+        var scaleX: Float,
+        var scaleY: Float,
+        var rotation: Float) {
+
+        constructor() : this(0f, 0f, 1f, 1f, 0f)
+
+        fun from(other: Snapshot) {
+            this.positionX = other.positionX
+            this.positionY = other.positionY
+            this.scaleX = other.scaleX
+            this.scaleY = other.scaleY
+            this.rotation = other.rotation
+        }
+
+        fun readLocalFrom(transform: Transform) {
+            this.positionX = transform.localPositionX
+            this.positionY = transform.localPositionY
+            this.scaleX = transform.localScaleX
+            this.scaleY = transform.localScaleY
+            this.rotation = transform.localRotation
+        }
+
+        fun readWorldFrom(transform: Transform) {
+            this.positionX = transform.worldPositionX
+            this.positionY = transform.worldPositionY
+            this.scaleX = transform.worldScaleX
+            this.scaleY = transform.worldScaleY
+            this.rotation = transform.worldRotation
+        }
+
+        fun writeLocalTo(transform: Transform) {
+            transform.localPositionX = this.positionX
+            transform.localPositionY = this.positionY
+            transform.localScaleX = this.scaleX
+            transform.localScaleY = this.scaleY
+            transform.localRotation = this.rotation
+        }
+
+        fun writeWorldTo(transform: Transform) {
+            transform.setWorld(positionX, positionY, rotation, scaleX, scaleY)
+        }
     }
 }
 

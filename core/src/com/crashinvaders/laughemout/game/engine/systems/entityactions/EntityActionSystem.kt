@@ -2,18 +2,21 @@ package com.crashinvaders.laughemout.game.engine.systems.entityactions
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.utils.SnapshotArray
-import com.crashinvaders.common.KtxPool
 import com.crashinvaders.common.use
 import com.github.quillraven.fleks.*
 import com.crashinvaders.laughemout.game.engine.components.ActionOwner
 import com.crashinvaders.laughemout.game.engine.components.Info
+import ktx.assets.pool
 import ktx.collections.GdxArrayMap
 import ktx.collections.getOrPut
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 class EntityActionSystem : IntervalSystem() {
 
     private val entityActions = GdxArrayMap<Entity, SnapshotArray<Action>>()
-    private val actionArrayPool = KtxPool<SnapshotArray<Action>> { SnapshotArray() }
+    private val actionArrayPool = pool { SnapshotArray<Action>() }
 
     private lateinit var eGlobalActionRoot: Entity
 
@@ -115,5 +118,19 @@ class EntityActionSystem : IntervalSystem() {
         hasCompletedActions = true
         actions.forEach { it.removedFromSystem() }
         actions.clear()
+    }
+
+    @OptIn(ExperimentalContracts::class)
+    inline fun actions(
+        entity: Entity? = null,
+        init: ParentAction.() -> Unit,
+    ) {
+        contract { callsInPlace(init, InvocationKind.EXACTLY_ONCE) }
+        val parentAction: ParentAction = if (entity != null) {
+            ParentAction { action -> this@EntityActionSystem.addAction(entity, action) }
+        } else {
+            ParentAction { action -> this@EntityActionSystem.addAction(action) }
+        }
+        parentAction.init()
     }
 }

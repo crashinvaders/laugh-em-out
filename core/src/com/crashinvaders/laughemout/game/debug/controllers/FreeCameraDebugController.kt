@@ -7,6 +7,7 @@ import com.crashinvaders.common.OrderedInputMultiplexer
 import com.crashinvaders.laughemout.game.CameraProcessorOrder
 import com.crashinvaders.laughemout.game.GameInputOrder
 import com.crashinvaders.laughemout.game.common.camera.Sod3CameraProcessor
+import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
 import ktx.app.KtxInputAdapter
 import ktx.math.component1
@@ -111,14 +112,14 @@ class FreeCameraDebugController(fleksWorld: FleksWorld) : KtxInputAdapter, Debug
         private var initialScale: Float = 1f
         var relativeScale: Float = 1f
 
-        override fun onAdded(camState: MainCameraStateSystem.CamState) {
-            super.onAdded(camState)
-            initialScale = camState.scale
+        override fun onAdded(camTransform: Transform.Snapshot) {
+            super.onAdded(camTransform)
+            initialScale = camTransform.scaleX
         }
 
-        override fun process(camState: MainCameraStateSystem.CamState, deltaTime: Float) {
+        override fun process(camTransform: Transform.Snapshot, deltaTime: Float) {
             this.scale = initialScale * relativeScale
-            super.process(camState, deltaTime)
+            super.process(camTransform, deltaTime)
         }
     }
 }

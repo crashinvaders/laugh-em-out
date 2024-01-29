@@ -1,7 +1,6 @@
 package com.crashinvaders.laughemout.game.engine.systems
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Camera
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.GdxRuntimeException
@@ -71,8 +70,8 @@ class MainCameraStateSystem(
         processors.add(processor)
         isDirty = true
 
-        sharedCamState.readTransform(cameraTransform)
-        processor.onAdded(sharedCamState)
+        sharedCamTransform.readWorldFrom(cameraTransform)
+        processor.onAdded(sharedCamTransform)
     }
 
     fun removeProcessor(processor: CamProcessor) {
@@ -83,11 +82,10 @@ class MainCameraStateSystem(
         if (!processors.removeValue(processor, true))
             throw GdxRuntimeException("Processor is not registered: ${processor::class.simpleName}")
 
-        sharedCamState.readTransform(cameraTransform)
         isDirty = true
 
-        sharedCamState.readTransform(cameraTransform)
-        processor.onRemoved(sharedCamState)
+        sharedCamTransform.readWorldFrom(cameraTransform)
+        processor.onRemoved(sharedCamTransform)
     }
 
     override fun onTick() {
@@ -115,14 +113,14 @@ class MainCameraStateSystem(
 
         val deltaTime = this.deltaTime
 
-        val camState = MainCameraStateSystem.sharedCamState
-        camState.readTransform(cameraTransform)
+        val camState = MainCameraStateSystem.sharedCamTransform
+        sharedCamTransform.readWorldFrom(cameraTransform)
 
         for (i in lastOverridingControllerIndex until processors.size) {
             processors[i].process(camState, deltaTime)
         }
 
-        camState.writeTransform(cameraTransform)
+        camState.writeWorldTo(cameraTransform)
 
         isProcessing = false
 
@@ -158,7 +156,7 @@ class MainCameraStateSystem(
 
     companion object {
         private val tmpVec = Vector3()
-        private val sharedCamState = CamState()
+        private val sharedCamTransform = Transform.Snapshot()
 
         private val processorComparator = Comparator<CamProcessor> { p0, p1 ->
             CommonUtils.compare(p0.getOrder(), p1.getOrder()) }
@@ -167,28 +165,28 @@ class MainCameraStateSystem(
             viewport.screenWidth.toFloat() / viewport.worldWidth
     }
 
-    data class CamState(
-        var x: Float = 0f,
-        var y: Float = 0f,
-        var scale: Float = 0f,
-    ) {
-        fun readTransform(transform: Transform) {
-            x = transform.worldPositionX
-            y = transform.worldPositionY
-            scale = transform.worldScaleX
-        }
-
-        fun writeTransform(transform: Transform) {
-            transform.setWorldPosition(x, y)
-            transform.setWorldScale(scale, scale)
-        }
-    }
+//    data class CamState(
+//        var x: Float = 0f,
+//        var y: Float = 0f,
+//        var scale: Float = 0f,
+//    ) {
+//        fun readTransform(transform: Transform) {
+//            x = transform.worldPositionX
+//            y = transform.worldPositionY
+//            scale = transform.worldScaleX
+//        }
+//
+//        fun writeTransform(transform: Transform) {
+//            transform.setWorldPosition(x, y)
+//            transform.setWorldScale(scale, scale)
+//        }
+//    }
 
     interface CamProcessor {
         fun getOrder(): Int
         fun isOverrideState(): Boolean
-        fun onAdded(camState: CamState)
-        fun onRemoved(camState: CamState)
-        fun process(camState: CamState, deltaTime: Float)
+        fun onAdded(camTransform: Transform.Snapshot)
+        fun onRemoved(camTransform: Transform.Snapshot)
+        fun process(camTransform: Transform.Snapshot, deltaTime: Float)
     }
 }

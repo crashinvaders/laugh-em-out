@@ -22,10 +22,8 @@ import com.crashinvaders.laughemout.game.engine.components.TransformDebugRenderT
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.CustomAction
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.RepeatAction
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.SequenceAction
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.transform.MoveToWorldAction
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.*
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.transform.TransformSpace
 import ktx.app.KtxInputAdapter
 
 class EntityActionSystemTest(private val fleksWorld: FleksWorld) : KtxInputAdapter, DebugController {
@@ -59,7 +57,7 @@ class EntityActionSystemTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
                 entity += DrawableTint()
                 entity += DrawableVisibility()
                 entity += DrawableDimensions(2f, 2f)
-                entity += DrawableOrigin(Align.bottom)
+                entity += DrawableOrigin(Align.center)
 
                 entity += SodInterpolation(4f, 0.4f, -0.5f)
                 entity += TransformDebugRenderTag
@@ -72,46 +70,33 @@ class EntityActionSystemTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
             inputMultiplexer.addProcessor(this@EntityActionSystemTest, GameInputOrder.DEBUG_CONTROLLERS)
         }
 
-        val actionSystem = fleksWorld.system<EntityActionSystem>()
-        actionSystem.addAction(entity, RepeatAction(
-            com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.SequenceAction(
-                MoveToWorldAction(2f, 1f, duration = 1f, interpolation = Interpolation.exp5),
-                CustomAction(
-                    { t ->
-                        transform.setWorldPosition(
-                            MathUtils.lerp(2f, 0f, t),
-                            MathUtils.lerp(1f, 0f, t)
-                        )
-                    },
-                    1f, Interpolation.exp5
-                ),
-//                MoveToWorldAction(0f, 0f, duration = 1f, interpolation = Interpolation.exp5)
-            )
-        ))
-
-        camProcessor = object : Sod2CameraProcessor(2f, 1f, 0f) {
-            override fun process(camState: MainCameraStateSystem.CamState, deltaTime: Float) {
-                this.x = transform.worldPositionX
-                this.y = transform.worldPositionY
-                super.process(camState, deltaTime)
+        fleksWorld.system<EntityActionSystem>().actions(entity) {
+            repeat {
+                sequence {
+                    parallel {
+                        rotateBy(60f)
+                        moveTo(2f, 1f, 1f, Interpolation.exp5, TransformSpace.World)
+                    }
+                    parallel {
+                        rotateBy(60f)
+                        interpolate(1f, Interpolation.exp5) { _, progress ->
+                            transform.setWorldPosition(
+                                MathUtils.lerp(2f, 0f, progress),
+                                MathUtils.lerp(1f, 0f, progress)
+                            )
+                        }
+                    }
+                }
             }
         }
-//        camProcessor = object : MainCameraStateSystem.CamProcessor {
-//            private val sod = SecondOrderDynamics2D()
-//
-//            override fun getOrder(): Int = 0
-//            override fun onAdded(camState: MainCameraStateSystem.CamState) {
-//                sod.reset(2f, 1f, 0f, camState.x, camState.y)
-//            }
-//            override fun onRemoved(camState: MainCameraStateSystem.CamState) = Unit
-//            override fun process(camState: MainCameraStateSystem.CamState, deltaTime: Float) {
-//                sod.posX = camState.x
-//                sod.posY = camState.y
-//                sod.update(deltaTime, transform.worldPositionX, transform.worldPositionY)
-//                camState.x = sod.posX
-//                camState.y = sod.posY
-//            }
-//        }
+
+        camProcessor = object : Sod2CameraProcessor(2f, 1f, 0f) {
+            override fun process(camTransform: Transform.Snapshot, deltaTime: Float) {
+                this.x = transform.worldPositionX
+                this.y = transform.worldPositionY
+                super.process(camTransform, deltaTime)
+            }
+        }
         camSystem.addProcessor(camProcessor)
     }
 
@@ -135,9 +120,5 @@ class EntityActionSystemTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
             }
         }
         return false
-    }
-
-    companion object {
-        private val tmpVec = Vector3()
     }
 }

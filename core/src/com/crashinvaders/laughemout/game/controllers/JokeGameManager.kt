@@ -28,6 +28,7 @@ import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActi
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.DelayAction
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.RunnableAction
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.SequenceAction
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.action
 import com.esotericsoftware.spine.SkeletonRenderer
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IntervalSystem
@@ -619,8 +620,8 @@ class JokeGameManager : IntervalSystem(),
                 completedMembers.forEach {
                     removedPlacementIndices.add(it[AudienceMember].placementIndex)
 
-                    sequenceAction.addAction(RunnableAction {
-                        bBoard.audienceMembers.removeValue(it, true)
+                    sequenceAction.addAction(RunnableAction { action ->
+                        bBoard.audienceMembers.removeValue(action.entity!!, true)
                         bBoard.scoreCount++
                         updateScoreLabel(world, bBoard.eScoreLabel, bBoard.scoreCount)
                         animateScoreLabelPulse(world, bBoard.eScoreLabel)
