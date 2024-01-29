@@ -9,8 +9,12 @@ class ActionOwner(
     private val onRemoveCallback: (entity: Entity) -> Unit
 ) : Component<ActionOwner> {
 
+    var muteRemoveCallback = false
+
     override fun World.onRemove(entity: Entity) {
-        onRemoveCallback(entity)
+        if (!muteRemoveCallback) {
+            onRemoveCallback(entity)
+        }
     }
 
     override fun type() = ActionOwner

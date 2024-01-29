@@ -2,48 +2,72 @@ package com.crashinvaders.laughemout.game.engine.systems.entityactions
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.utils.SnapshotArray
+import com.crashinvaders.common.KtxPool
 import com.crashinvaders.common.use
 import com.github.quillraven.fleks.*
 import com.crashinvaders.laughemout.game.engine.components.ActionOwner
+import com.crashinvaders.laughemout.game.engine.components.Info
 import ktx.collections.GdxArrayMap
 import ktx.collections.getOrPut
 
 class EntityActionSystem : IntervalSystem() {
 
-    private val activeActions = GdxArrayMap<Entity, SnapshotArray<Action>>()
+    private val entityActions = GdxArrayMap<Entity, SnapshotArray<Action>>()
+    private val actionArrayPool = KtxPool<SnapshotArray<Action>> { SnapshotArray() }
 
-    private var isUpdating = false
+    private lateinit var eGlobalActionRoot: Entity
+
+    private var isProcessingActions = false
+    private var hasCompletedActions = false
+
+    override fun onInit() {
+        super.onInit()
+
+        eGlobalActionRoot = world.entity {
+            it += Info("GlobalActionRoot")
+            it += ActionOwner { entity ->  onActionOwnerRemoved(entity) }
+        }
+    }
 
     override fun onTick() {
-        val deltaTime = this.deltaTime
+        if (!entityActions.isEmpty) {
+            val deltaTime = this.deltaTime
 
-        var hasCompletedActions = false
-
-        isUpdating = true
-        val entitySize = activeActions.size
-        for (i in 0 until entitySize) {
-            val actions = activeActions.getValueAt(i)
-            actions.use { action ->
-                val isCompleted = action.act(deltaTime)
-                if (isCompleted) {
-                    hasCompletedActions = true
-                    actions.removeValue(action, true)
-                    action.removedFromSystem()
+            isProcessingActions = true
+            val entitySize = entityActions.size
+            for (i in 0 until entitySize) {
+                val actions = entityActions.getValueAt(i)
+                actions.use { action ->
+                    if (!action.isAttached) {
+                        hasCompletedActions = true
+                        return@use
+                    }
+                    val isCompleted = action.act(deltaTime)
+                    if (isCompleted) {
+                        hasCompletedActions = true
+                        actions.removeValue(action, true)
+                        if (action.isAttached){
+                            action.removedFromSystem()
+                        }
+                    }
                 }
             }
+            isProcessingActions = false
         }
-        isUpdating = false
 
         if (hasCompletedActions) {
-            for (i in (activeActions.size - 1) downTo 0) {
-                //TODO Pool snapshot array.
-                val actions = activeActions.getValueAt(i)
+            for (i in (entityActions.size - 1) downTo 0) {
+                val actions = entityActions.getValueAt(i)
                 if (actions.isEmpty) {
-                    val entity = activeActions.getKeyAt(i)
-                    activeActions.removeIndex(i)
-                    //TODO Mute component's removal callback.
-                    entity.configure {
-                        it -= ActionOwner
+                    val entity = entityActions.getKeyAt(i)
+                    entityActions.removeIndex(i)
+                    actionArrayPool.free(actions)
+
+                    if (ActionOwner in entity) {
+                        entity[ActionOwner].muteRemoveCallback = true
+                        entity.configure {
+                            it -= ActionOwner
+                        }
                     }
                 }
             }
@@ -52,10 +76,10 @@ class EntityActionSystem : IntervalSystem() {
 
     /** Run an action without it's being bound to an entity. */
     fun addAction(action: Action) =
-        addAction(Entity.NONE, action)
+        addAction(eGlobalActionRoot, action)
 
     fun addAction(entity: Entity, action: Action) {
-        if (isUpdating) {
+        if (isProcessingActions) {
             Gdx.app.postRunnable { addAction(entity, action) }
             return
         }
@@ -66,14 +90,13 @@ class EntityActionSystem : IntervalSystem() {
             }
         }
 
-        //TODO Pool snapshot array.
-        val actions = activeActions.getOrPut(entity) { SnapshotArray() }
+        val actions = entityActions.getOrPut(entity) { actionArrayPool.obtain() }
         actions.add(action)
         action.addedToSystem(world, entity)
     }
 
     fun removeActions(entity: Entity) {
-        if (isUpdating) {
+        if (isProcessingActions) {
             Gdx.app.postRunnable { removeActions(entity) }
             return
         }
@@ -84,13 +107,13 @@ class EntityActionSystem : IntervalSystem() {
     }
 
     private fun onActionOwnerRemoved(entity: Entity) {
-        val actions = activeActions[entity]
+        val actions = entityActions[entity]
         if (actions == null) {
             return
         }
 
-//        debug { "Entity ${entity.getPrintName(world)} is removing and still has ${actions.size} actions running." }
-        activeActions.removeKey(entity)
+        hasCompletedActions = true
         actions.forEach { it.removedFromSystem() }
+        actions.clear()
     }
 }
