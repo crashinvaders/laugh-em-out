@@ -30,9 +30,10 @@ dependencies {
     api "io.github.libktx:ktx-vis-style:$ktxVersion"
     api "io.github.libktx:ktx-vis:$ktxVersion"
     api "io.github.libktx:ktx-tiled:$ktxVersion"
+//    api "io.github.libktx:ktx-async:$ktxVersion" // Doesn't work on TeaVM (yet?)
 
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
+//    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
 
     api "com.github.tommyettinger:textratypist:0.10.0"
 }

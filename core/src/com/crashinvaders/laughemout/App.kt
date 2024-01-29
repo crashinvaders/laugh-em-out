@@ -2,7 +2,6 @@ package com.crashinvaders.laughemout
 
 import com.badlogic.gdx.*
 import com.badlogic.gdx.assets.AssetManager
-import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.utils.GdxRuntimeException
@@ -10,7 +9,6 @@ import com.crashinvaders.common.OrderedInputMultiplexer
 import com.github.tommyettinger.textra.KnownFonts
 import com.crashinvaders.laughemout.common.audio.GameMusicController
 import com.crashinvaders.laughemout.game.GameScreen
-import com.esotericsoftware.spine.utils.SkeletonActor
 import ktx.app.KtxGame
 import ktx.app.KtxInputAdapter
 import ktx.app.KtxScreen
@@ -30,17 +28,23 @@ class App(val params: Params) : KtxGame<KtxScreen>() {
 
     val isDebug: Boolean get() = params.isDebug
 
+    private var isFirstCreateHandled = false
+
     override fun create() {
-        if (params.isDebug) {
-            Gdx.app.logLevel = Application.LOG_DEBUG
+        if (!isFirstCreateHandled) {
+            isFirstCreateHandled = true
+
+            if (params.isDebug) {
+                Gdx.app.logLevel = Application.LOG_DEBUG
+            }
+            Gdx.app.input.inputProcessor = inputMultiplexer
+
+            KnownFonts.setAssetPrefix("textratypist/")
         }
-        Gdx.app.input.inputProcessor = inputMultiplexer
 
         if (params.isDebug) {
             inputMultiplexer.addProcessor(createDebugInputProcessor(), Int.MIN_VALUE)
         }
-
-        KnownFonts.setAssetPrefix("textratypist/")
 
         //TODO Turn this to a loader screen.
         assets = AssetManager()
