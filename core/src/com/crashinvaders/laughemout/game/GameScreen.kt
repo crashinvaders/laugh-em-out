@@ -17,9 +17,9 @@ import com.crashinvaders.common.events.EventBus
 import com.crashinvaders.laughemout.App
 import com.crashinvaders.laughemout.game.controllers.JokeBuilderUiController
 import com.crashinvaders.laughemout.game.controllers.JokeGameManager
-import com.crashinvaders.laughemout.game.debug.DebugInputProcessor
 import com.crashinvaders.laughemout.game.engine.OnResizeEvent
-import com.crashinvaders.laughemout.game.engine.components.render.*
+import com.crashinvaders.common.TimeManager
+import com.crashinvaders.laughemout.game.debug.DebugInputProcessor
 import com.crashinvaders.laughemout.game.engine.systems.*
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
 import com.crashinvaders.laughemout.game.engine.systems.postprocessing.PostProcessingSystem
@@ -35,6 +35,8 @@ import ktx.freetype.generateFont
 @Suppress("DELEGATED_MEMBER_HIDES_SUPERTYPE_OVERRIDE")
 class GameScreen : KtxScreen,
     OrderedDisposableRegistry by OrderedDisposableContainer() {
+
+    val timeManager = TimeManager()
 
     val eventBus = EventBus()
 
@@ -62,6 +64,7 @@ class GameScreen : KtxScreen,
 
         injectables {
             add(assets)
+            add(timeManager)
             add(eventBus)
             add(shapeRenderer)
             add(batch)
@@ -221,8 +224,9 @@ class GameScreen : KtxScreen,
     override fun render(delta: Float) {
         clearScreen(clearColor.r, clearColor.g, clearColor.b, clearColor.a, clearDepth = false)
 
-        GdxAI.getTimepiece().update(delta)
+        val deltaProcessed = timeManager.process(delta)
 
-        fleksWorld.update(delta)
+        GdxAI.getTimepiece().update(deltaProcessed)
+        fleksWorld.update(deltaProcessed)
     }
 }

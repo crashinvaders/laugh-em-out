@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.Disposable
 import com.crashinvaders.common.FleksWorld
+import com.crashinvaders.common.TimeManager
 import com.crashinvaders.common.toggle
 import com.crashinvaders.laughemout.App
 import com.crashinvaders.laughemout.game.controllers.GameOverHelper
@@ -27,36 +28,35 @@ import ktx.log.debug
 import ktx.math.component1
 import ktx.math.component2
 import kotlin.reflect.KClass
-import kotlin.run
 
 class DebugInputProcessor(private val fleksWorld: FleksWorld) : KtxInputAdapter, Disposable {
 
     private val debugControllers = gdxMapOf<KClass<out DebugController>, DebugController>()
 
+    private val timeManager = fleksWorld.inject<TimeManager>()
+
+    private var pauseToken: TimeManager.Token? = null
+    private val speedUpToken = TimeManager.Token("DebugSpeedUp", 0, false, 3f)
+
     override fun keyDown(keycode: Int): Boolean {
         when (keycode) {
             Keys.Q -> {
+                // Toggle transform debug renderer.
+                if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
+                    fleksWorld.system<TransformDebugRenderSystem>().toggle()
+                    return true
+                }
+                // Toggle physics debug renderer.
+                if (Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)) {
+                    fleksWorld.system<PhysDebugRenderSystem>().toggle()
+                    return true
+                }
                 // Toggle drawable debug renderer.
                 val stage = fleksWorld.system<DrawableRenderSystem>().stage
                 stage.isDebugAll = !stage.isDebugAll
                 return true
             }
             Keys.W -> {
-                // Toggle physics debug renderer.
-                fleksWorld.system<PhysDebugRenderSystem>().toggle()
-                return true
-            }
-            Keys.E -> {
-                // Toggle transform debug renderer.
-                fleksWorld.system<TransformDebugRenderSystem>().toggle()
-                return true
-            }
-            Keys.R -> {
-                // Toggle post-processing.
-                fleksWorld.system<PostProcessingSystem>().toggle()
-                return true
-            }
-            Keys.T -> {
                 // Toggle HUD debug renderer.
                 if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
                     fleksWorld.system<GameHudSystem>().toggle()
@@ -68,12 +68,36 @@ class DebugInputProcessor(private val fleksWorld: FleksWorld) : KtxInputAdapter,
                 stage.isDebugAll = !stage.isDebugAll
                 return true
             }
-
-            // Debug controllers.
-            Keys.F -> {
+            Keys.E -> {
+                // Toggle post-processing.
+                fleksWorld.system<PostProcessingSystem>().toggle()
+                return true
+            }
+            Keys.T -> {
+                // Free camera.
                 toggleDebugController { FreeCameraDebugController(fleksWorld) }
                 return true
             }
+
+            // Debug controllers.
+            Keys.F -> {
+                //Toggle game pause.
+                if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) {
+                    val timeManager = fleksWorld.inject<TimeManager>()
+                    if (pauseToken == null) {
+                        pauseToken = TimeManager.Token("DebugPause", Int.MAX_VALUE, true, 0f)
+                        timeManager.addToken(pauseToken!!)
+                    } else {
+                        timeManager.removeToken(pauseToken!!)
+                        pauseToken = null
+                    }
+                    return true
+                }
+                // Game time speed-up.
+                timeManager.addToken(speedUpToken)
+                return true
+            }
+
             // Test world setups.
             Keys.S -> {
                 toggleDebugController { TransformHierarchyTest(fleksWorld) }
@@ -175,8 +199,20 @@ class DebugInputProcessor(private val fleksWorld: FleksWorld) : KtxInputAdapter,
 
                 return true
             }
+
+            else -> return false
         }
-        return true
+    }
+
+    override fun keyUp(keycode: Int): Boolean {
+        when (keycode) {
+            Keys.F -> {
+                // Game time speed-up.
+                timeManager.removeToken(speedUpToken)
+                return true
+            }
+            else -> return false
+        }
     }
 
     private fun mouseWorldPos(): Vector3 {
