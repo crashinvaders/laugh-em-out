@@ -2,6 +2,7 @@ package com.crashinvaders.laughemout.game.engine.systems.entityactions
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.utils.SnapshotArray
+import com.crashinvaders.common.TimeManager
 import com.crashinvaders.common.use
 import com.github.quillraven.fleks.*
 import com.crashinvaders.laughemout.game.engine.components.ActionOwner
@@ -17,8 +18,10 @@ class EntityActionSystem : IntervalSystem() {
 
     private val entityActions = GdxArrayMap<Entity, SnapshotArray<Action>>()
     private val actionArrayPool = pool { SnapshotArray<Action>() }
+    
+    private val timeManager = world.inject<TimeManager>()
 
-    private lateinit var eGlobalActionRoot: Entity
+    lateinit var eGlobalActionRoot: Entity; private set
 
     private var isProcessingActions = false
     private var hasCompletedActions = false
@@ -33,8 +36,9 @@ class EntityActionSystem : IntervalSystem() {
     }
 
     override fun onTick() {
-        if (!entityActions.isEmpty) {
-            val deltaTime = this.deltaTime
+        if (entityActions.size != 0) {
+            val deltaGame = timeManager.delta
+            val deltaUnscaled = timeManager.deltaUnscaled
 
             isProcessingActions = true
             val entitySize = entityActions.size
@@ -44,6 +48,10 @@ class EntityActionSystem : IntervalSystem() {
                     if (!action.isAttached) {
                         hasCompletedActions = true
                         return@use
+                    }
+                    val deltaTime = when(action.timeMode) {
+                        Action.TimeMode.GameTime -> deltaGame
+                        Action.TimeMode.UnscaledTime -> deltaUnscaled
                     }
                     val isCompleted = action.act(deltaTime)
                     if (isCompleted) {
@@ -59,11 +67,13 @@ class EntityActionSystem : IntervalSystem() {
         }
 
         if (hasCompletedActions) {
+            hasCompletedActions = false
             for (i in (entityActions.size - 1) downTo 0) {
                 val actions = entityActions.getValueAt(i)
-                if (actions.isEmpty) {
+                if (actions.size == 0) {
                     val entity = entityActions.getKeyAt(i)
                     entityActions.removeIndex(i)
+                    actions.clear()
                     actionArrayPool.free(actions)
 
                     if (ActionOwner in entity) {

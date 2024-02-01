@@ -21,6 +21,7 @@ import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActi
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.*
 import com.crashinvaders.laughemout.game.engine.systems.postprocessing.PostProcessingSystem
 import com.crashinvaders.laughemout.game.hud.GameHudSystem
+import com.github.quillraven.fleks.Entity
 import ktx.app.KtxInputAdapter
 import ktx.collections.gdxMapOf
 import ktx.collections.set

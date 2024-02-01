@@ -2,6 +2,7 @@ package com.crashinvaders.laughemout.game.engine.components;
 
 import com.badlogic.gdx.math.Affine2
 import com.crashinvaders.common.sod.SecondOrderDynamicsAffine2D
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.Action
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 
@@ -21,6 +22,8 @@ class SodInterpolation(
     var cachedRotation = 0f
 
     var pendingReset = true
+
+    var timeMode: TimeMode = TimeMode.GameTime
 
     init {
         configure(f, z, r)
@@ -48,5 +51,10 @@ class SodInterpolation(
 
     companion object : ComponentType<SodInterpolation>() {
         private val tmpMatrix = Affine2()
+    }
+
+    enum class TimeMode {
+        GameTime,
+        UnscaledTime,
     }
 }

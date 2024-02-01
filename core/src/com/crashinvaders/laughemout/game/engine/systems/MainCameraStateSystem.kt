@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.GdxRuntimeException
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.crashinvaders.common.CommonUtils
+import com.crashinvaders.common.TimeManager
 import com.crashinvaders.common.events.Event
 import com.crashinvaders.common.events.EventBus
 import com.crashinvaders.common.events.EventHandler
@@ -27,6 +28,8 @@ class MainCameraStateSystem(
     private val processorsToRemove = GdxArray<CamProcessor>()
 
     val camera = OrthographicCamera()
+
+    private val timeManager = world.inject<TimeManager>()
 
     lateinit var cameraEntity: Entity; private set
     lateinit var cameraComp: WorldCamera; private set
@@ -111,13 +114,19 @@ class MainCameraStateSystem(
 
         isProcessing = true
 
-        val deltaTime = this.deltaTime
+        val deltaGame = timeManager.delta
+        val deltaUnscaled = timeManager.deltaUnscaled
 
         val camState = MainCameraStateSystem.sharedCamTransform
         sharedCamTransform.readWorldFrom(cameraTransform)
 
         for (i in lastOverridingControllerIndex until processors.size) {
-            processors[i].process(camState, deltaTime)
+            val camProcessor = processors[i]
+            val deltaTime = when(camProcessor.getTimeMode()) {
+                TimeMode.GameTime -> deltaGame
+                TimeMode.UnscaledTime -> deltaUnscaled
+            }
+            camProcessor.process(camState, deltaTime)
         }
 
         camState.writeWorldTo(cameraTransform)
@@ -185,8 +194,14 @@ class MainCameraStateSystem(
     interface CamProcessor {
         fun getOrder(): Int
         fun isOverrideState(): Boolean
+        fun getTimeMode(): TimeMode
         fun onAdded(camTransform: Transform.Snapshot)
         fun onRemoved(camTransform: Transform.Snapshot)
         fun process(camTransform: Transform.Snapshot, deltaTime: Float)
+    }
+
+    enum class TimeMode {
+        GameTime,
+        UnscaledTime,
     }
 }

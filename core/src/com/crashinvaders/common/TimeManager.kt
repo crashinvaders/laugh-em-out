@@ -9,10 +9,10 @@ class TimeManager {
     private var isTokenDirty = false
 
     var delta: Float = 0f; private set
-    var unscaledDelta: Float = 0f; private set
+    var deltaUnscaled: Float = 0f; private set
 
     var time: Float = 0f; private set
-    var unscaledTime: Float = 0f; private set
+    var timeUnscaled: Float = 0f; private set
 
     fun addToken(token: Token) {
         tokens.add(token)
@@ -25,7 +25,7 @@ class TimeManager {
         }
     }
 
-    fun process(unscaledDelta: Float): Float {
+    fun process(deltaUnscaled: Float): Float {
         if (isTokenDirty) {
             isTokenDirty = false
 
@@ -42,10 +42,10 @@ class TimeManager {
             }
         }
 
-        this.unscaledDelta = unscaledDelta;
-        this.delta = unscaledDelta * timeFactor
+        this.deltaUnscaled = deltaUnscaled;
+        this.delta = deltaUnscaled * timeFactor
 
-        this.unscaledTime += unscaledDelta
+        this.timeUnscaled += deltaUnscaled
         this.time += delta
 
         return delta

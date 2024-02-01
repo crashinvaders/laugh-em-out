@@ -21,6 +21,7 @@ import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.components.TransformDebugRenderTag
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.Action
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.*
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.transform.TransformSpace
@@ -59,7 +60,9 @@ class EntityActionSystemTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
                 entity += DrawableDimensions(2f, 2f)
                 entity += DrawableOrigin(Align.center)
 
-                entity += SodInterpolation(4f, 0.4f, -0.5f)
+                entity += SodInterpolation(4f, 0.4f, -0.5f).apply {
+                    timeMode = SodInterpolation.TimeMode.UnscaledTime
+                }
                 entity += TransformDebugRenderTag
             }
 
@@ -72,6 +75,7 @@ class EntityActionSystemTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
 
         fleksWorld.system<EntityActionSystem>().actions(entity) {
             repeat {
+                timeMode = Action.TimeMode.UnscaledTime
                 sequence {
                     parallel {
                         rotateBy(60f)

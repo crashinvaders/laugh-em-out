@@ -4,20 +4,15 @@ import com.badlogic.gdx.utils.Pool
 import com.badlogic.gdx.utils.Pool.Poolable
 import com.crashinvaders.common.FleksWorld
 import com.github.quillraven.fleks.Entity
-import ktx.app.gdxError
 
 abstract class Action : Poolable {
 
     private var _world: FleksWorld? = null
     val world: FleksWorld get() = _world!!
-//    var world: FleksWorld? = null
-//        protected set
 
     /** The entity this action is attached to, or null if it is not attached.  */
     private var _entity: Entity? = null
     val entity: Entity get() = _entity!!
-//    var entity: Entity? = null
-//        protected set
 
     /** Indicates whether entity is attached to processing system.  */
     var isAttached = false
@@ -28,6 +23,9 @@ abstract class Action : Poolable {
      * @see addedToSystem
      */
     var pool: Pool<Any>? = null
+
+    /** Applied only to the root action (the one that has been added to the system). */
+    var timeMode: TimeMode = TimeMode.GameTime
 
     /** Action added to precessing system  */
     open fun addedToSystem(world: FleksWorld, entity: Entity) {
@@ -44,39 +42,16 @@ abstract class Action : Poolable {
             pool = null
         }
     }
-    //TODO move parts of that javadoc to addedToSystem/removedFromSystem
-    /** Sets the actor this action is attached to. This also sets the [target][.setTarget] actor if it is null. This
-     * method is called automatically when an action is added to an actor. This method is also called with null when an action is
-     * removed from an actor.
-     *
-     *
-     * When set to null, if the action has a [pool][.setPool] then the action is [returned][Pool.free] to
-     * the pool (which calls [.reset]) and the pool is set to null. If the action does not have a pool, [.reset] is
-     * not called.
-     *
-     *
-     * This method is not typically a good place for an action subclass to query the actor's state because the action may not be
-     * executed for some time, eg it may be [delayed][DelayAction]. The actor's state is best queried in the first call to
-     * [.act]. For a [TemporalAction], use TemporalAction#begin().  */
-    //    public void setEntity(Entity entity) {
-    //        this.entity = entity;
-    //        if (target == null) setTarget(actor);
-    //        if (actor == null) {
-    //            if (pool != null) {
-    //                pool.free(this);
-    //                pool = null;
-    //            }
-    //        }
-    //    }
 
     override fun reset() {
         _world = null
         _entity = null
         pool = null
+        timeMode = TimeMode.GameTime
         restart()
     }
 
-    /** Sets the state of the action so it can be run again.  */
+    /** Sets the state of the action, so it can be run again.  */
     open fun restart() = Unit
 
     /** Updates the action based on time.
@@ -85,8 +60,9 @@ abstract class Action : Poolable {
      */
     abstract fun act(delta: Float): Boolean
 
-//    open fun addAction(action: Action) {
-//        gdxError("The ${this::class.simpleName} cannot have children actions.")
-//    }
+    enum class TimeMode {
+        GameTime,
+        UnscaledTime,
+    }
 }
 

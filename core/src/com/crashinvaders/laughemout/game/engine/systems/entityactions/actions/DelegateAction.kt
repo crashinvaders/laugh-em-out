@@ -6,9 +6,7 @@ import com.crashinvaders.laughemout.game.engine.systems.entityactions.Action
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.ParentAction
 import ktx.app.gdxError
 
-/**
- * Base class for an action that wraps another action.
- */
+/** Base class for an action that wraps another action. */
 abstract class DelegateAction() : Action(), ParentAction {
 
     protected var action: Action? = null
@@ -48,15 +46,6 @@ abstract class DelegateAction() : Action(), ParentAction {
         action = null
         super.reset()
     }
-//    @Override
-    //    public void setEntity(Entity entity) {
-    //        if (action != null) action.setEntity(entity);
-    //        super.setEntity(entity);
-    //    }
-    //    public void setTarget (Actor target) {
-    //        if (action != null) action.setTarget(target);
-    //        super.setTarget(target);
-    //    }
 
     override fun toString(): String {
         return super.toString() + if (action == null) "" else "($action)"

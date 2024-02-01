@@ -3,11 +3,9 @@ package com.crashinvaders.laughemout.game.engine.systems.entityactions.actions
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.Pool
 import com.badlogic.gdx.utils.Pools
-import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.Action
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.ParentAction
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.transform.*
-import com.github.quillraven.fleks.Entity
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -59,9 +57,21 @@ inline fun ParentAction.repeat(
     return addAction(action)
 }
 
-fun ParentAction.delay(delay: Float) {
+fun ParentAction.delay(duration: Float) {
     val action = action<DelayAction>()
-    action.duration = delay
+    action.duration = duration
+    return addAction(action)
+}
+
+@OptIn(ExperimentalContracts::class)
+inline fun ParentAction.delay(
+    duration: Float,
+    init: DelayDelegateAction.() -> Unit = {},
+) {
+    contract { callsInPlace(init, InvocationKind.EXACTLY_ONCE) }
+    val action = action<DelayDelegateAction>()
+    action.duration = duration
+    action.init()
     return addAction(action)
 }
 
@@ -176,4 +186,19 @@ fun ParentAction.rotateBy(
 }
 
 fun ParentAction.removeEntity() =
-    runnable { action -> action.world!! -= action.entity!! }
+    runnable { action -> action.world -= action.entity }
+
+fun ParentAction.runDelayed(
+    duration: Float,
+    runnable: (action: RunnableAction) -> Unit) {
+    delay(duration) { runnable(runnable) }
+}
+
+fun ParentAction.runDelayedInd(
+    duration: Float,
+    runnable: (action: RunnableAction) -> Unit) {
+    delay(duration) {
+        (this as Action).timeMode = Action.TimeMode.UnscaledTime
+        runnable(runnable)
+    }
+}

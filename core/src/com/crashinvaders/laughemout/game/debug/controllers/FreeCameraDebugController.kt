@@ -107,7 +107,9 @@ class FreeCameraDebugController(fleksWorld: FleksWorld) : KtxInputAdapter, Debug
         private val tmpVec = Vector3()
     }
 
-    private class FreeCamProcessor : Sod3CameraProcessor(5f, 0.9f, 0f, CameraProcessorOrder.DEBUG_FREE) {
+    private class FreeCamProcessor : Sod3CameraProcessor(5f, 0.9f, 0f,
+        CameraProcessorOrder.DEBUG_FREE,
+        timeMode = MainCameraStateSystem.TimeMode.UnscaledTime) {
 
         private var initialScale: Float = 1f
         var relativeScale: Float = 1f

@@ -11,7 +11,8 @@ open class Sod2CameraProcessor(
     val r: Float,
     private val order: Int = 0,
     private val overridePrevState: Boolean = true,
-    private val readCamValuesWhenAdded: Boolean = true
+    private val timeMode: MainCameraStateSystem.TimeMode = MainCameraStateSystem.TimeMode.GameTime,
+    private val readCamValuesWhenAdded: Boolean = true,
 ): MainCameraStateSystem.CamProcessor {
 
     private val sod = SecondOrderDynamics2D().also {
@@ -26,6 +27,8 @@ open class Sod2CameraProcessor(
     override fun getOrder(): Int = order
 
     override fun isOverrideState(): Boolean = overridePrevState
+
+    override fun getTimeMode(): MainCameraStateSystem.TimeMode = timeMode
 
     override fun onAdded(camTransform: Transform.Snapshot) {
         if (readCamValuesWhenAdded) {
@@ -55,6 +58,7 @@ open class Sod3CameraProcessor(
     r: Float,
     private val order: Int = 0,
     private val overridePrevState: Boolean = true,
+    private val timeMode: MainCameraStateSystem.TimeMode = MainCameraStateSystem.TimeMode.GameTime,
     private val readCamValuesWhenAdded: Boolean = true
 ): MainCameraStateSystem.CamProcessor {
 
@@ -72,6 +76,8 @@ open class Sod3CameraProcessor(
     override fun getOrder(): Int = order
 
     override fun isOverrideState(): Boolean = overridePrevState
+
+    override fun getTimeMode(): MainCameraStateSystem.TimeMode = timeMode
 
     override fun onAdded(camTransform: Transform.Snapshot) {
         if (readCamValuesWhenAdded) {
