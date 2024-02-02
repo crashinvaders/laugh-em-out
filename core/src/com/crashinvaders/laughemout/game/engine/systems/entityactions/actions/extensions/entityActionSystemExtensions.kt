@@ -1,7 +1,10 @@
-package com.crashinvaders.laughemout.game.engine.systems.entityactions.actions
+package com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.extensions
 
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.Action
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.DelayDelegateAction
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.RunnableAction
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.action
 import com.github.quillraven.fleks.Entity
 
 fun EntityActionSystem.schedule(
@@ -9,11 +12,11 @@ fun EntityActionSystem.schedule(
     timeMode: Action.TimeMode = Action.TimeMode.GameTime,
     runnable: (action: Action) -> Unit
 ) {
-    schedule(eGlobalActionRoot, delay, timeMode, runnable)
+    schedule(globalActionHost, delay, timeMode, runnable)
 }
 
 fun EntityActionSystem.schedule(
-    entity: Entity = eGlobalActionRoot,
+    entity: Entity = globalActionHost,
     delay: Float,
     timeMode: Action.TimeMode = Action.TimeMode.GameTime,
     runnable: (action: Action) -> Unit
@@ -33,7 +36,7 @@ fun EntityActionSystem.scheduleInd(
     delay: Float,
     runnable: (action: Action) -> Unit
 ) {
-    scheduleInd(eGlobalActionRoot, delay, runnable)
+    scheduleInd(globalActionHost, delay, runnable)
 }
 
 fun EntityActionSystem.scheduleInd(

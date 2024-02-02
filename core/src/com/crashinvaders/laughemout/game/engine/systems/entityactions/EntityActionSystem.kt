@@ -21,7 +21,7 @@ class EntityActionSystem : IntervalSystem() {
     
     private val timeManager = world.inject<TimeManager>()
 
-    lateinit var eGlobalActionRoot: Entity; private set
+    lateinit var globalActionHost: Entity; private set
 
     private var isProcessingActions = false
     private var hasCompletedActions = false
@@ -29,7 +29,7 @@ class EntityActionSystem : IntervalSystem() {
     override fun onInit() {
         super.onInit()
 
-        eGlobalActionRoot = world.entity {
+        globalActionHost = world.entity {
             it += Info("GlobalActionRoot")
             it += ActionOwner { entity ->  onActionOwnerRemoved(entity) }
         }
@@ -89,7 +89,7 @@ class EntityActionSystem : IntervalSystem() {
 
     /** Run an action without it's being bound to an entity. */
     fun addAction(action: Action) =
-        addAction(eGlobalActionRoot, action)
+        addAction(globalActionHost, action)
 
     fun addAction(entity: Entity, action: Action) {
         if (isProcessingActions) {
@@ -108,15 +108,34 @@ class EntityActionSystem : IntervalSystem() {
         action.addedToSystem(world, entity)
     }
 
-    fun removeActions(entity: Entity) {
+    fun removeAllActions(entity: Entity) {
         if (isProcessingActions) {
-            Gdx.app.postRunnable { removeActions(entity) }
+            Gdx.app.postRunnable { removeAllActions(entity) }
             return
         }
 
         entity.configure {
             entity -= ActionOwner
         }
+    }
+
+    fun removeAction(action: Action) {
+        if (!action.isAttached) {
+            return
+        }
+
+        if (isProcessingActions) {
+            Gdx.app.postRunnable { removeAction(action) }
+            return
+        }
+
+        val actions = entityActions[action.entity]
+        if (actions == null) {
+            return
+        }
+
+        actions.removeValue(action, true)
+        hasCompletedActions = true
     }
 
     private fun onActionOwnerRemoved(entity: Entity) {

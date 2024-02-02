@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Camera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.MathUtils
-import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.FleksWorld
@@ -118,7 +117,7 @@ class EntityActionSystemTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
         when (keycode) {
             Input.Keys.G -> {
                 if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-                    fleksWorld.system<EntityActionSystem>().removeActions(entity)
+                    fleksWorld.system<EntityActionSystem>().removeAllActions(entity)
                     return true
                 }
             }

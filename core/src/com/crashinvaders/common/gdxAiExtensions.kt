@@ -13,11 +13,35 @@ import kotlin.contracts.contract
 
 @OptIn(ExperimentalContracts::class)
 @GdxAiDsl
-fun <E> Task<E>.runnable
-        (runnable: (E) -> Unit
+fun <E> Task<E>.runnable(
+    runnable: (E) -> Unit
 ): Int {
     contract { callsInPlace(runnable, InvocationKind.EXACTLY_ONCE) }
     val task = RunnableTask(runnable)
+    return addChild(task)
+}
+
+@OptIn(ExperimentalContracts::class)
+@GdxAiDsl
+fun <E> Task<E>.waitUntil(
+    condition: (E) -> Boolean
+): Int {
+    contract { callsInPlace(condition, InvocationKind.AT_LEAST_ONCE) }
+    val task = CustomTask<E>(
+        onExecute = {
+            if (condition.invoke(`object`)) Task.Status.SUCCEEDED else Task.Status.RUNNING
+        }
+    )
+    return addChild(task)
+}
+
+@OptIn(ExperimentalContracts::class)
+@GdxAiDsl
+fun <E> Task<E>.awaitCompletion(
+    onStart: (E, onCompleteCallback: () -> Unit) -> Unit
+): Int {
+    contract { callsInPlace(onStart, InvocationKind.EXACTLY_ONCE) }
+    val task = AwaitCompletionTask(onStart)
     return addChild(task)
 }
 
@@ -129,6 +153,35 @@ class CustomTask<E>(
     override fun resetTask() = onResetTask()
 
     override fun execute() = onExecute()
+
+    override fun copyTo(task: Task<E>?): Task<E> {
+        TODO("Not yet implemented")
+    }
+}
+
+class AwaitCompletionTask<E>(
+    private val onStart: (E, onCompleteCallback: () -> Unit) -> Unit
+): LeafTask<E>() {
+
+    var isCompleted = false
+        private set
+
+    override fun start() {
+        super.start()
+
+        onStart(`object`) {
+            isCompleted = true
+        }
+    }
+
+    override fun resetTask() {
+        super.resetTask()
+        isCompleted = false
+    }
+
+    override fun execute(): Status {
+        return if (isCompleted) Status.SUCCEEDED else Status.RUNNING
+    }
 
     override fun copyTo(task: Task<E>?): Task<E> {
         TODO("Not yet implemented")
