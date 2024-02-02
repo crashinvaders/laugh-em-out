@@ -6,6 +6,8 @@ import com.badlogic.gdx.ai.GdxAI
 import com.badlogic.gdx.ai.btree.Decorator
 import com.badlogic.gdx.ai.btree.LeafTask
 import com.badlogic.gdx.ai.btree.Task
+import com.badlogic.gdx.ai.btree.branch.Parallel
+import com.badlogic.gdx.utils.Array
 import ktx.ai.GdxAiDsl
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -70,6 +72,34 @@ inline fun <E> Task<E>.resetOnCompletion(
     val decorator = ResetOnCompletionDecorator(task)
     decorator.init()
     return addChild(decorator)
+}
+
+/**
+ * Patched parallel task that properly reset its child tasks.
+ * @see ktx.ai.parallel
+ */
+@OptIn(ExperimentalContracts::class)
+@GdxAiDsl
+inline fun <E> Task<E>.parallelPatched(
+    policy: Parallel.Policy = Parallel.Policy.Sequence,
+    orchestrator: Parallel.Orchestrator = Parallel.Orchestrator.Resume,
+    tasks: Array<Task<E>> = Array(),
+    init: (@GdxAiDsl Parallel<E>).() -> Unit = {},
+): Int {
+    contract { callsInPlace(init, InvocationKind.EXACTLY_ONCE) }
+    val parallel = object : Parallel<E>(policy, orchestrator, tasks) {
+        override fun resetAllChildren() {
+            var i = 0
+            val n = childCount
+            while (i < n) {
+                val child = getChild(i)
+                child.resetTask()
+                i++
+            }
+        }
+    }
+    parallel.init()
+    return addChild(parallel)
 }
 
 class RunnableTask<E>
@@ -160,7 +190,8 @@ class CustomTask<E>(
 }
 
 class AwaitCompletionTask<E>(
-    private val onStart: (E, onCompleteCallback: () -> Unit) -> Unit
+    private val onStart: (E, onCompleteCallback: () -> Unit) -> Unit,
+    private val onEnd: (E) -> Unit = { },
 ): LeafTask<E>() {
 
     var isCompleted = false
@@ -172,6 +203,11 @@ class AwaitCompletionTask<E>(
         onStart(`object`) {
             isCompleted = true
         }
+    }
+
+    override fun end() {
+        super.end()
+        onEnd.invoke(`object`)
     }
 
     override fun resetTask() {

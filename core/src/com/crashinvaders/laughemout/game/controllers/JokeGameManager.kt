@@ -1,7 +1,9 @@
 package com.crashinvaders.laughemout.game.controllers
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ai.btree.BehaviorTree
+import com.badlogic.gdx.ai.btree.LeafTask
+import com.badlogic.gdx.ai.btree.Task
+import com.badlogic.gdx.ai.btree.branch.Parallel
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.*
@@ -29,9 +31,7 @@ import com.github.quillraven.fleks.IntervalSystem
 import com.github.tommyettinger.textra.Font
 import com.github.tommyettinger.textra.TextraLabel
 import com.github.tommyettinger.textra.TypingLabel
-import ktx.ai.repeat
-import ktx.ai.sequence
-import ktx.ai.waitLeaf
+import ktx.ai.*
 import ktx.app.gdxError
 import ktx.collections.*
 import ktx.log.debug
@@ -87,34 +87,12 @@ class JokeGameManager : IntervalSystem(),
 
                         waitLeaf(1f)
 
-                        // Start joke timer.
-                        runnable {
-                            if (bBoard.jokeCount == 0) {
-                                return@runnable
-                            }
-                            val jokeDuration = when {
-                                bBoard.jokeCount < 3 -> JokeTimerDuration.Sec25
-                                bBoard.jokeCount < 5 -> JokeTimerDuration.Sec20
-                                bBoard.jokeCount < 7 -> JokeTimerDuration.Sec15
-                                bBoard.jokeCount < 11 -> JokeTimerDuration.Sec10
-                                else -> JokeTimerDuration.Sec7
-                            }
-                            bBoard.eJokeTimer = JokeTimerHelper.createTimer(
-                                world, 60f * UPP, -47f * UPP, jokeDuration
-                            ) {
-                                Gdx.app.postRunnable { onJokeBuilderTimeUp() }
-                            }
+                        parallelPatched(Parallel.Policy.Selector, Parallel.Orchestrator.Join) {
+                            awaitCompletion { bBoard, callback -> showAndAwaitJokeBuilder(bBoard, callback) }
+                            alwaysFail { add(JokeTimerTask()) } // Always fail is to always wait for the joke builder.
                         }
-                        awaitCompletion { bBoard, callback -> showAndAwaitJokeBuilder(bBoard, callback) }
 
-                        runnable {
-                            if (bBoard.eJokeTimer != null) {
-                                if (bBoard.eJokeTimer!! in world) {
-                                    world -= bBoard.eJokeTimer!!
-                                }
-                                bBoard.eJokeTimer = null
-                            }
-
+                        runnable { bBoard ->
                             val completedJoke = bBoard.completedJoke!!
 
                             bBoard.completedJokeView = createResultJokeView(world, completedJoke)
@@ -180,28 +158,6 @@ class JokeGameManager : IntervalSystem(),
         }
     }
 
-    private fun onJokeBuilderTimeUp() {
-        // Destroy the timer at first.
-        if (bBoard.eJokeTimer != null) {
-            if (bBoard.eJokeTimer!! in world) {
-                world -= bBoard.eJokeTimer!!
-            }
-            bBoard.eJokeTimer = null
-        }
-
-        val wasFinalized = world.system<JokeBuilderUiController>().tryFinalize()
-        if (wasFinalized) {
-            return
-        }
-
-        val candidates = bBoard.audienceMembers.filter { it[AudienceMember].emoLevel > -2f }.toGdxArray()
-        candidates.shuffle()
-        val audMemb = candidates.firstOrNull()
-        if (audMemb != null) {
-            changeAudMemberEmoLevel(world, audMemb[AudienceMember], -1)
-        }
-    }
-
     override fun onTick() {
         bTree.step()
     }
@@ -213,7 +169,7 @@ class JokeGameManager : IntervalSystem(),
 
     companion object {
 
-        private fun showAndAwaitJokeBuilder(bBoard: BTreeBlackBoard, onCompleteCallback: () -> Unit) {
+        private fun showAndAwaitJokeBuilder(bBoard: BTreeBlackBoard, callback: () -> Unit) {
             val subjectCount = 3
             val subjects: GdxArray<JokeSubjectData>
             val world = bBoard.world
@@ -249,7 +205,7 @@ class JokeGameManager : IntervalSystem(),
                 }
 
                 bBoard.completedJoke = it
-                onCompleteCallback.invoke()
+                callback.invoke()
             }
         }
 
@@ -479,6 +435,94 @@ class JokeGameManager : IntervalSystem(),
                 }
             }
             return foundIndex
+        }
+    }
+
+    private class JokeTimerTask : LeafTask<BTreeBlackBoard>() {
+
+        private var isTimeUp = false
+
+        private val bBoard: BTreeBlackBoard; get() = `object`
+
+        override fun start() {
+            super.start()
+
+            debug { "Timer Task: Start" }
+            val world = bBoard.world
+
+            if (bBoard.jokeCount == 0) {
+                isTimeUp = true
+                return
+            }
+
+            val jokeDuration = when {
+                bBoard.jokeCount < 3 -> JokeTimerDuration.Sec25
+                bBoard.jokeCount < 5 -> JokeTimerDuration.Sec20
+                bBoard.jokeCount < 7 -> JokeTimerDuration.Sec15
+                bBoard.jokeCount < 11 -> JokeTimerDuration.Sec10
+                else -> JokeTimerDuration.Sec7
+            }
+            bBoard.eJokeTimer = JokeTimerHelper.createTimer(
+                world, 60f * UPP, -47f * UPP, jokeDuration
+            ) {
+//                Gdx.app.postRunnable { onJokeBuilderTimeUp() }
+                onJokeBuilderTimeUp()
+            }
+        }
+
+        override fun end() {
+            super.end()
+            debug { "Timer Task: End" }
+            hideTimer()
+        }
+
+        override fun resetTask() {
+            super.resetTask()
+            isTimeUp = false
+        }
+
+        private fun onJokeBuilderTimeUp() {
+            val world = bBoard.world
+
+            hideTimer()
+//            // At first, destroy the timer
+//            if (bBoard.eJokeTimer != null) {
+//                if (bBoard.eJokeTimer!! in world) {
+//                    world -= bBoard.eJokeTimer!!
+//                }
+//                bBoard.eJokeTimer = null
+//            }
+
+            val wasFinalized = world.system<JokeBuilderUiController>().tryFinalize()
+            if (wasFinalized) {
+                return
+            }
+
+            with(world) {
+                val candidates = bBoard.audienceMembers.filter { it[AudienceMember].emoLevel > -2f }.toGdxArray()
+                candidates.shuffle()
+                val audMemb = candidates.firstOrNull()
+                if (audMemb != null) {
+                    changeAudMemberEmoLevel(world, audMemb[AudienceMember], -1)
+                }
+            }
+        }
+
+        private fun hideTimer() {
+            val world = bBoard.world
+            if (bBoard.eJokeTimer != null) {
+                if (bBoard.eJokeTimer!! in world) {
+                    world -= bBoard.eJokeTimer!!
+                }
+                bBoard.eJokeTimer = null
+            }
+        }
+
+        override fun execute(): Status =
+            if (isTimeUp) Status.SUCCEEDED else Status.RUNNING
+
+        override fun copyTo(task: Task<BTreeBlackBoard>?): Task<BTreeBlackBoard> {
+            TODO("Not yet implemented")
         }
     }
 

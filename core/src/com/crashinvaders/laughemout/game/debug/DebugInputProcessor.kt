@@ -37,7 +37,7 @@ class DebugInputProcessor(private val fleksWorld: FleksWorld) : KtxInputAdapter,
     private val timeManager = fleksWorld.inject<TimeManager>()
 
     private var pauseToken: TimeManager.Token? = null
-    private val speedUpToken = TimeManager.Token("DebugSpeedUp", 0, false, 3f)
+    private val speedUpToken = TimeManager.Token("DebugSpeedUp", 0, false, 4f)
 
     override fun keyDown(keycode: Int): Boolean {
         when (keycode) {
