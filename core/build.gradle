@@ -5,7 +5,7 @@ dependencies {
     api "com.badlogicgames.gdx:gdx:$gdxVersion"
     api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
     api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
-    api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+    api "com.badlogicgames.gdx:gdx-ai:$gdxAiVersion"
     api "com.kotcrab.vis:vis-ui:$visUiVersion"
 
     api "io.github.quillraven.fleks:Fleks:$fleksVersion"
