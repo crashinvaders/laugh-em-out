@@ -6,12 +6,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.MathUtils.randomBoolean
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.FleksWorld
-import com.crashinvaders.laughemout.game.engine.components.Info
-import com.crashinvaders.laughemout.game.engine.components.SkeletonContainer
-import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.esotericsoftware.spine.*
 import com.esotericsoftware.spine.utils.SkeletonActor
@@ -21,10 +17,9 @@ import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
 import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
 import com.crashinvaders.laughemout.game.components.AudienceMember
-import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
+import com.crashinvaders.laughemout.game.engine.components.*
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.DelayAction
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.DelegateAction
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.RunnableAction
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.SequenceAction
 import ktx.app.gdxError
@@ -66,6 +61,7 @@ object AudienceMemberHelper {
             it += SkeletonContainer(skeleton, animState)
 
             it += ActorContainer(skelActor)
+            it += DrawableRendererContainer(ActorRenderer)
             it += DrawableOrder(order = if (isFrontRow(placementIndex)) GameDrawOrder.AUDIENCE_FRONT_ROW else GameDrawOrder.AUDIENCE_BACK_ROW)
             it += DrawableTint()
             it += DrawableVisibility()

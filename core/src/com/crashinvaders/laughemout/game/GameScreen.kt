@@ -20,7 +20,6 @@ import com.crashinvaders.laughemout.game.controllers.JokeGameManager
 import com.crashinvaders.laughemout.game.engine.OnResizeEvent
 import com.crashinvaders.common.TimeManager
 import com.crashinvaders.laughemout.game.debug.DebugInputProcessor
-import com.crashinvaders.laughemout.game.engine.components.SkeletonBoneParenting
 import com.crashinvaders.laughemout.game.engine.systems.*
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
 import com.crashinvaders.laughemout.game.engine.systems.postprocessing.PostProcessingSystem
@@ -89,10 +88,10 @@ class GameScreen : KtxScreen,
 
             add(EntityActionSystem())
 
-            //region Pre-engine game controllers
-            //endregion
+//region Pre-engine game controllers
+//endregion
 
-            //region Engine core
+//region Engine core
             // Physics
             add(TransformToPhysMapperSystem())
             add(PhysWorldSystem())
@@ -103,10 +102,12 @@ class GameScreen : KtxScreen,
             add(SkeletonUpdateSystem())
             add(SkeletonBoneParentingSystem())
 
+            add(ActorStageSystem())
+
             // Update cameras
 //            add(MainCameraStateSystem(ScreenViewport().apply { unitsPerPixel = 1f/32f }))
             add(MainCameraStateSystem(object : ExtendViewport(12f, 8f) {
-                override fun apply(centerCamera: Boolean) = Unit // We don't need the Viewport to update its camera.
+                override fun apply(centerCamera: Boolean) = Unit // We don't need the viewport to update its camera.
             }))
             add(WorldCameraSystem())
 
@@ -123,15 +124,15 @@ class GameScreen : KtxScreen,
 
             // [Post Render] Interpolations
             add(SodInterpolationPostRenderSystem())
-            //endregion
+//endregion
 
-            //region Post-engine game controllers
+//region Post-engine game controllers
 
             add(GameHudSystem())
 
             add(JokeBuilderUiController().apply { enabled = false })
             add(JokeGameManager())
-            //endregion
+//endregion
         }
     }.also {
         registerDisposable({ it.dispose() }, -1000)
@@ -167,6 +168,7 @@ class GameScreen : KtxScreen,
 //            it += Transform()
 //
 //            it += ActorContainer(Image(paletteTexture))
+//            it += RendererContainer(ActorRenderer)
 //            it += DrawableOrder()
 //            it += DrawableTint()
 //            it += DrawableVisibility()
@@ -181,6 +183,7 @@ class GameScreen : KtxScreen,
 //            }
 //
 //            it += ActorContainer(Image(referenceTexture))
+//            it += RendererContainer(ActorRenderer)
 //            it += DrawableOrder()
 //            it += DrawableTint()
 //            it += DrawableVisibility()

@@ -1,6 +1,7 @@
 package com.crashinvaders.laughemout.game
 
 import com.crashinvaders.common.FleksWorld
+import com.crashinvaders.laughemout.game.WorldHelper.getEntityNames
 import com.github.quillraven.fleks.*
 import com.crashinvaders.laughemout.game.engine.components.Info
 import ktx.app.gdxError
@@ -18,4 +19,17 @@ object WorldHelper {
             return entity.getOrNull(Info)?.name ?: "[${entity.id}:${entity.version}]"
         }
     }
+
+    fun Family.getEntityNames(world: FleksWorld, separator: String, nameExtractor: World.(Entity) -> String): String {
+        val sb = StringBuilder()
+        this.forEach {
+            if (sb.length != 0) sb.append(separator)
+            val entityName = world.nameExtractor(it)
+            sb.append(entityName)
+        }
+        return sb.toString()
+    }
+
+    fun Family.getEntityNames(world: FleksWorld): String =
+        getEntityNames(world, ", ") { it.getPrintName(world) }
 }

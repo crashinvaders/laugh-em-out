@@ -15,10 +15,7 @@ import com.crashinvaders.laughemout.game.GameInputOrder
 import com.crashinvaders.laughemout.game.common.camera.Sod2CameraProcessor
 import com.crashinvaders.laughemout.game.debug.controllers.DebugController
 import com.crashinvaders.laughemout.game.engine.TimeMode
-import com.crashinvaders.laughemout.game.engine.components.Info
-import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
-import com.crashinvaders.laughemout.game.engine.components.Transform
-import com.crashinvaders.laughemout.game.engine.components.TransformDebugRenderTag
+import com.crashinvaders.laughemout.game.engine.components.*
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
@@ -52,6 +49,7 @@ class EntityActionSystemTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
                 }
 
                 entity += ActorContainer(Image(textureDosTest0))
+                entity += DrawableRendererContainer(ActorRenderer)
                 entity += DrawableOrder()
                 entity += DrawableTint()
                 entity += DrawableVisibility()

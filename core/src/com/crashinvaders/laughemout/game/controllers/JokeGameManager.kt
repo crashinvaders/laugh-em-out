@@ -16,10 +16,7 @@ import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActorPixels
 import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
 import com.crashinvaders.laughemout.game.common.camera.Sod3CameraProcessor
 import com.crashinvaders.laughemout.game.components.AudienceMember
-import com.crashinvaders.laughemout.game.engine.components.Info
-import com.crashinvaders.laughemout.game.engine.components.SkeletonContainer
-import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
-import com.crashinvaders.laughemout.game.engine.components.Transform
+import com.crashinvaders.laughemout.game.engine.components.*
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
 import com.crashinvaders.laughemout.game.engine.systems.OnWorldInitializedHandler
@@ -379,6 +376,7 @@ class JokeGameManager : IntervalSystem(),
                 val text = "[#c8d7eb][#ffedd4]${data.subjectPre.text.replace('\n', ' ')}[] ${data.connector.text.replace('\n', ' ')} [#ffedd4]${data.subjectPost.text.replace('\n', ' ')}[]"
                 val actor = TypingLabel(text, font)
                 it += ActorContainer(actor)
+                it += DrawableRendererContainer(ActorRenderer)
                 it += DrawableOrder(GameDrawOrder.COMPLETED_JOKE_VIEW)
                 it += DrawableTint()
                 it += DrawableVisibility()
@@ -399,6 +397,7 @@ class JokeGameManager : IntervalSystem(),
 
                 val actor = TextraLabel("", font)
                 it += ActorContainer(actor)
+                it += DrawableRendererContainer(ActorRenderer)
                 it += DrawableOrder(GameDrawOrder.UI_SCORE_LABEL)
                 it += DrawableTint()
                 it += DrawableVisibility(false)
@@ -454,7 +453,6 @@ class JokeGameManager : IntervalSystem(),
         override fun start() {
             super.start()
 
-            debug { "Timer Task: Start" }
             val world = bBoard.world
 
             if (bBoard.jokeCount == 0) {
@@ -479,7 +477,6 @@ class JokeGameManager : IntervalSystem(),
 
         override fun end() {
             super.end()
-            debug { "Timer Task: End" }
             hideTimer()
         }
 

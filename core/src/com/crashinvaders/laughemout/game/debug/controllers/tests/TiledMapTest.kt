@@ -17,6 +17,7 @@ import com.crashinvaders.common.OrderedInputMultiplexer
 import com.github.quillraven.fleks.Entity
 import com.crashinvaders.laughemout.game.GameInputOrder
 import com.crashinvaders.laughemout.game.debug.controllers.DebugController
+import com.crashinvaders.laughemout.game.engine.components.ActorContainer
 import com.crashinvaders.laughemout.game.engine.components.Info
 import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.components.render.*
@@ -64,6 +65,7 @@ class TiledMapTest(private val fleksWorld: FleksWorld) : KtxInputAdapter, DebugC
                     }
 
                     entity += ActorContainer(TileMapLayerActor(camera, tileMapRenderer, layer))
+                    entity += DrawableRendererContainer(ActorRenderer)
                     entity += DrawableOrder(drawOrder)
                     entity += DrawableTint()
                     entity += DrawableVisibility()

@@ -49,6 +49,7 @@ object GameOverHelper {
             it += SkeletonContainer(skeleton, animState)
 
             it += ActorContainer(skelActor)
+            it += DrawableRendererContainer(ActorRenderer)
             it += DrawableOrder(order = GameDrawOrder.UI_GAME_OVER_MAIN)
             it += DrawableTint()
             it += DrawableVisibility()
@@ -68,6 +69,7 @@ object GameOverHelper {
                 pack()
             }
             it += ActorContainer(actor)
+            it += DrawableRendererContainer(ActorRenderer)
             it += DrawableOrder(GameDrawOrder.UI_GAME_OVER_SCORE)
             it += DrawableTint()
             it += DrawableVisibility()

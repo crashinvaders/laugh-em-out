@@ -3,6 +3,7 @@ package com.crashinvaders.laughemout.game.common
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.common.applyToPoint
 import com.crashinvaders.laughemout.game.UPP
@@ -26,6 +27,13 @@ object DrawableUtils {
     fun DrawableDimensions.fromActorUnits(actor: Actor): DrawableDimensions {
         this.width = actor.width
         this.height = actor.height
+        return this
+    }
+
+    fun DrawableDimensions.fromDrawablePixels(drawable: Drawable): DrawableDimensions {
+        //TODO Should we also include leftWidth/rightWidth/bottomHeight/topHeight?
+        this.width = drawable.minWidth * UPP
+        this.height = drawable.minHeight * UPP
         return this
     }
 

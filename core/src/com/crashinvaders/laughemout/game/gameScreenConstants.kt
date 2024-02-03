@@ -7,7 +7,7 @@ const val UPP = 1f/PPU
 object GameInputOrder {
     const val HUD = 200
     const val JOKE_BUILDER_UI = 300
-    const val DRAWABLES = 400
+    const val STAGE_ACTORS = 400
     const val DEBUG_KEYS = 1000
     const val DEBUG_CONTROLLERS = 1100
 }

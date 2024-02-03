@@ -3,19 +3,32 @@ package com.crashinvaders.laughemout.game.engine.components.render;
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Align
+import com.crashinvaders.common.BlankSignal
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
+
+class DrawableRendererContainer(
+    val renderer: EntityRenderer
+) : Component<DrawableRendererContainer> {
+
+    override fun type() = DrawableRendererContainer
+    companion object : ComponentType<DrawableRendererContainer>()
+}
 
 class DrawableOrder(
     order: Int = 0
 ) : Component<DrawableOrder>, Comparable<DrawableOrder> {
 
+    val onOrderChange = BlankSignal()
+
     var order: Int = order
         set(value) {
-            isDirty = true
             field = value
+            isDirty = true
+            onOrderChange.invoke()
         }
 
+    @Deprecated("Use onOrderChange signal instead.")
     var isDirty: Boolean = true
 
     override fun compareTo(other: DrawableOrder): Int =

@@ -44,6 +44,7 @@ object ComedianHelper {
             it += SkeletonContainer(skeleton, animState)
 
             it += ActorContainer(skelActor)
+            it += DrawableRendererContainer(ActorRenderer)
             it += DrawableOrder(order = GameDrawOrder.COMEDIAN)
             it += DrawableTint()
             it += DrawableVisibility()
@@ -73,6 +74,7 @@ object ComedianHelper {
             val actor = Image(atlasCharacters.findRegion("char-head-w-s9")!!)
 
             it += ActorContainer(actor)
+            it += DrawableRendererContainer(ActorRenderer)
             it += DrawableOrder()
             it += DrawableTint()
             it += DrawableVisibility()

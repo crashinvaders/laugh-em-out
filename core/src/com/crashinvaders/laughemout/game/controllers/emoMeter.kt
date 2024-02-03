@@ -10,6 +10,7 @@ import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
 import com.crashinvaders.laughemout.game.components.AudienceMember
+import com.crashinvaders.laughemout.game.engine.components.ActorContainer
 import com.crashinvaders.laughemout.game.engine.components.Info
 import com.crashinvaders.laughemout.game.engine.components.SkeletonContainer
 import com.crashinvaders.laughemout.game.engine.components.Transform
@@ -59,6 +60,7 @@ object EmoMeterHelper {
             it += SkeletonContainer(skeleton, animState)
 
             it += ActorContainer(skelActor)
+            it += DrawableRendererContainer(ActorRenderer)
             it += DrawableOrder(order = GameDrawOrder.UI_EMO_METER)
             it += DrawableTint()
             it += DrawableVisibility()

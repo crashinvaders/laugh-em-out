@@ -59,6 +59,7 @@ class TransformHierarchyTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
                         debug { "Pew pew" }
                     }
                 })
+                entity += DrawableRendererContainer(ActorRenderer)
                 entity += DrawableOrder()
                 entity += DrawableTint().apply {
 //                    color.set(0x00ff00ffu.toInt())
@@ -84,6 +85,7 @@ class TransformHierarchyTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
                 }
 
                 entity += ActorContainer(Image(textureDosTest0))
+                entity += DrawableRendererContainer(ActorRenderer)
                 entity += DrawableOrder()
                 entity += DrawableTint()
                 entity += DrawableVisibility()
@@ -107,6 +109,7 @@ class TransformHierarchyTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
                 }
 
                 entity += ActorContainer(Image(textureDosTest0))
+                entity += DrawableRendererContainer(ActorRenderer)
                 entity += DrawableOrder()
                 entity += DrawableTint()
                 entity += DrawableVisibility()
@@ -131,6 +134,7 @@ class TransformHierarchyTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
 //                        localRotation = MathUtils.random(360f)
 //                    }
 //                    entity += ActorContainer(Image(textureDosTest0))
+//                    entity += RendererContainer(ActorRenderer)
 //                    entity += DrawableOrder()
 //                    entity += DrawableTint()
 //                    entity += DrawableVisibility()

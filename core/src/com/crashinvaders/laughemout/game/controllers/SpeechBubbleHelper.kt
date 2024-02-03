@@ -11,10 +11,7 @@ import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
 import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActorPixels
 import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
-import com.crashinvaders.laughemout.game.engine.components.Info
-import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
-import com.crashinvaders.laughemout.game.engine.components.Transform
-import com.crashinvaders.laughemout.game.engine.components.TransformDebugRenderTag
+import com.crashinvaders.laughemout.game.engine.components.*
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.DelayAction
@@ -69,6 +66,7 @@ object SpeechBubbleHelper {
             }
 
             it += ActorContainer(actor)
+            it += DrawableRendererContainer(ActorRenderer)
             it += DrawableOrder(GameDrawOrder.UI_SPEECH_BUBBLE)
             it += DrawableTint()
             it += DrawableVisibility()

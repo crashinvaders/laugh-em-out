@@ -24,10 +24,7 @@ import com.crashinvaders.laughemout.game.common.camera.Sod3CameraProcessor
 import com.crashinvaders.laughemout.game.components.JokeSubjectCard
 import com.crashinvaders.laughemout.game.components.JokeSubjectCardPlaceholder
 import com.crashinvaders.laughemout.game.components.JokeSubjectCardRosterPlacement
-import com.crashinvaders.laughemout.game.engine.components.Info
-import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
-import com.crashinvaders.laughemout.game.engine.components.Transform
-import com.crashinvaders.laughemout.game.engine.components.TransformDebugRenderTag
+import com.crashinvaders.laughemout.game.engine.components.*
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
@@ -45,7 +42,6 @@ import com.github.tommyettinger.textra.TypingLabel
 import ktx.actors.onClick
 import ktx.app.KtxInputAdapter
 import ktx.app.gdxError
-import ktx.log.debug
 import ktx.math.component1
 import ktx.math.component2
 
@@ -357,6 +353,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                     pack()
                 }
                 it += ActorContainer(actor)
+                it += DrawableRendererContainer(ActorRenderer)
                 it += DrawableOrder(DRAW_ORDER_MISC)
                 it += DrawableTint()
                 it += DrawableVisibility(true)
@@ -386,6 +383,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                     pack()
                 }
                 it += ActorContainer(actor)
+                it += DrawableRendererContainer(ActorRenderer)
                 it += DrawableOrder(DRAW_ORDER_JOKE_IT_BUTTON)
                 it += DrawableTint()
                 it += DrawableVisibility(false)
@@ -412,6 +410,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                     pack()
                 }
                 it += ActorContainer(actor)
+                it += DrawableRendererContainer(ActorRenderer)
                 it += DrawableOrder(DRAW_ORDER_MISC)
                 it += DrawableTint()
                 it += DrawableVisibility()
@@ -435,6 +434,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
 
                 val actor = Image(atlas.findRegion("joke-subj-placeholder"))
                 it += ActorContainer(actor)
+                it += DrawableRendererContainer(ActorRenderer)
                 it += DrawableOrder(DRAW_ORDER_PLACEHOLDER)
                 it += DrawableTint()
                 it += DrawableVisibility()
@@ -458,6 +458,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
 
                 val actor = Image(atlas.findRegion("joke-subj-placeholder"))
                 it += ActorContainer(actor)
+                it += DrawableRendererContainer(ActorRenderer)
                 it += DrawableOrder(DRAW_ORDER_PLACEHOLDER)
                 it += DrawableTint()
                 it += DrawableVisibility()
@@ -516,6 +517,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                         }
                     }
                     it += ActorContainer(actor)
+                    it += DrawableRendererContainer(ActorRenderer)
                     it += DrawableOrder(DRAW_ORDER_CARD_REGULAR)
                     it += DrawableTint()
                     it += DrawableVisibility()

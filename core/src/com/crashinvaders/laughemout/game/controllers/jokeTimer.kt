@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
+import com.crashinvaders.laughemout.game.engine.components.ActorContainer
 import com.crashinvaders.laughemout.game.engine.components.Info
 import com.crashinvaders.laughemout.game.engine.components.SkeletonContainer
 import com.crashinvaders.laughemout.game.engine.components.Transform
@@ -43,6 +44,7 @@ object JokeTimerHelper {
             it += SkeletonContainer(skeleton, animState)
 
             it += ActorContainer(skelActor)
+            it += DrawableRendererContainer(ActorRenderer)
             it += DrawableOrder(GameDrawOrder.JOKE_TIMER)
             it += DrawableTint()
             it += DrawableVisibility()

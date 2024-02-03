@@ -57,6 +57,7 @@ class TestHud0(
                     localPositionY = 1f
                 }
                 it += ActorContainer(group)
+                it += DrawableRendererContainer(ActorRenderer)
                 it += DrawableOrder()
                 it += DrawableTint()
                 it += DrawableVisibility()

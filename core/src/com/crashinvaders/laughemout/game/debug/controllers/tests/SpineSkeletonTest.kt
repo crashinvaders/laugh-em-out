@@ -11,6 +11,7 @@ import com.esotericsoftware.spine.utils.SkeletonActor
 import com.github.quillraven.fleks.Entity
 import com.crashinvaders.laughemout.game.GameInputOrder
 import com.crashinvaders.laughemout.game.debug.controllers.DebugController
+import com.crashinvaders.laughemout.game.engine.components.ActorContainer
 import com.crashinvaders.laughemout.game.engine.components.Info
 import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.components.render.*
@@ -54,6 +55,7 @@ class SpineSkeletonTest(private val fleksWorld: FleksWorld) : KtxInputAdapter, D
                 }
 
                 entity += ActorContainer(skelActor)
+                entity += DrawableRendererContainer(ActorRenderer)
                 entity += DrawableOrder()
                 entity += DrawableTint()
                 entity += DrawableVisibility()
