@@ -357,7 +357,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                 it += DrawableOrder(DRAW_ORDER_MISC)
                 it += DrawableTint()
                 it += DrawableVisibility(true)
-                it += DrawableDimensions().fromActorPixels(actor)
+                it += DrawableDimensions().fromActorUnits(actor) //FIXME Actor has world size. Wrap it in transformational group.
                 it += DrawableOrigin(Align.center)
 
                 it += SodInterpolation(6f, 0.6f, -0.5f).apply {
@@ -414,7 +414,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                 it += DrawableOrder(DRAW_ORDER_MISC)
                 it += DrawableTint()
                 it += DrawableVisibility()
-                it += DrawableDimensions().fromActorPixels(actor)
+                it += DrawableDimensions().fromActorUnits(actor) //FIXME Actor has world size. Wrap it in transformational group.
                 it += DrawableOrigin(Align.center)
 
                 it += SodInterpolation(6f, 0.6f, -0.5f).apply {
