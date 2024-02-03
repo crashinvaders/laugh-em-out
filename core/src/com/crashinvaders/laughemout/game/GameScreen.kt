@@ -20,6 +20,7 @@ import com.crashinvaders.laughemout.game.controllers.JokeGameManager
 import com.crashinvaders.laughemout.game.engine.OnResizeEvent
 import com.crashinvaders.common.TimeManager
 import com.crashinvaders.laughemout.game.debug.DebugInputProcessor
+import com.crashinvaders.laughemout.game.engine.components.render.SkeletonEntityRenderer
 import com.crashinvaders.laughemout.game.engine.systems.*
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
 import com.crashinvaders.laughemout.game.engine.systems.postprocessing.PostProcessingSystem
@@ -80,7 +81,10 @@ class GameScreen : KtxScreen,
                 val fontScale = UPP * it.originalCellWidth
                 it.scaleTo(fontScale, fontScale)
             }.alsoRegisterDisposable())
-            add(SkeletonRenderer())
+
+            val skeletonRenderer = SkeletonRenderer()
+            add(skeletonRenderer)
+            add(SkeletonEntityRenderer(skeletonRenderer))
         }
 
         systems {

@@ -35,7 +35,6 @@ object AudienceMemberHelper {
     private val tmpVec2 = Vector2()
 
     fun create(world: FleksWorld, x: Float, y: Float, placementIndex: Int): Entity {
-        val skelRenderer = world.inject<SkeletonRenderer>()
         val assets = world.inject<AssetManager>()
         val atlasCharacters = assets.get<TextureAtlas>("skeletons/characters.atlas")
 
@@ -59,7 +58,7 @@ object AudienceMemberHelper {
 
             it += SkeletonContainer(skeleton, animState)
 
-            it += DrawableRenderer(SkeletonEntityRenderer(skelRenderer))
+            it += DrawableRenderer(world.inject<SkeletonEntityRenderer>())
             it += DrawableOrder(order = if (isFrontRow(placementIndex)) GameDrawOrder.AUDIENCE_FRONT_ROW else GameDrawOrder.AUDIENCE_BACK_ROW)
             it += DrawableTint()
             it += DrawableVisibility()

@@ -43,7 +43,7 @@ object ComedianHelper {
 
             it += SkeletonContainer(skeleton, animState)
 
-            it += DrawableRenderer(SkeletonEntityRenderer(skelRenderer))
+            it += DrawableRenderer(world.inject<SkeletonEntityRenderer>())
             it += DrawableOrder(order = GameDrawOrder.COMEDIAN)
             it += DrawableTint()
             it += DrawableVisibility()

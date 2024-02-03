@@ -19,7 +19,6 @@ import com.github.quillraven.fleks.Entity
 object JokeTimerHelper {
 
     fun createTimer(world: FleksWorld, x: Float, y: Float, duration: JokeTimerDuration, onTimeUp: () -> Unit): Entity {
-        val skelRenderer = world.inject<SkeletonRenderer>()
         val atlasUi = world.inject<TextureAtlas>("ui")
 
         val skelData = SkeletonBinary(atlasUi)
@@ -40,7 +39,7 @@ object JokeTimerHelper {
 
             it += SkeletonContainer(skeleton, animState)
 
-            it += DrawableRenderer(SkeletonEntityRenderer(skelRenderer))
+            it += DrawableRenderer(world.inject<SkeletonEntityRenderer>())
             it += DrawableOrder(GameDrawOrder.JOKE_TIMER)
             it += DrawableTint()
             it += DrawableVisibility()

@@ -47,7 +47,7 @@ object GameOverHelper {
 
             it += SkeletonContainer(skeleton, animState)
 
-            it += DrawableRenderer(SkeletonEntityRenderer(skelRenderer))
+            it += DrawableRenderer(world.inject<SkeletonEntityRenderer>())
             it += DrawableOrder(order = GameDrawOrder.UI_GAME_OVER_MAIN)
             it += DrawableTint()
             it += DrawableVisibility()

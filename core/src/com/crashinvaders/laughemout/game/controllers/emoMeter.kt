@@ -58,7 +58,7 @@ object EmoMeterHelper {
 
             it += SkeletonContainer(skeleton, animState)
 
-            it += DrawableRenderer(SkeletonEntityRenderer(skelRenderer))
+            it += DrawableRenderer(world.inject<SkeletonEntityRenderer>())
             it += DrawableOrder(order = GameDrawOrder.UI_EMO_METER)
             it += DrawableTint()
             it += DrawableVisibility()
