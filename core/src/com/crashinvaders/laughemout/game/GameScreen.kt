@@ -125,6 +125,7 @@ class GameScreen : KtxScreen,
             add(postProcessingSystem)
             add(PhysDebugRenderSystem())
             add(TransformDebugRenderSystem().apply { enabled = false })
+            add(DrawableDebugRenderSystem().apply { enabled = false })
 
             // [Post Render] Interpolations
             add(SodInterpolationPostRenderSystem())

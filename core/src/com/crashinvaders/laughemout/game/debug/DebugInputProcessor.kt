@@ -53,9 +53,7 @@ class DebugInputProcessor(private val fleksWorld: FleksWorld) : KtxInputAdapter,
                     return true
                 }
                 // Toggle drawable debug renderer.
-                val stage = fleksWorld.system<ActorStageSystem>().stage
-                //FIXME ActorStageSystem no longer renders anything. Find a way to enable actor debugging.
-                stage.isDebugAll = !stage.isDebugAll
+                fleksWorld.system<DrawableDebugRenderSystem>().toggle()
                 return true
             }
             Keys.W -> {

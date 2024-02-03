@@ -15,5 +15,5 @@ class WorldCamera(
 }
 
 enum class WorldCameraTag : EntityTags by entityTagOf() {
-    MAIN, DEBUG_OVERLAY
+    MAIN, DEBUG_TRANSFORMS, DEBUG_DRAWABLES
 }

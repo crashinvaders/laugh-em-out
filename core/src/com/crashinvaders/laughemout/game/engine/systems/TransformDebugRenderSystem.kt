@@ -48,7 +48,7 @@ class TransformDebugRenderSystem : IteratingSystem(
         world.entity {
             it += Info("DebugOverlayCamera")
             it += WorldCamera(camera = debugCam, ppu = 1f)
-            it += WorldCameraTag.DEBUG_OVERLAY
+            it += WorldCameraTag.DEBUG_TRANSFORMS
             it += Transform().apply {
 //                parent = mainCamEntity[Transform]
             }
@@ -96,7 +96,6 @@ class TransformDebugRenderSystem : IteratingSystem(
 
         debugFont.draw(batch, glyphLayout, renderPosX - textWidth * 0.5f, renderPosY - 8f)
 
-
         //TODO Remove me.
         if (entity.has(WorldCamera)) {
             val (camWorldX, camWorldY) = entity[WorldCamera].camera.position
@@ -118,7 +117,7 @@ class TransformDebugRenderSystem : IteratingSystem(
 
         private fun toString(matrix: Affine2): String =
             when (Gdx.app.type) {
-                //TODO TeaVM not yet support the "f" formatting symbol. But they should enable it in 0.9.3+ release.
+                //TODO TeaVM doesn't support the "f" formatting symbol yet. But they should enable it in 0.9.3+ release.
                 Application.ApplicationType.WebGL -> ""
                 else -> "[#ffb020]%+.1f %+.1f [#ff4040]%+.1f\n[#20ffb0]%+.1f %+.1f [#40ff40]%+.1f"
                     .format(matrix.m00, matrix.m01, matrix.m02, matrix.m10, matrix.m11, matrix.m12)

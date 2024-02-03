@@ -9,6 +9,8 @@ import com.badlogic.gdx.math.Vector2
 import kotlin.math.sign
 import kotlin.math.sqrt
 
+private val tmpVec2 = Vector2()
+
 val Rectangle.centerX: Float
     get() = x + width * 0.5f
 val Rectangle.centerY: Float
@@ -65,6 +67,9 @@ fun Affine2.extractUp(out: Vector2): Vector2 =
     else
         out.set(m10, -m00).nor()
 
+fun Affine2.applyToPoint(x: Float, y: Float): Vector2 =
+    applyToPoint(tmpVec2.set(x, y))
+
 fun Affine2.applyToPoint(point: Vector2): Vector2 {
     val x = point.x
     val y = point.y
@@ -72,6 +77,10 @@ fun Affine2.applyToPoint(point: Vector2): Vector2 {
     point.y = m10 * x + m11 * y + m12
     return point
 }
+
+fun Affine2.applyToVector(x: Float, y: Float): Vector2 =
+    applyToVector(tmpVec2.set(x, y))
+
 fun Affine2.applyToVector(point: Vector2): Vector2 {
     val x = point.x
     val y = point.y

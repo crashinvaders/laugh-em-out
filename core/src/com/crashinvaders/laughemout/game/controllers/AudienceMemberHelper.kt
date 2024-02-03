@@ -40,7 +40,7 @@ object AudienceMemberHelper {
 
         val skelData = SkeletonBinary(atlasCharacters)
             .apply { scale = UPP }
-            .readSkeletonData(com.badlogic.gdx.Gdx.files.internal("skeletons/audience-char.skel"))
+            .readSkeletonData(Gdx.files.internal("skeletons/audience-char.skel"))
 
         val skeleton = Skeleton(skelData)
         skeleton.rootBone.scaleX = -1f
