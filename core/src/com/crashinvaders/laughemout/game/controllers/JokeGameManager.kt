@@ -5,6 +5,7 @@ import com.badlogic.gdx.ai.btree.LeafTask
 import com.badlogic.gdx.ai.btree.Task
 import com.badlogic.gdx.ai.btree.branch.Parallel
 import com.badlogic.gdx.math.MathUtils
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.*
 import com.crashinvaders.laughemout.App
@@ -16,6 +17,7 @@ import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
 import com.crashinvaders.laughemout.game.common.camera.Sod3CameraProcessor
 import com.crashinvaders.laughemout.game.components.AudienceMember
 import com.crashinvaders.laughemout.game.engine.components.Info
+import com.crashinvaders.laughemout.game.engine.components.SkeletonContainer
 import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
 import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.components.render.*
@@ -168,6 +170,11 @@ class JokeGameManager : IntervalSystem(),
     }
 
     companion object {
+
+        private fun getAudMemberOverheadPos(world: FleksWorld, eAudMemb: Entity): Vector2 =
+            with(world) {
+                return eAudMemb[SkeletonContainer].getBonePosition("overhead-anchor")
+            }
 
         private fun showAndAwaitJokeBuilder(bBoard: BTreeBlackBoard, callback: () -> Unit) {
             val subjectCount = 3
@@ -535,6 +542,7 @@ class JokeGameManager : IntervalSystem(),
 
     private class BTreeBlackBoard(val world: FleksWorld, maxAudienceCount: Int) {
 
+        // Permanent fields, available thought the entire game.
         val audienceMembers = GdxArray<Entity>()
         lateinit var eComedian: Entity
         lateinit var eScoreLabel: Entity
@@ -543,10 +551,11 @@ class JokeGameManager : IntervalSystem(),
         var maxAudienceCount: Int = maxAudienceCount
         var isGameOver = false
 
+        // These fields get reset every round.
         var eJokeTimer: Entity? = null
         var completedJoke: JokeStructureData? = null
         var completedJokeView: Entity? = null
-        var jokeAffections = GdxMap<AudienceMember, AudienceJokeAffectionEntry>()
+        val jokeAffections = GdxMap<AudienceMember, AudienceJokeAffectionEntry>()
 
         fun resetRound() {
             eJokeTimer = null

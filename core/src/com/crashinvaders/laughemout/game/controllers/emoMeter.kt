@@ -1,8 +1,9 @@
 package com.crashinvaders.laughemout.game.controllers
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
-import com.badlogic.gdx.math.MathUtils
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.EntityComponent
 import com.crashinvaders.common.FleksWorld
@@ -17,7 +18,6 @@ import com.esotericsoftware.spine.*
 import com.esotericsoftware.spine.utils.SkeletonActor
 import com.github.quillraven.fleks.ComponentType
 import com.github.quillraven.fleks.Entity
-import com.crashinvaders.common.CommonUtils.random
 import ktx.app.gdxError
 
 object EmoMeterHelper {
@@ -25,12 +25,14 @@ object EmoMeterHelper {
     private const val TRACK_FRAME = 0
     private const val TRACK_TOKEN = 1
 
-    fun create(world: FleksWorld, audMemb: Entity): Entity {
+    fun create(world: FleksWorld, eAudMemb: Entity): Entity {
         val cAmTransform: Transform
         val cAmAudMember: AudienceMember
+        val audMemberOverheadPos: Vector2
         with(world) {
-            cAmTransform = audMemb[Transform]
-            cAmAudMember = audMemb[AudienceMember]
+            cAmTransform = eAudMemb[Transform]
+            cAmAudMember = eAudMemb[AudienceMember]
+            audMemberOverheadPos = eAudMemb[SkeletonContainer].getBonePosition("overhead-anchor")
         }
 
         val skelRenderer = world.inject<SkeletonRenderer>()
@@ -39,7 +41,7 @@ object EmoMeterHelper {
 
         val skelData = SkeletonBinary(atlasCharacters)
             .apply { scale = UPP }
-            .readSkeletonData(com.badlogic.gdx.Gdx.files.internal("skeletons/emotion-meter.skel"))
+            .readSkeletonData(Gdx.files.internal("skeletons/emotion-meter.skel"))
 
         val skeleton = Skeleton(skelData)
         val animState = AnimationState(AnimationStateData(skelData))
@@ -50,8 +52,8 @@ object EmoMeterHelper {
             it += EmoMeter(cAmAudMember, cAmAudMember.emoLevel)
             it += Transform().apply {
                 parent = cAmTransform
-                localPositionX = 0f
-                localPositionY = 56f * UPP
+                localPositionX = audMemberOverheadPos.x
+                localPositionY = audMemberOverheadPos.y + 8f * UPP
             }
 
             it += SkeletonContainer(skeleton, animState)

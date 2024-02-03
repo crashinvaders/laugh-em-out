@@ -53,9 +53,6 @@ object AudienceMemberHelper {
         val animState = AnimationState(AnimationStateData(skelData))
         val skelActor = SkeletonActor(skelRenderer, skeleton, animState)
 
-        animState.setAnimation(TRACK_GENERAL, "appear0", false)
-        animState.addAnimation(TRACK_GENERAL, animationNamesIdle.random(), true, 0f)
-
         lateinit var cAudMember: AudienceMember
 
         val entity = world.entity {
@@ -82,6 +79,10 @@ object AudienceMemberHelper {
             cAudMember = it[AudienceMember]
         }
 
+        setUpSkeleton(world, entity)
+        animState.apply(skeleton)
+        skeleton.updateWorldTransform()
+
         with(world) {
             entity[AudienceMember].emoLevel = MathUtils.random(-1, +1)
 
@@ -89,7 +90,8 @@ object AudienceMemberHelper {
             cAudMember.emoMeter = eEmoMeter[EmoMeter]
         }
 
-        setUpSkeleton(world, entity)
+        animState.setAnimation(TRACK_GENERAL, "appear0", false)
+        animState.addAnimation(TRACK_GENERAL, animationNamesIdle.random(), true, 0f)
 
         return entity
     }

@@ -44,7 +44,7 @@ class GameScreen : KtxScreen,
 
     val batch = PolygonSpriteBatch().alsoRegisterDisposable()
 
-    val b2dWorld = com.crashinvaders.laughemout.game.engine.systems.PhysWorldSystem.createWorld().alsoRegisterDisposable()
+    val b2dWorld = PhysWorldSystem.createWorld().alsoRegisterDisposable()
 
     val clearColor = Color.valueOf("544470")
 
