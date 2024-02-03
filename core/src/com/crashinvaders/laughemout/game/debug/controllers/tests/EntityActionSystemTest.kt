@@ -14,13 +14,13 @@ import com.github.quillraven.fleks.Entity
 import com.crashinvaders.laughemout.game.GameInputOrder
 import com.crashinvaders.laughemout.game.common.camera.Sod2CameraProcessor
 import com.crashinvaders.laughemout.game.debug.controllers.DebugController
+import com.crashinvaders.laughemout.game.engine.TimeMode
 import com.crashinvaders.laughemout.game.engine.components.Info
 import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
 import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.components.TransformDebugRenderTag
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.Action
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.*
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.transform.TransformSpace
@@ -36,12 +36,11 @@ class EntityActionSystemTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
 
     private val inputMultiplexer: OrderedInputMultiplexer = fleksWorld.inject()
 
-    private val camSystem: MainCameraStateSystem
+    private val camSystem = fleksWorld.system<MainCameraStateSystem>()
+
     private val camProcessor: Sod2CameraProcessor
 
     init {
-        camSystem = fleksWorld.system<MainCameraStateSystem>()
-
         var transform: Transform
 
         with(fleksWorld) {
@@ -60,7 +59,7 @@ class EntityActionSystemTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
                 entity += DrawableOrigin(Align.center)
 
                 entity += SodInterpolation(4f, 0.4f, -0.5f).apply {
-                    timeMode = SodInterpolation.TimeMode.UnscaledTime
+                    timeMode = TimeMode.UnscaledTime
                 }
                 entity += TransformDebugRenderTag
             }
@@ -74,7 +73,7 @@ class EntityActionSystemTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
 
         fleksWorld.system<EntityActionSystem>().actions(entity) {
             repeat {
-                timeMode = Action.TimeMode.UnscaledTime
+                timeMode = TimeMode.UnscaledTime
                 sequence {
                     parallel {
                         rotateBy(60f)

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.utils.SnapshotArray
 import com.crashinvaders.common.TimeManager
 import com.crashinvaders.common.use
+import com.crashinvaders.laughemout.game.engine.TimeMode
 import com.github.quillraven.fleks.*
 import com.crashinvaders.laughemout.game.engine.components.ActionOwner
 import com.crashinvaders.laughemout.game.engine.components.Info
@@ -50,8 +51,8 @@ class EntityActionSystem : IntervalSystem() {
                         return@use
                     }
                     val deltaTime = when(action.timeMode) {
-                        Action.TimeMode.GameTime -> deltaGame
-                        Action.TimeMode.UnscaledTime -> deltaUnscaled
+                        TimeMode.GameTime -> deltaGame
+                        TimeMode.UnscaledTime -> deltaUnscaled
                     }
                     val isCompleted = action.act(deltaTime)
                     if (isCompleted) {

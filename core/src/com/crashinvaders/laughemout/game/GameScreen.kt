@@ -20,6 +20,7 @@ import com.crashinvaders.laughemout.game.controllers.JokeGameManager
 import com.crashinvaders.laughemout.game.engine.OnResizeEvent
 import com.crashinvaders.common.TimeManager
 import com.crashinvaders.laughemout.game.debug.DebugInputProcessor
+import com.crashinvaders.laughemout.game.engine.components.SkeletonBoneParenting
 import com.crashinvaders.laughemout.game.engine.systems.*
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
 import com.crashinvaders.laughemout.game.engine.systems.postprocessing.PostProcessingSystem
@@ -97,6 +98,10 @@ class GameScreen : KtxScreen,
             add(PhysWorldSystem())
             add(PhysToTransformMapperSystem())
             add(PhysContactSubscriptionSystem())
+
+            // Skeleton related systems
+            add(SkeletonUpdateSystem())
+            add(SkeletonBoneParentingSystem())
 
             // Update cameras
 //            add(MainCameraStateSystem(ScreenViewport().apply { unitsPerPixel = 1f/32f }))

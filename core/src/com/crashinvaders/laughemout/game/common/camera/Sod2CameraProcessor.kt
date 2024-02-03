@@ -2,6 +2,7 @@ package com.crashinvaders.laughemout.game.common.camera
 
 import com.crashinvaders.common.sod.SecondOrderDynamics2D
 import com.crashinvaders.common.sod.SecondOrderDynamicsArray
+import com.crashinvaders.laughemout.game.engine.TimeMode
 import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
 
@@ -11,7 +12,7 @@ open class Sod2CameraProcessor(
     val r: Float,
     private val order: Int = 0,
     private val overridePrevState: Boolean = true,
-    private val timeMode: MainCameraStateSystem.TimeMode = MainCameraStateSystem.TimeMode.GameTime,
+    private val timeMode: TimeMode = TimeMode.GameTime,
     private val readCamValuesWhenAdded: Boolean = true,
 ): MainCameraStateSystem.CamProcessor {
 
@@ -28,7 +29,7 @@ open class Sod2CameraProcessor(
 
     override fun isOverrideState(): Boolean = overridePrevState
 
-    override fun getTimeMode(): MainCameraStateSystem.TimeMode = timeMode
+    override fun getTimeMode(): TimeMode = timeMode
 
     override fun onAdded(camTransform: Transform.Snapshot) {
         if (readCamValuesWhenAdded) {
@@ -58,7 +59,7 @@ open class Sod3CameraProcessor(
     r: Float,
     private val order: Int = 0,
     private val overridePrevState: Boolean = true,
-    private val timeMode: MainCameraStateSystem.TimeMode = MainCameraStateSystem.TimeMode.GameTime,
+    private val timeMode: TimeMode = TimeMode.GameTime,
     private val readCamValuesWhenAdded: Boolean = true
 ): MainCameraStateSystem.CamProcessor {
 
@@ -77,7 +78,7 @@ open class Sod3CameraProcessor(
 
     override fun isOverrideState(): Boolean = overridePrevState
 
-    override fun getTimeMode(): MainCameraStateSystem.TimeMode = timeMode
+    override fun getTimeMode(): TimeMode = timeMode
 
     override fun onAdded(camTransform: Transform.Snapshot) {
         if (readCamValuesWhenAdded) {

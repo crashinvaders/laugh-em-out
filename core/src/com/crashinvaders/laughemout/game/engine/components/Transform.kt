@@ -10,7 +10,7 @@ import ktx.collections.GdxArray
 
 class Transform : Component<Transform> {
 
-    private lateinit var entity: Entity
+    lateinit var entity: Entity
 
     private val tmpVec = Vector2()
 
@@ -19,7 +19,6 @@ class Transform : Component<Transform> {
     private val w2lProj = Affine2()
 
     var nestingLevel: Int = 0
-        get
         private set
 
     var parent: Transform? = null

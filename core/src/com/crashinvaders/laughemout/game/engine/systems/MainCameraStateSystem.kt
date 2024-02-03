@@ -13,6 +13,7 @@ import com.crashinvaders.common.events.EventHandler
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IntervalSystem
 import com.crashinvaders.laughemout.game.engine.OnResizeEvent
+import com.crashinvaders.laughemout.game.engine.TimeMode
 import com.crashinvaders.laughemout.game.engine.components.Info
 import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.components.WorldCamera
@@ -198,10 +199,5 @@ class MainCameraStateSystem(
         fun onAdded(camTransform: Transform.Snapshot)
         fun onRemoved(camTransform: Transform.Snapshot)
         fun process(camTransform: Transform.Snapshot, deltaTime: Float)
-    }
-
-    enum class TimeMode {
-        GameTime,
-        UnscaledTime,
     }
 }

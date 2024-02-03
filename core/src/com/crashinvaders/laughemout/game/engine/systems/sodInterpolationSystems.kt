@@ -1,12 +1,12 @@
 package com.crashinvaders.laughemout.game.engine.systems
 
 import com.crashinvaders.common.TimeManager
+import com.crashinvaders.laughemout.game.engine.TimeMode
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.collection.compareEntity
 import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
 import com.crashinvaders.laughemout.game.engine.components.Transform
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.Action
 
 class SodInterpolationPreRenderSystem : IteratingSystem(
     family,
@@ -59,8 +59,8 @@ class SodInterpolationPreRenderSystem : IteratingSystem(
         val sodIntrpl = entity[SodInterpolation]
 
         val deltaTime = when(sodIntrpl.timeMode) {
-            SodInterpolation.TimeMode.GameTime -> timeManager.delta
-            SodInterpolation.TimeMode.UnscaledTime -> timeManager.deltaUnscaled
+            TimeMode.GameTime -> timeManager.delta
+            TimeMode.UnscaledTime -> timeManager.deltaUnscaled
         }
 
         // Update SOD state.

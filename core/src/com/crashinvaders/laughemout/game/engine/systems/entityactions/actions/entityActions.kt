@@ -3,6 +3,7 @@ package com.crashinvaders.laughemout.game.engine.systems.entityactions.actions
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.Pool
 import com.badlogic.gdx.utils.Pools
+import com.crashinvaders.laughemout.game.engine.TimeMode
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.Action
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.ParentAction
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.transform.*
@@ -198,7 +199,7 @@ fun ParentAction.runDelayedInd(
     duration: Float,
     runnable: (action: RunnableAction) -> Unit) {
     delay(duration) {
-        (this as Action).timeMode = Action.TimeMode.UnscaledTime
+        (this as Action).timeMode = TimeMode.UnscaledTime
         runnable(runnable)
     }
 }

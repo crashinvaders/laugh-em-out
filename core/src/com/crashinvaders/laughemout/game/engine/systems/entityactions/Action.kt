@@ -3,6 +3,7 @@ package com.crashinvaders.laughemout.game.engine.systems.entityactions
 import com.badlogic.gdx.utils.Pool
 import com.badlogic.gdx.utils.Pool.Poolable
 import com.crashinvaders.common.FleksWorld
+import com.crashinvaders.laughemout.game.engine.TimeMode
 import com.github.quillraven.fleks.Entity
 
 abstract class Action : Poolable {
@@ -60,9 +61,5 @@ abstract class Action : Poolable {
      */
     abstract fun act(delta: Float): Boolean
 
-    enum class TimeMode {
-        GameTime,
-        UnscaledTime,
-    }
 }
 

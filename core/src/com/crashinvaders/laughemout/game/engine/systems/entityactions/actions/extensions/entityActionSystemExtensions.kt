@@ -1,5 +1,6 @@
 package com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.extensions
 
+import com.crashinvaders.laughemout.game.engine.TimeMode
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.Action
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.DelayDelegateAction
@@ -9,7 +10,7 @@ import com.github.quillraven.fleks.Entity
 
 fun EntityActionSystem.schedule(
     delay: Float,
-    timeMode: Action.TimeMode = Action.TimeMode.GameTime,
+    timeMode: TimeMode = TimeMode.GameTime,
     runnable: (action: Action) -> Unit
 ) {
     schedule(globalActionHost, delay, timeMode, runnable)
@@ -18,7 +19,7 @@ fun EntityActionSystem.schedule(
 fun EntityActionSystem.schedule(
     entity: Entity = globalActionHost,
     delay: Float,
-    timeMode: Action.TimeMode = Action.TimeMode.GameTime,
+    timeMode: TimeMode = TimeMode.GameTime,
     runnable: (action: Action) -> Unit
 ) {
     val runnableAction = action<RunnableAction>()
@@ -44,5 +45,5 @@ fun EntityActionSystem.scheduleInd(
     delay: Float,
     runnable: (action: Action) -> Unit
 ) {
-    schedule(entity, delay, Action.TimeMode.UnscaledTime, runnable)
+    schedule(entity, delay, TimeMode.UnscaledTime, runnable)
 }

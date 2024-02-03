@@ -7,6 +7,7 @@ import com.crashinvaders.common.OrderedInputMultiplexer
 import com.crashinvaders.laughemout.game.CameraProcessorOrder
 import com.crashinvaders.laughemout.game.GameInputOrder
 import com.crashinvaders.laughemout.game.common.camera.Sod3CameraProcessor
+import com.crashinvaders.laughemout.game.engine.TimeMode
 import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
 import ktx.app.KtxInputAdapter
@@ -79,8 +80,8 @@ class FreeCameraDebugController(fleksWorld: FleksWorld) : KtxInputAdapter, Debug
     }
 
     override fun scrolled(amountX: Float, amountY: Float): Boolean {
-        changeEntityScale(amountY);
-        return true;
+        changeEntityScale(amountY)
+        return true
     }
 
     private fun moveEntity(screenX: Int, screenY: Int, prevScreenX: Int, prevScreenY: Int) {
@@ -109,7 +110,7 @@ class FreeCameraDebugController(fleksWorld: FleksWorld) : KtxInputAdapter, Debug
 
     private class FreeCamProcessor : Sod3CameraProcessor(5f, 0.9f, 0f,
         CameraProcessorOrder.DEBUG_FREE,
-        timeMode = MainCameraStateSystem.TimeMode.UnscaledTime) {
+        timeMode = TimeMode.UnscaledTime) {
 
         private var initialScale: Float = 1f
         var relativeScale: Float = 1f
