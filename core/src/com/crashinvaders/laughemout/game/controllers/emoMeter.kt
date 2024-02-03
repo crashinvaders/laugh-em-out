@@ -46,7 +46,6 @@ object EmoMeterHelper {
 
         val skeleton = Skeleton(skelData)
         val animState = AnimationState(AnimationStateData(skelData))
-        val skelActor = SkeletonActor(skelRenderer, skeleton, animState)
 
         val entity = world.entity {
             it += Info("AudienceMember")
@@ -59,8 +58,7 @@ object EmoMeterHelper {
 
             it += SkeletonContainer(skeleton, animState)
 
-            it += ActorContainer(skelActor)
-            it += DrawableRendererContainer(ActorRenderer)
+            it += DrawableRenderer(SkeletonEntityRenderer(skelRenderer))
             it += DrawableOrder(order = GameDrawOrder.UI_EMO_METER)
             it += DrawableTint()
             it += DrawableVisibility()

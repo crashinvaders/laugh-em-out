@@ -66,7 +66,7 @@ object SpeechBubbleHelper {
             }
 
             it += ActorContainer(actor)
-            it += DrawableRendererContainer(ActorRenderer)
+            it += DrawableRenderer(ActorEntityRenderer)
             it += DrawableOrder(GameDrawOrder.UI_SPEECH_BUBBLE)
             it += DrawableTint()
             it += DrawableVisibility()

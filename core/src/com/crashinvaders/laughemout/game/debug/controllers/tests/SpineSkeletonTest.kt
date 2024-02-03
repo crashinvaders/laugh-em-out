@@ -55,7 +55,7 @@ class SpineSkeletonTest(private val fleksWorld: FleksWorld) : KtxInputAdapter, D
                 }
 
                 entity += ActorContainer(skelActor)
-                entity += DrawableRendererContainer(ActorRenderer)
+                entity += DrawableRenderer(ActorEntityRenderer)
                 entity += DrawableOrder()
                 entity += DrawableTint()
                 entity += DrawableVisibility()

@@ -353,7 +353,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                     pack()
                 }
                 it += ActorContainer(actor)
-                it += DrawableRendererContainer(ActorRenderer)
+                it += DrawableRenderer(ActorEntityRenderer)
                 it += DrawableOrder(DRAW_ORDER_MISC)
                 it += DrawableTint()
                 it += DrawableVisibility(true)
@@ -383,7 +383,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                     pack()
                 }
                 it += ActorContainer(actor)
-                it += DrawableRendererContainer(ActorRenderer)
+                it += DrawableRenderer(ActorEntityRenderer)
                 it += DrawableOrder(DRAW_ORDER_JOKE_IT_BUTTON)
                 it += DrawableTint()
                 it += DrawableVisibility(false)
@@ -410,7 +410,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                     pack()
                 }
                 it += ActorContainer(actor)
-                it += DrawableRendererContainer(ActorRenderer)
+                it += DrawableRenderer(ActorEntityRenderer)
                 it += DrawableOrder(DRAW_ORDER_MISC)
                 it += DrawableTint()
                 it += DrawableVisibility()
@@ -434,7 +434,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
 
                 val actor = Image(atlas.findRegion("joke-subj-placeholder"))
                 it += ActorContainer(actor)
-                it += DrawableRendererContainer(ActorRenderer)
+                it += DrawableRenderer(ActorEntityRenderer)
                 it += DrawableOrder(DRAW_ORDER_PLACEHOLDER)
                 it += DrawableTint()
                 it += DrawableVisibility()
@@ -458,7 +458,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
 
                 val actor = Image(atlas.findRegion("joke-subj-placeholder"))
                 it += ActorContainer(actor)
-                it += DrawableRendererContainer(ActorRenderer)
+                it += DrawableRenderer(ActorEntityRenderer)
                 it += DrawableOrder(DRAW_ORDER_PLACEHOLDER)
                 it += DrawableTint()
                 it += DrawableVisibility()
@@ -517,7 +517,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                         }
                     }
                     it += ActorContainer(actor)
-                    it += DrawableRendererContainer(ActorRenderer)
+                    it += DrawableRenderer(ActorEntityRenderer)
                     it += DrawableOrder(DRAW_ORDER_CARD_REGULAR)
                     it += DrawableTint()
                     it += DrawableVisibility()

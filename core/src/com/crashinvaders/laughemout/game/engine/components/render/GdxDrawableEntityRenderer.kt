@@ -1,22 +1,21 @@
-package com.crashinvaders.laughemout.game.engine.components.render;
+package com.crashinvaders.laughemout.game.engine.components.render
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.crashinvaders.common.FleksWorld
-import com.crashinvaders.laughemout.game.engine.components.ActorContainer
+import com.crashinvaders.laughemout.game.engine.components.GdxDrawableContainer
 import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.github.quillraven.fleks.Entity
 import ktx.collections.gdxArrayOf
 import ktx.math.component1
 import ktx.math.component2
 
-object ActorRenderer : EntityRenderer {
+object GdxDrawableEntityRenderer : EntityRenderer {
 
     private val requiredComponents = gdxArrayOf(
         Transform,
-        ActorContainer,
+        GdxDrawableContainer,
         DrawableVisibility,
         DrawableOrigin,
-        DrawableTint,
         DrawableDimensions)
 
     override fun FleksWorld.validate(entity: Entity) {
@@ -24,16 +23,12 @@ object ActorRenderer : EntityRenderer {
     }
 
     override fun FleksWorld.render(entity: Entity, batch: Batch) {
-        val actor = entity[ActorContainer].actor
         val visible = entity[DrawableVisibility].isVisible
-        actor.isVisible = visible
-
         if (!visible) {
             return
         }
 
         val origin = entity[DrawableOrigin]
-        val tint = entity[DrawableTint]
 
         val dimensions = entity[DrawableDimensions]
         val width = dimensions.width
@@ -50,14 +45,8 @@ object ActorRenderer : EntityRenderer {
         val originX = origin.x * width
         val originY = origin.y * height
 
-        actor.setSize(width, height)
-        actor.setPosition(posX + shiftX, posY + shiftY)
-        actor.setScale(scaleX, scaleY)
-        actor.setOrigin(originX, originY)
-        actor.rotation = rotation
-        actor.color = tint.color
+        val drawable = entity[GdxDrawableContainer].drawable
 
-//        actor.act(deltaTime)
-        actor.draw(batch, 1f)
+        drawable.draw(batch, posX + shiftX, posY + shiftY, originX, originY, width, height, scaleX, scaleY, rotation)
     }
 }

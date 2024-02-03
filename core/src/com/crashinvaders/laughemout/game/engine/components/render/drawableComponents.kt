@@ -7,12 +7,12 @@ import com.crashinvaders.common.BlankSignal
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 
-class DrawableRendererContainer(
+class DrawableRenderer(
     val renderer: EntityRenderer
-) : Component<DrawableRendererContainer> {
+) : Component<DrawableRenderer> {
 
-    override fun type() = DrawableRendererContainer
-    companion object : ComponentType<DrawableRendererContainer>()
+    override fun type() = DrawableRenderer
+    companion object : ComponentType<DrawableRenderer>()
 }
 
 class DrawableOrder(

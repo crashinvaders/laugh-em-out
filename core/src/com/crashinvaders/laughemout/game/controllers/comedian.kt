@@ -4,16 +4,17 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Image
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
 import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActorPixels
+import com.crashinvaders.laughemout.game.common.DrawableUtils.fromDrawablePixels
 import com.crashinvaders.laughemout.game.components.Comedian
 import com.crashinvaders.laughemout.game.engine.components.*
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.esotericsoftware.spine.*
-import com.esotericsoftware.spine.utils.SkeletonActor
 import com.github.quillraven.fleks.Entity
 import ktx.actors.onTouchDown
 
@@ -29,7 +30,6 @@ object ComedianHelper {
 
         val skeleton = Skeleton(skelData)
         val animState = AnimationState(AnimationStateData(skelData))
-        val skelActor = SkeletonActor(skelRenderer, skeleton, animState)
 
         animState.setAnimation(0, "animation", true)
 
@@ -43,12 +43,11 @@ object ComedianHelper {
 
             it += SkeletonContainer(skeleton, animState)
 
-            it += ActorContainer(skelActor)
-            it += DrawableRendererContainer(ActorRenderer)
+            it += DrawableRenderer(SkeletonEntityRenderer(skelRenderer))
             it += DrawableOrder(order = GameDrawOrder.COMEDIAN)
             it += DrawableTint()
             it += DrawableVisibility()
-            it += DrawableDimensions(0f)
+            it += DrawableDimensions(2f)
             it += DrawableOrigin(Align.bottom)
         }
 
@@ -74,7 +73,7 @@ object ComedianHelper {
             val actor = Image(atlasCharacters.findRegion("char-head-w-s9")!!)
 
             it += ActorContainer(actor)
-            it += DrawableRendererContainer(ActorRenderer)
+            it += DrawableRenderer(ActorEntityRenderer)
             it += DrawableOrder()
             it += DrawableTint()
             it += DrawableVisibility()

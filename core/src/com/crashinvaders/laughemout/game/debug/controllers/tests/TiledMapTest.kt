@@ -65,7 +65,7 @@ class TiledMapTest(private val fleksWorld: FleksWorld) : KtxInputAdapter, DebugC
                     }
 
                     entity += ActorContainer(TileMapLayerActor(camera, tileMapRenderer, layer))
-                    entity += DrawableRendererContainer(ActorRenderer)
+                    entity += DrawableRenderer(ActorEntityRenderer)
                     entity += DrawableOrder(drawOrder)
                     entity += DrawableTint()
                     entity += DrawableVisibility()

@@ -5,7 +5,6 @@ import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
-import com.crashinvaders.laughemout.game.engine.components.ActorContainer
 import com.crashinvaders.laughemout.game.engine.components.Info
 import com.crashinvaders.laughemout.game.engine.components.SkeletonContainer
 import com.crashinvaders.laughemout.game.engine.components.Transform
@@ -15,7 +14,6 @@ import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.De
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.RunnableAction
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.SequenceAction
 import com.esotericsoftware.spine.*
-import com.esotericsoftware.spine.utils.SkeletonActor
 import com.github.quillraven.fleks.Entity
 
 object JokeTimerHelper {
@@ -30,7 +28,6 @@ object JokeTimerHelper {
 
         val skeleton = Skeleton(skelData)
         val animState = AnimationState(AnimationStateData(skelData))
-        val skelActor = SkeletonActor(skelRenderer, skeleton, animState)
 
         animState.setAnimation(0, duration.animName, false)
 
@@ -43,8 +40,7 @@ object JokeTimerHelper {
 
             it += SkeletonContainer(skeleton, animState)
 
-            it += ActorContainer(skelActor)
-            it += DrawableRendererContainer(ActorRenderer)
+            it += DrawableRenderer(SkeletonEntityRenderer(skelRenderer))
             it += DrawableOrder(GameDrawOrder.JOKE_TIMER)
             it += DrawableTint()
             it += DrawableVisibility()

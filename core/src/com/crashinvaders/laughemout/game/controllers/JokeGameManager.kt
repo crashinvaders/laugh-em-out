@@ -376,7 +376,7 @@ class JokeGameManager : IntervalSystem(),
                 val text = "[#c8d7eb][#ffedd4]${data.subjectPre.text.replace('\n', ' ')}[] ${data.connector.text.replace('\n', ' ')} [#ffedd4]${data.subjectPost.text.replace('\n', ' ')}[]"
                 val actor = TypingLabel(text, font)
                 it += ActorContainer(actor)
-                it += DrawableRendererContainer(ActorRenderer)
+                it += DrawableRenderer(ActorEntityRenderer)
                 it += DrawableOrder(GameDrawOrder.COMPLETED_JOKE_VIEW)
                 it += DrawableTint()
                 it += DrawableVisibility()
@@ -397,7 +397,7 @@ class JokeGameManager : IntervalSystem(),
 
                 val actor = TextraLabel("", font)
                 it += ActorContainer(actor)
-                it += DrawableRendererContainer(ActorRenderer)
+                it += DrawableRenderer(ActorEntityRenderer)
                 it += DrawableOrder(GameDrawOrder.UI_SCORE_LABEL)
                 it += DrawableTint()
                 it += DrawableVisibility(false)

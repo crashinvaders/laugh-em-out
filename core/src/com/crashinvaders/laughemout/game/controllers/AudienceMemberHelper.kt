@@ -46,7 +46,6 @@ object AudienceMemberHelper {
         val skeleton = Skeleton(skelData)
         skeleton.rootBone.scaleX = -1f
         val animState = AnimationState(AnimationStateData(skelData))
-        val skelActor = SkeletonActor(skelRenderer, skeleton, animState)
 
         lateinit var cAudMember: AudienceMember
 
@@ -60,8 +59,7 @@ object AudienceMemberHelper {
 
             it += SkeletonContainer(skeleton, animState)
 
-            it += ActorContainer(skelActor)
-            it += DrawableRendererContainer(ActorRenderer)
+            it += DrawableRenderer(SkeletonEntityRenderer(skelRenderer))
             it += DrawableOrder(order = if (isFrontRow(placementIndex)) GameDrawOrder.AUDIENCE_FRONT_ROW else GameDrawOrder.AUDIENCE_BACK_ROW)
             it += DrawableTint()
             it += DrawableVisibility()

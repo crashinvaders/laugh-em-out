@@ -27,7 +27,7 @@ interface EntityRenderer {
                             it.substring(it.lastIndexOf('.') + 1)
                         }
                     }
-                    gdxError("Entity \"${entity.getPrintName(this)}\" must have $componentName component to be compatible with ${ActorRenderer::class.simpleName}")
+                    gdxError("Entity \"${entity.getPrintName(this)}\" must have $componentName component to be compatible with ${ActorEntityRenderer::class.simpleName}")
                 }
             }
         }

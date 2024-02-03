@@ -53,7 +53,7 @@ class SimplePhysicsTest(private val fleksWorld: FleksWorld) : DebugController {
                 })
 
                 entity += ActorContainer(Image(textureCircleRed))
-                entity += DrawableRendererContainer(ActorRenderer)
+                entity += DrawableRenderer(ActorEntityRenderer)
                 entity += DrawableOrder()
                 entity += DrawableTint()
                 entity += DrawableVisibility()
@@ -86,7 +86,7 @@ class SimplePhysicsTest(private val fleksWorld: FleksWorld) : DebugController {
                 entity += PhysTransformMapperTag.PHYS_TO_TRANSFORM
 
                 entity += ActorContainer(Image(textureCircleGreen))
-                entity += DrawableRendererContainer(ActorRenderer)
+                entity += DrawableRenderer(ActorEntityRenderer)
                 entity += DrawableOrder()
                 entity += DrawableTint()
                 entity += DrawableVisibility()
@@ -117,7 +117,7 @@ class SimplePhysicsTest(private val fleksWorld: FleksWorld) : DebugController {
                 entity += PhysTransformMapperTag.TRANSFORM_TO_PHYS
 
                 entity += ActorContainer(Image(textureCircleBlue))
-                entity += DrawableRendererContainer(ActorRenderer)
+                entity += DrawableRenderer(ActorEntityRenderer)
                 entity += DrawableOrder()
                 entity += DrawableTint()
                 entity += DrawableVisibility()

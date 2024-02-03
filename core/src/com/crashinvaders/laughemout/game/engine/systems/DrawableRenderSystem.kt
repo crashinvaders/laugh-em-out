@@ -3,15 +3,14 @@ package com.crashinvaders.laughemout.game.engine.systems
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch
 import com.crashinvaders.laughemout.game.engine.components.render.DrawableOrder
-import com.crashinvaders.laughemout.game.engine.components.render.DrawableRendererContainer
-import com.crashinvaders.laughemout.game.engine.components.render.DrawableVisibility
+import com.crashinvaders.laughemout.game.engine.components.render.DrawableRenderer
 import com.github.quillraven.fleks.*
 import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.World.Companion.inject
 import com.github.quillraven.fleks.collection.compareEntityBy
 
 class DrawableRenderSystem : IteratingSystem(
-    family { all(DrawableRendererContainer, DrawableOrder) },
+    family { all(DrawableRenderer, DrawableOrder) },
     comparator = compareEntityBy(DrawableOrder),
     sortingType = Manual
 ),
@@ -34,7 +33,7 @@ class DrawableRenderSystem : IteratingSystem(
     override fun onAddEntity(entity: Entity) {
         doSort = true
 
-        val renderer = entity[DrawableRendererContainer].renderer
+        val renderer = entity[DrawableRenderer].renderer
         with(renderer) {
             world.validate(entity)
         }
@@ -71,7 +70,7 @@ class DrawableRenderSystem : IteratingSystem(
 //            return
 //        }
 
-        val renderer = entity[DrawableRendererContainer].renderer
+        val renderer = entity[DrawableRenderer].renderer
         with(renderer) {
             world.render(entity, batch)
         }

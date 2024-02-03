@@ -77,7 +77,7 @@ object EnvironmentHelper {
 
             val drawable = TextureRegionDrawable(atlasEnv.findRegion("stage0"))
             it += GdxDrawableContainer(drawable)
-            it += DrawableRendererContainer(GdxDrawableRenderer)
+            it += DrawableRenderer(GdxDrawableEntityRenderer)
             it += DrawableOrder(GameDrawOrder.ENVIRONMENT_BACK)
             it += DrawableTint()
             it += DrawableVisibility()
@@ -94,7 +94,7 @@ object EnvironmentHelper {
 
             val drawable = TextureRegionDrawable(atlasEnv.findRegion("title-leo0"))
             it += GdxDrawableContainer(drawable)
-            it += DrawableRendererContainer(GdxDrawableRenderer)
+            it += DrawableRenderer(GdxDrawableEntityRenderer)
             it += DrawableOrder(GameDrawOrder.ENVIRONMENT_BACK - 5)
             it += DrawableTint()
             it += DrawableVisibility()
@@ -111,7 +111,7 @@ object EnvironmentHelper {
 
             val drawable = TextureRegionDrawable(atlasEnv.findRegion("ground0"))
             it += GdxDrawableContainer(drawable)
-            it += DrawableRendererContainer(GdxDrawableRenderer)
+            it += DrawableRenderer(GdxDrawableEntityRenderer)
             it += DrawableOrder(GameDrawOrder.ENVIRONMENT_BACK - 10)
             it += DrawableTint()
             it += DrawableVisibility()

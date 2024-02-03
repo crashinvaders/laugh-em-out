@@ -49,7 +49,7 @@ class EntityActionSystemTest(private val fleksWorld: FleksWorld) : KtxInputAdapt
                 }
 
                 entity += ActorContainer(Image(textureDosTest0))
-                entity += DrawableRendererContainer(ActorRenderer)
+                entity += DrawableRenderer(ActorEntityRenderer)
                 entity += DrawableOrder()
                 entity += DrawableTint()
                 entity += DrawableVisibility()

@@ -35,7 +35,6 @@ object GameOverHelper {
 
         val skeleton = Skeleton(skelData)
         val animState = AnimationState(AnimationStateData(skelData))
-        val skelActor = SkeletonActor(skelRenderer, skeleton, animState)
 
         animState.setAnimation(0, "animation", false)
 
@@ -48,8 +47,7 @@ object GameOverHelper {
 
             it += SkeletonContainer(skeleton, animState)
 
-            it += ActorContainer(skelActor)
-            it += DrawableRendererContainer(ActorRenderer)
+            it += DrawableRenderer(SkeletonEntityRenderer(skelRenderer))
             it += DrawableOrder(order = GameDrawOrder.UI_GAME_OVER_MAIN)
             it += DrawableTint()
             it += DrawableVisibility()
@@ -69,7 +67,7 @@ object GameOverHelper {
                 pack()
             }
             it += ActorContainer(actor)
-            it += DrawableRendererContainer(ActorRenderer)
+            it += DrawableRenderer(ActorEntityRenderer)
             it += DrawableOrder(GameDrawOrder.UI_GAME_OVER_SCORE)
             it += DrawableTint()
             it += DrawableVisibility()
