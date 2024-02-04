@@ -2,6 +2,7 @@ package com.crashinvaders.laughemout
 
 import com.badlogic.gdx.*
 import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.assets.loaders.BitmapFontLoader
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.utils.GdxRuntimeException
@@ -111,7 +112,9 @@ class App(val params: Params) : KtxGame<KtxScreen>() {
     }
 
     private fun loadAssets(assets: AssetManager) {
-        assets.load<BitmapFont>("fonts/pixola-cursiva.fnt")
+        assets.load<BitmapFont>("fonts/pixola-cursiva.fnt", BitmapFontLoader.BitmapFontParameter().apply {
+            atlasName = "atlases/ui.atlas"
+        })
 
         assets.load<TextureAtlas>("atlases/ui.atlas")
         assets.load<TextureAtlas>("atlases/env.atlas")

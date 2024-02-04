@@ -213,4 +213,22 @@ object JokeGameDataHelper {
         "Comic relief!",
         "Joke of the day!",
     )
+
+    val audienceReactionsEmojiPositive = gdxArrayOf(
+        SpeechBubbleHelper.Emoji.Laugh,
+        SpeechBubbleHelper.Emoji.Smile,
+        SpeechBubbleHelper.Emoji.Rofl,
+    )
+
+    val audienceReactionsEmojiNegative = gdxArrayOf(
+        SpeechBubbleHelper.Emoji.Angry,
+        SpeechBubbleHelper.Emoji.Scared,
+        SpeechBubbleHelper.Emoji.Disappointment,
+        SpeechBubbleHelper.Emoji.Dislike,
+    )
+
+    val audienceReactionsEmojiNeutral = gdxArrayOf(
+        SpeechBubbleHelper.Emoji.Surprise,
+        SpeechBubbleHelper.Emoji.Neutral,
+    )
 }

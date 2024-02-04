@@ -110,6 +110,7 @@ class JokeGameManager : IntervalSystem(),
                         waitLeaf(2f)
 
                         entityAction(world, bBoard.eComedian) { createAffectAudienceAction(it) }
+                        entityAction(world, bBoard.eComedian) { createAudienceJokeReactionAction(it) }
 
                         runnable { bBoard ->
                             // Activate score label for the first time.
@@ -256,21 +257,115 @@ class JokeGameManager : IntervalSystem(),
                             delay(1f)
                         }
                     }
+                }
+            }
+        }
 
-                    // Show message reaction for the last affected audience member.
-                    if (index == affections.size - 1) {
-                        runnable {
-                            val (x, y) = AudienceMemberHelper.getOverheadPos(world, audMemb.entity)
-                            val message = when {
-                                affection.affectionSum > 0 -> "[#544470]" + JokeGameDataHelper.audienceReactionsPositive.random()
-                                affection.affectionSum < 0 -> "[#733547]" + JokeGameDataHelper.audienceReactionsNegative.random()
+        private fun ParentAction.createAudienceJokeReactionAction(bBoard: BTreeBlackBoard) {
+            val world = bBoard.world
+            val affections = bBoard.jokeAffections.values().toGdxArray()
+
+            if (affections.size == 0) {
+                return
+            }
+
+            // Canceled case (game over).
+            affections.firstOrNull { it.audMemb.emoLevel == -3 }.let { affection ->
+                if (affection == null) {
+                    return@let
+                }
+                sequence {
+                    runnable {
+                        val (x, y) = AudienceMemberHelper.getOverheadPos(world, affection.audMemb.entity)
+                        SpeechBubbleHelper.createBubble(
+                            world,
+                            "{SHAKE}[#733547]" + JokeGameDataHelper.audienceReactionsNegative.random(), //TODO We need a very specific reaction here.
+                            x,
+                            y + 10f * UPP,
+                            duration = 3f,
+                            affection = SpeechBubbleHelper.Affection.Negative
+                        )
+                    }
+                    delay(1f)
+                }
+                return
+            }
+
+            // Laughed out case.
+            affections.firstOrNull { it.audMemb.emoLevel == +3 }.let { affection ->
+                if (affection == null) {
+                    return@let
+                }
+                sequence {
+                    runnable {
+                        val (x, y) = AudienceMemberHelper.getOverheadPos(world, affection.audMemb.entity)
+                        SpeechBubbleHelper.createBubble(
+                            world,
+                            "{RAINBOW}[#544470]" + JokeGameDataHelper.audienceReactionsPositive.random(), //TODO We need a very specific reaction here.
+                            x,
+                            y + 10f * UPP,
+                            duration = 3f,
+                            affection = SpeechBubbleHelper.Affection.Positive
+                        )
+                    }
+                    delay(1f)
+                }
+                return
+            }
+
+            // Show message reaction for the random affected audience member.
+            affections.random().let { affection ->
+                sequence {
+                    runnable {
+                        if (MathUtils.randomBoolean(0.75f)) {
+                            // Create text reaction.
+                            val (x, y) = AudienceMemberHelper.getOverheadPos(world, affection.audMemb.entity)
+                            val affectionSum = affection.affectionSum
+                            val message: String = when {
+                                affectionSum > 0 -> "[#544470]" + JokeGameDataHelper.audienceReactionsPositive.random()
+                                affectionSum < 0 -> "[#733547]" + JokeGameDataHelper.audienceReactionsNegative.random()
                                 else -> JokeGameDataHelper.audienceReactionsNeutral.random()
                             }
-                            SpeechBubbleHelper.createBubble(world, message, x, y + 10f * UPP, 3f)
+                            val bubbleAffection: SpeechBubbleHelper.Affection = when {
+                                affectionSum > 0 -> SpeechBubbleHelper.Affection.Positive
+                                affectionSum < 0 -> SpeechBubbleHelper.Affection.Negative
+                                else -> SpeechBubbleHelper.Affection.Neutral
+                            }
+                            SpeechBubbleHelper.createBubble(
+                                world,
+                                message,
+                                x,
+                                y + 10f * UPP,
+                                duration = 3f,
+                                affection = bubbleAffection
+                            )
+                        } else {
+                            // Create emoji-only reaction.
+                            val (x, y) = AudienceMemberHelper.getOverheadPos(world, affection.audMemb.entity)
+                            val affectionSum = affection.affectionSum
+                            val emoji: SpeechBubbleHelper.Emoji = when {
+                                affectionSum > 0 -> JokeGameDataHelper.audienceReactionsEmojiPositive.random()
+                                affectionSum < 0 -> JokeGameDataHelper.audienceReactionsEmojiNegative.random()
+                                else -> JokeGameDataHelper.audienceReactionsEmojiNeutral.random()
+                            }
+                            val bubbleAffection: SpeechBubbleHelper.Affection = when {
+                                affectionSum > 0 -> SpeechBubbleHelper.Affection.Positive
+                                affectionSum < 0 -> SpeechBubbleHelper.Affection.Negative
+                                else -> SpeechBubbleHelper.Affection.Neutral
+                            }
+                            SpeechBubbleHelper.createEmojiBubble(
+                                world,
+                                emoji,
+                                x,
+                                y + 10f * UPP,
+                                duration = 2f,
+                                affection = bubbleAffection
+                            )
                         }
-                        delay(1.0f)
                     }
+                    delay(1.0f)
                 }
+                return
             }
         }
 
