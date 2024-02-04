@@ -69,8 +69,8 @@ object JokeGameDataHelper {
         JokeSubjectData("MASKED\nPEOPLE", mouth = AudienceMemberHelper.Mouth.FaceMask0),
         JokeSubjectData("BEARDED\nPEOPLE", hasFacialHair = true),
 
-        JokeSubjectData("PEOPLE\nWITH\nGLASSES", isWearingGlasses = true),
-        JokeSubjectData("PEOPLE\nWITH\nSUNGLASSES", isWearingShades = true),
+        JokeSubjectData("PEOPLE IN\nGLASSES", isWearingGlasses = true),
+        JokeSubjectData("PEOPLE IN\nSUNGLASSES", isWearingShades = true),
         JokeSubjectData("FANCY\nPEOPLE", isFancyLooking = true),
     )
 

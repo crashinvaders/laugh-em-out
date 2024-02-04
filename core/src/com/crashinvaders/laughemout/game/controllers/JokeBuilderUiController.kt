@@ -241,45 +241,47 @@ class JokeBuilderUiController : IteratingSystem(family { all(
         return true
     }
 
-    private fun FleksWorld.moveCardToRoster(card: Entity) {
-        val cJokeSubjectCard = card[JokeSubjectCard]
+    private fun FleksWorld.moveCardToRoster(eCard: Entity) {
+        val cJokeSubjectCard = eCard[JokeSubjectCard]
         cJokeSubjectCard.currentJokeSubjPlaceholder?.attachedCard = null
 
         subjCardRosterPlacementFamily.sort(rosterPlacementComparator)
-        val placement = subjCardRosterPlacementFamily.firstOrNull {
+        val ePlacement = subjCardRosterPlacementFamily.firstOrNull {
             val placement = it[JokeSubjectCardRosterPlacement]
             placement.attachedCard == cJokeSubjectCard || placement.attachedCard == null
         }
-        if (placement == null) {
+        if (ePlacement == null) {
             gdxError("No free placement available.")
         }
-        placement[JokeSubjectCardRosterPlacement].attachedCard = cJokeSubjectCard
+        ePlacement[JokeSubjectCardRosterPlacement].attachedCard = cJokeSubjectCard
 
-        card[DrawableOrder].order = DRAW_ORDER_CARD_REGULAR
+        eCard[DrawableOrder].order = DRAW_ORDER_CARD_REGULAR
 
-        val transform = card[Transform]
-        transform.parent = placement[Transform]
-        transform.localPositionX = 0f
-        transform.localPositionY = 0f
-    }
-
-    private fun FleksWorld.moveCardToSubjPlaceholder(card: Entity, placeholder: Entity) {
-        val cJokeSubjectCard = card[JokeSubjectCard]
-        cJokeSubjectCard.currentJokeSubjPlaceholder?.attachedCard = null
-
-        val cPlaceholder = placeholder[JokeSubjectCardPlaceholder]
-        if (cPlaceholder.attachedCard != null) {
-            val oldCard = cPlaceholder.attachedCard!!.entity
-            moveCardToRoster(oldCard)
-        }
-
-        card[DrawableOrder].order = DRAW_ORDER_CARD_REGULAR
-
-        cPlaceholder.attachedCard = cJokeSubjectCard
-        val cTransform = card[Transform]
-        cTransform.parent = placeholder[Transform]
+        val cTransform = eCard[Transform]
+        cTransform.parent = ePlacement[Transform]
         cTransform.localPositionX = 0f
         cTransform.localPositionY = 0f
+    }
+
+    private fun FleksWorld.moveCardToSubjPlaceholder(eCard: Entity, ePlaceholder: Entity) {
+        val cJokeSubjectCard = eCard[JokeSubjectCard]
+        cJokeSubjectCard.currentJokeSubjPlaceholder?.attachedCard = null
+
+        val cPlaceholder = ePlaceholder[JokeSubjectCardPlaceholder]
+        if (cPlaceholder.attachedCard != null) {
+            val eOldCard = cPlaceholder.attachedCard!!.entity
+            moveCardToRoster(eOldCard)
+        }
+
+        eCard[DrawableOrder].order = DRAW_ORDER_CARD_REGULAR
+
+        cPlaceholder.attachedCard = cJokeSubjectCard
+        val cTransform = eCard[Transform]
+        cTransform.parent = ePlaceholder[Transform]
+        cTransform.localPositionX = 0f
+        cTransform.localPositionY = 0f
+
+        eCard[SodInterpolation].addAccel(0f, 0f, 0f, 50f, 50f)
     }
 
     private fun FleksWorld.handleJokeCardPlacementChange() {
@@ -497,6 +499,7 @@ class JokeBuilderUiController : IteratingSystem(family { all(
 
                     val actor = run {
                         val label = TextraLabel("[SHAKE][#ffedd4]${subjectData.text}", font)
+                        label.alignment = Align.center
 
                         val container = Container(label)
                         container.background = TextureRegionDrawable(atlas.findRegion("joke-subj-frame"))
