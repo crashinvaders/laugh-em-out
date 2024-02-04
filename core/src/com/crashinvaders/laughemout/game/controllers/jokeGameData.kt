@@ -34,6 +34,7 @@ data class JokeSubjectData(
     val isBald: Boolean = false,
     val isSmiling: Boolean = false,
     val isFrowning: Boolean = false,
+    val hasFacialHair: Boolean = false,
 )
 
 data class JokeConnectorData(
@@ -65,11 +66,11 @@ object JokeGameDataHelper {
 
         JokeSubjectData("PEOPLE\nIN HATS", isWearingHat = true),
 
-        JokeSubjectData("BEARDY\nPEOPLE", mouth = AudienceMemberHelper.Mouth.Beard0),
         JokeSubjectData("MASKED\nPEOPLE", mouth = AudienceMemberHelper.Mouth.FaceMask0),
+        JokeSubjectData("BEARDED\nPEOPLE", hasFacialHair = true),
 
         JokeSubjectData("PEOPLE\nWITH\nGLASSES", isWearingGlasses = true),
-        JokeSubjectData("PEOPLE\nWITH\nSHADES", isWearingShades = true),
+        JokeSubjectData("PEOPLE\nWITH\nSUNGLASSES", isWearingShades = true),
         JokeSubjectData("FANCY\nPEOPLE", isFancyLooking = true),
     )
 

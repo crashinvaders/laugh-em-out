@@ -338,7 +338,8 @@ class JokeGameManager : IntervalSystem(),
                     (jokeSubject.isWearingGlasses && audMemb.isWearingGlasses()) ||
                     (jokeSubject.isBald && audMemb.isBald()) ||
                     (jokeSubject.isSmiling && audMemb.emoLevel >= 1) ||
-                    (jokeSubject.isFrowning && audMemb.emoLevel <= -1)
+                    (jokeSubject.isFrowning && audMemb.emoLevel <= -1) ||
+                    (jokeSubject.hasFacialHair && audMemb.mouth != null && audMemb.mouth.isFacialHair)
         }
 
         fun changeAudMemberEmoLevel(world: FleksWorld, audMemb: AudienceMember, emoLevelDelta: Int) {

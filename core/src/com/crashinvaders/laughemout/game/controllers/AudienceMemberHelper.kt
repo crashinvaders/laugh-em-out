@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.MathUtils
+import com.badlogic.gdx.math.MathUtils.random
 import com.badlogic.gdx.math.MathUtils.randomBoolean
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Align
@@ -118,7 +119,11 @@ object AudienceMemberHelper {
         val bodyStyle: BodyStyle = BodyStyle.values().filter { it.gender == gender }.random()
         val glasses: Glasses? = if (randomBoolean(0.8f)) null else Glasses.values().random()
         val neck: Neck? = if (randomBoolean(0.8f)) null else Neck.values().random()
-        val mouth: Mouth? = if (randomBoolean(0.9f)) null else Mouth.values().filter { it.targetGender == null || it.targetGender == gender }.random()
+        val mouth: Mouth? = when {
+            randomBoolean(0.1f) -> Mouth.FaceMask0
+            gender == Gender.Male && randomBoolean(0.35f) -> Mouth.values().filter { it.targetGender == gender }.random()
+            else -> null
+        }
 
         return AudienceMember(placementIndex, race, gender, hairStyle, hairColor, heightLevel, bodyStyle, glasses, hat, neck, mouth)
     }
@@ -137,9 +142,9 @@ object AudienceMemberHelper {
             skeleton.setAttachment("char-hat", if (cAudMemb.hat == null) null else "${cAudMemb.hat.imgName}")
             skeleton.setAttachment("char-glasses", if (cAudMemb.glasses == null) null else "${cAudMemb.glasses.imgName}")
             skeleton.setAttachment("char-neck", if (cAudMemb.neck == null) null else "${cAudMemb.neck.imgName}")
-            skeleton.setAttachment("char-mouth", if (cAudMemb.mouth == null) null else when(cAudMemb.mouth) {
-                Mouth.Beard0 -> "${cAudMemb.mouth.imgName}${cAudMemb.hairColor.imgSuffix}"
-                else -> "${cAudMemb.mouth.imgName}"
+            skeleton.setAttachment("char-mouth", if (cAudMemb.mouth == null) null else when {
+                cAudMemb.mouth.isFacialHair -> "${cAudMemb.mouth.imgName}${cAudMemb.hairColor.imgSuffix}"
+                else -> cAudMemb.mouth.imgName
             })
 
             val animState = cSkelContainer.animState
@@ -261,9 +266,11 @@ object AudienceMemberHelper {
         Dredd1("glasses-dredd1", isShades = true),
         Goggles0("glasses-goggles0"),
         Goggles1("glasses-goggles1"),
+        Wayfarer0("glasses-wfr0"),
         Shades0("glasses-shades0", isShades = true),
         Shades1("glasses-shades1", isShades = true),
         Shades2("glasses-shades2", isShades = true),
+        SportRed0("glasses-sport-red0", isShades = true),
     }
 
     enum class Hat(val imgName: String, val isFancy: Boolean = false) {
@@ -282,9 +289,17 @@ object AudienceMemberHelper {
         Scarf0("neck-scarf0"),
     }
 
-    enum class Mouth(val imgName: String, val hideEmotions: Boolean = false, val isFancy: Boolean = false, val targetGender: Gender? = null) {
-        Beard0("face-beard0", hideEmotions = true, targetGender = Gender.Male),
+    enum class Mouth(val imgName: String, val hideEmotions: Boolean = false,
+                     val isFancy: Boolean = false, val isFacialHair: Boolean = false, val targetGender: Gender? = null) {
         FaceMask0("face-mask0", hideEmotions = true),
+
+        GrandMustache0("face-grand-mustache0", hideEmotions = true, targetGender = Gender.Male, isFacialHair = true),
+        BeardJack0("face-beard-jack0", hideEmotions = true, targetGender = Gender.Male, isFacialHair = true),
+
+        BeardChinCurtain0("face-beard-chin-curtain0", targetGender = Gender.Male, isFacialHair = true),
+        BeardDoubleChin0("face-beard-doublechin0", targetGender = Gender.Male, isFacialHair = true),
+        BeardGoat0("face-beard-goat0", targetGender = Gender.Male, isFacialHair = true),
+        BeardSides0("face-beard-sides0", targetGender = Gender.Male, isFacialHair = true),
     }
 
     enum class Race(val imgSuffix: String) {
@@ -299,7 +314,7 @@ object AudienceMemberHelper {
     }
 
     enum class HairStyle(val imgName: String, val targetGender: Gender? = null) {
-        Hair0("hair0"),
+        Hair0("hair0", targetGender = Gender.Male),
         Hair1("hair1"),
         Hair2("hair2", targetGender = Gender.Female),
         Hair3("hair3", targetGender = Gender.Male),
@@ -307,6 +322,7 @@ object AudienceMemberHelper {
         Hair5("hair5", targetGender = Gender.Female),
         Hair6("hair6"),
         Hair7("hair7", targetGender = Gender.Female),
+        Hair8("hair8", targetGender = Gender.Female),
     }
 
     enum class HairColor(val imgSuffix: String) {
