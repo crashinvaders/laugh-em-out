@@ -145,7 +145,7 @@ class DebugInputProcessor(private val fleksWorld: FleksWorld) : KtxInputAdapter,
 //                App.Inst.gameMusic.stopMusic()
 //            }
 
-            Keys.A -> {
+            Keys.N -> {
                 val (x, y) = mouseWorldPos()
                 SpeechBubbleHelper.createBubble(fleksWorld, "Pew pew\nshakalaka\npew pew meow", x, y, 2.0f)
                 return true

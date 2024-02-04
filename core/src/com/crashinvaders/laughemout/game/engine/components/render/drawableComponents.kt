@@ -40,8 +40,11 @@ class DrawableOrder(
 }
 
 class DrawableTint(
-    val color: Color = Color(1f, 1f, 1f, 1f)
+    color: Color = Color.WHITE
 ) : Component<DrawableTint> {
+
+    val color = Color(color)
+
     override fun type() = DrawableTint
     companion object : ComponentType<DrawableTint>()
 }

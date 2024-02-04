@@ -37,6 +37,8 @@ object GameDrawOrder {
 
     const val UI_GAME_OVER_MAIN = 5000
     const val UI_GAME_OVER_SCORE = 5005
+
+    const val SCREEN_FADE = 10000
 }
 
 object CameraProcessorOrder {

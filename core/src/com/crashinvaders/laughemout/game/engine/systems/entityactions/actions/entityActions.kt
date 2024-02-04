@@ -220,6 +220,22 @@ fun ParentAction.tintTo(
     duration: Float = 0f,
     interpolation: Interpolation = Interpolation.linear,
 ) {
+    tintTo(color.toIntBits(), duration, interpolation)
+}
+
+fun ParentAction.tintTo(
+    color: UInt,
+    duration: Float = 0f,
+    interpolation: Interpolation = Interpolation.linear,
+) {
+    tintTo(color.toInt(), duration, interpolation)
+}
+
+fun ParentAction.tintTo(
+    color: Int,
+    duration: Float = 0f,
+    interpolation: Interpolation = Interpolation.linear,
+) {
     val action = action<TintToAction>()
     action.end.set(color)
     action.duration = duration

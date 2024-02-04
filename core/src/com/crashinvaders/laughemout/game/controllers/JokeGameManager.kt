@@ -4,13 +4,17 @@ import com.badlogic.gdx.ai.btree.BehaviorTree
 import com.badlogic.gdx.ai.btree.LeafTask
 import com.badlogic.gdx.ai.btree.Task
 import com.badlogic.gdx.ai.btree.branch.Parallel
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.MathUtils
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.*
 import com.crashinvaders.laughemout.App
 import com.crashinvaders.laughemout.game.CameraProcessorOrder
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
+import com.crashinvaders.laughemout.game.common.DrawableUtils.fromDrawablePixels
 import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
 import com.crashinvaders.laughemout.game.common.camera.Sod3CameraProcessor
 import com.crashinvaders.laughemout.game.components.AudienceMember
@@ -18,11 +22,10 @@ import com.crashinvaders.laughemout.game.engine.components.*
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
 import com.crashinvaders.laughemout.game.engine.systems.OnWorldInitializedHandler
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem.Companion.actions
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.ParentAction
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.delay
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.*
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.extensions.entityAction
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.runnable
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.sequence
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IntervalSystem
 import com.github.tommyettinger.textra.Font
@@ -50,6 +53,8 @@ class JokeGameManager : IntervalSystem(),
 
     override fun onWorldInitialized() {
         super.onInit()
+
+        ScreenFadeHelper.createFadeInEffect(world, 0.5f)
 
         EnvironmentHelper.createObjects(world)
         bBoard.eScoreLabel = createScoreLabel(world)
@@ -164,6 +169,7 @@ class JokeGameManager : IntervalSystem(),
     }
 
     companion object {
+
         private fun showAndAwaitJokeBuilder(bBoard: BTreeBlackBoard, callback: () -> Unit) {
             val subjectCount = 3
             val subjects: GdxArray<JokeSubjectData>
