@@ -83,7 +83,7 @@ class JokeGameManager : IntervalSystem(),
                         waitLeaf(1f)
 
                         entityAction(world, bBoard.eComedian) { createSpawnAudienceAction(it) }
-
+                        entityAction(world, bBoard.eComedian) { createFirstJokeAnnouncementAction(it) }
                         waitLeaf(1f)
 
                         parallelPatched(Parallel.Policy.Selector, Parallel.Orchestrator.Join) {
@@ -101,7 +101,7 @@ class JokeGameManager : IntervalSystem(),
                             SpeechBubbleHelper.createBubble(
                                 world, "...",
                                 bBoard.eComedian[Transform].worldPositionX,
-                                bBoard.eComedian[Transform].worldPositionY + 56f * UPP,
+                                bBoard.eComedian[Transform].worldPositionY + 44f * UPP,
                                 2f)
 
                             evalJokeAffections(world, bBoard)
@@ -227,6 +227,25 @@ class JokeGameManager : IntervalSystem(),
                     delay(0.5f)
                 }
             }
+        }
+
+        private fun ParentAction.createFirstJokeAnnouncementAction(bBoard: SessionBlackBoard) {
+            if (bBoard.jokeCount != 0) {
+                return
+            }
+
+            val world = bBoard.world
+            with(world) {
+                val message = "Here goes the\nfirst joke..."
+                SpeechBubbleHelper.createBubble(
+                    world,
+                    message,
+                    bBoard.eComedian[Transform].worldPositionX,
+                    bBoard.eComedian[Transform].worldPositionY + 44f * UPP,
+                    3f
+                )
+            }
+            delay(1f)
         }
 
         @Suppress("GDXKotlinUnsafeIterator")

@@ -12,9 +12,12 @@ object TeaVMBuilder {
     @JvmStatic fun main(arguments: Array<String>) {
         val teaBuildConfiguration = TeaBuildConfiguration().apply {
             assetsPath.add(File("../assets"))
+            assetsPath.add(File("resources"))
             webappPath = File("build/dist").canonicalPath
             // Register any extra classpath assets here:
             // additionalAssetsClasspathFiles += "com/crashinvaders/laughemout/asset.extension"
+
+            logoPath = "leo-logo.png"
         }
 
         // Register any classes or packages that require reflection here:
