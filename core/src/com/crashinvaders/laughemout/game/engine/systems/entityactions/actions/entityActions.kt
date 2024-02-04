@@ -1,9 +1,11 @@
 package com.crashinvaders.laughemout.game.engine.systems.entityactions.actions
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.Pool
 import com.badlogic.gdx.utils.Pools
 import com.crashinvaders.laughemout.game.engine.TimeMode
+import com.crashinvaders.laughemout.game.engine.components.SodInterpolation
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.Action
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.ParentAction
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.transform.*
@@ -19,11 +21,16 @@ inline fun <reified T : Action> action(): T {
     action.pool = pool as Pool<Any>
     return action
 }
-//fun <T : Action> action(type: KClass<out T>): T {
-//    val pool = Pools.get(type.java)
-//    val action = pool.obtain()
-//    action.pool = pool as Pool<Any>
-//    return action
+
+//@OptIn(ExperimentalContracts::class)
+//inline fun Entity.actions(
+//    world: FleksWorld,
+//    init: ParentAction.() -> Unit = {},
+//) {
+//    contract { callsInPlace(init, InvocationKind.EXACTLY_ONCE) }
+//    world.system<EntityActionSystem>().actions(this) {
+//        init()
+//    }
 //}
 
 @OptIn(ExperimentalContracts::class)
@@ -33,7 +40,7 @@ inline fun ParentAction.sequence(
     contract { callsInPlace(init, InvocationKind.EXACTLY_ONCE) }
     val action = action<SequenceAction>()
     action.init()
-    return addAction(action)
+    addAction(action)
 }
 
 @OptIn(ExperimentalContracts::class)
@@ -43,7 +50,7 @@ inline fun ParentAction.parallel(
     contract { callsInPlace(init, InvocationKind.EXACTLY_ONCE) }
     val action = action<ParallelAction>()
     action.init()
-    return addAction(action)
+    addAction(action)
 }
 
 @OptIn(ExperimentalContracts::class)
@@ -55,13 +62,13 @@ inline fun ParentAction.repeat(
     val action = action<RepeatAction>()
     action.repeatTimes = repeatTimes
     action.init()
-    return addAction(action)
+    addAction(action)
 }
 
 fun ParentAction.delay(duration: Float) {
     val action = action<DelayAction>()
     action.duration = duration
-    return addAction(action)
+    addAction(action)
 }
 
 @OptIn(ExperimentalContracts::class)
@@ -73,13 +80,13 @@ inline fun ParentAction.delay(
     val action = action<DelayDelegateAction>()
     action.duration = duration
     action.init()
-    return addAction(action)
+    addAction(action)
 }
 
 fun ParentAction.runnable(runnable: (action: RunnableAction) -> Unit) {
     val action = action<RunnableAction>()
     action.runnable = runnable
-    return addAction(action)
+    addAction(action)
 }
 
 fun ParentAction.interpolate(
@@ -91,7 +98,7 @@ fun ParentAction.interpolate(
     action.duration = duration
     action.interpolation = interpolation
     action.func = func
-    return addAction(action)
+    addAction(action)
 }
 
 fun ParentAction.moveTo(
@@ -107,7 +114,7 @@ fun ParentAction.moveTo(
     action.duration = duration
     action.interpolation = interpolation
     action.space = space
-    return addAction(action)
+    addAction(action)
 }
 
 fun ParentAction.moveBy(
@@ -123,7 +130,7 @@ fun ParentAction.moveBy(
     action.duration = duration
     action.interpolation = interpolation
     action.space = space
-    return addAction(action)
+    addAction(action)
 }
 
 fun ParentAction.scaleTo(
@@ -139,7 +146,7 @@ fun ParentAction.scaleTo(
     action.duration = duration
     action.interpolation = interpolation
     action.space = space
-    return addAction(action)
+    addAction(action)
 }
 
 fun ParentAction.scaleBy(
@@ -155,7 +162,7 @@ fun ParentAction.scaleBy(
     action.duration = duration
     action.interpolation = interpolation
     action.space = space
-    return addAction(action)
+    addAction(action)
 }
 
 fun ParentAction.rotateTo(
@@ -169,7 +176,7 @@ fun ParentAction.rotateTo(
     action.duration = duration
     action.interpolation = interpolation
     action.space = space
-    return addAction(action)
+    addAction(action)
 }
 
 fun ParentAction.rotateBy(
@@ -183,7 +190,7 @@ fun ParentAction.rotateBy(
     action.duration = duration
     action.interpolation = interpolation
     action.space = space
-    return addAction(action)
+    addAction(action)
 }
 
 fun ParentAction.removeEntity() =
@@ -202,4 +209,42 @@ fun ParentAction.runDelayedInd(
         (this as Action).timeMode = TimeMode.UnscaledTime
         runnable(runnable)
     }
+}
+
+fun ParentAction.sodAccel(x: Float, y: Float, rotation: Float, scaleX: Float, scaleY: Float) {
+    runnable { with(it.world) { it.entity[SodInterpolation].setAccel(x, y, rotation, scaleX, scaleY) } }
+}
+
+fun ParentAction.tintTo(
+    color: Color,
+    duration: Float = 0f,
+    interpolation: Interpolation = Interpolation.linear,
+) {
+    val action = action<TintToAction>()
+    action.end.set(color)
+    action.duration = duration
+    action.interpolation = interpolation
+    addAction(action)
+}
+
+fun ParentAction.tintFadeIn(
+    duration: Float = 0f,
+    interpolation: Interpolation = Interpolation.linear,
+) {
+    val action = action<TintToAction>()
+    action.end.set(1f, 1f, 1f, 1f)
+    action.duration = duration
+    action.interpolation = interpolation
+    addAction(action)
+}
+
+fun ParentAction.tintFadeOut(
+    duration: Float = 0f,
+    interpolation: Interpolation = Interpolation.linear,
+) {
+    val action = action<TintToAction>()
+    action.end.set(1f, 1f, 1f, 0f)
+    action.duration = duration
+    action.interpolation = interpolation
+    addAction(action)
 }

@@ -34,7 +34,7 @@ class MainCameraStateSystem(
 
     lateinit var cameraEntity: Entity; private set
     lateinit var cameraComp: WorldCamera; private set
-    private lateinit var cameraTransform: Transform
+    lateinit var cameraTransform: Transform; private set
 
     private var lastOverridingControllerIndex: Int = 0
 

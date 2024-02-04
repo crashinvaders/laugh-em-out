@@ -163,4 +163,15 @@ class EntityActionSystem : IntervalSystem() {
         }
         parentAction.init()
     }
+
+    companion object {
+        @OptIn(ExperimentalContracts::class)
+        inline fun World.actions(
+            entity: Entity? = null,
+            init: ParentAction.() -> Unit = {},
+        ) {
+            contract { callsInPlace(init, InvocationKind.EXACTLY_ONCE) }
+            this.system<EntityActionSystem>().actions(entity, init)
+        }
+    }
 }

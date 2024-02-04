@@ -16,7 +16,8 @@ object GdxDrawableEntityRenderer : EntityRenderer {
         GdxDrawableContainer,
         DrawableVisibility,
         DrawableOrigin,
-        DrawableDimensions)
+        DrawableDimensions,
+        DrawableTint)
 
     override fun FleksWorld.validate(entity: Entity) {
         checkRequiredComponents(entity, requiredComponents)
@@ -46,6 +47,8 @@ object GdxDrawableEntityRenderer : EntityRenderer {
         val originY = origin.y * height
 
         val drawable = entity[GdxDrawableContainer].drawable
+
+        batch.color = entity[DrawableTint].color
 
         drawable.draw(batch, posX + shiftX, posY + shiftY, originX, originY, width, height, scaleX, scaleY, rotation)
     }

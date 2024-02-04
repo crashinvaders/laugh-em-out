@@ -10,7 +10,6 @@ import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.esotericsoftware.spine.*
-import com.esotericsoftware.spine.utils.SkeletonActor
 import com.github.quillraven.fleks.Entity
 import com.crashinvaders.common.CommonUtils.random
 import com.crashinvaders.laughemout.game.GameDrawOrder
@@ -36,7 +35,7 @@ object AudienceMemberHelper {
 
     fun create(world: FleksWorld, x: Float, y: Float, placementIndex: Int): Entity {
         val assets = world.inject<AssetManager>()
-        val atlasCharacters = assets.get<TextureAtlas>("skeletons/characters.atlas")
+        val atlasCharacters = world.inject<TextureAtlas>("characters")
 
         val skelData = SkeletonBinary(atlasCharacters)
             .apply { scale = UPP }
@@ -215,16 +214,21 @@ object AudienceMemberHelper {
         }
     }
 
-    fun updateFaceEmotion(world: FleksWorld, entity: Entity) {
+    fun updateFaceEmotion(world: FleksWorld, eAudMemb: Entity) {
         with(world) {
-            val cAudMemb = entity[AudienceMember]
-            val cSkelContainer = entity[SkeletonContainer]
+            val cAudMemb = eAudMemb[AudienceMember]
+            val cSkelContainer = eAudMemb[SkeletonContainer]
 
             val emoType = evalEmotionLevelType(cAudMemb.emoLevel)
             val skeleton = cSkelContainer.skeleton
             skeleton.setAttachment("char-head", "char-head${cAudMemb.race.imgSuffix}${emoType.imgSuffix}")
         }
     }
+
+    fun getOverheadPos(world: FleksWorld, eAudMemb: Entity): Vector2 =
+        with(world) {
+            return eAudMemb[SkeletonContainer].getBonePosition("overhead-anchor")
+        }
 
     enum class EmotionLevel(val imgSuffix: String) {
         Angry("-s0"),
@@ -249,6 +253,7 @@ object AudienceMemberHelper {
         F2(Gender.Female, "char-body-f2"),
         F3(Gender.Female, "char-body-f3"),
         F4(Gender.Female, "char-body-f4"),
+        F5(Gender.Female, "char-body-f5"),
     }
 
     enum class Glasses(val imgName: String, val isFancy: Boolean = false, val isShades: Boolean = false) {

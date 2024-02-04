@@ -22,7 +22,6 @@ object ComedianHelper {
 
     fun createComedian(world: FleksWorld, x: Float, y: Float): Entity {
         val atlasCharacters = world.inject<TextureAtlas>("characters")
-        val skelRenderer = world.inject<SkeletonRenderer>()
 
         val skelData = SkeletonBinary(atlasCharacters)
             .apply { scale = UPP }

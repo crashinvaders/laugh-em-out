@@ -5,14 +5,12 @@ import com.badlogic.gdx.ai.btree.LeafTask
 import com.badlogic.gdx.ai.btree.Task
 import com.badlogic.gdx.ai.btree.branch.Parallel
 import com.badlogic.gdx.math.MathUtils
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.*
 import com.crashinvaders.laughemout.App
 import com.crashinvaders.laughemout.game.CameraProcessorOrder
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
-import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActorPixels
 import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
 import com.crashinvaders.laughemout.game.common.camera.Sod3CameraProcessor
 import com.crashinvaders.laughemout.game.components.AudienceMember
@@ -96,12 +94,11 @@ class JokeGameManager : IntervalSystem(),
 
                             bBoard.completedJokeView = createResultJokeView(world, completedJoke)
 
-                            SpeechBubbleHelper.createSpeechBubble(
+                            SpeechBubbleHelper.createBubble(
                                 world, "...",
                                 bBoard.eComedian[Transform].worldPositionX,
                                 bBoard.eComedian[Transform].worldPositionY + 56f * UPP,
-                                SpeechBubbleSize.Small, 2f
-                            )
+                                2f)
 
                             evalJokeAffections(world, bBoard)
                         }
@@ -167,12 +164,6 @@ class JokeGameManager : IntervalSystem(),
     }
 
     companion object {
-
-        private fun getAudMemberOverheadPos(world: FleksWorld, eAudMemb: Entity): Vector2 =
-            with(world) {
-                return eAudMemb[SkeletonContainer].getBonePosition("overhead-anchor")
-            }
-
         private fun showAndAwaitJokeBuilder(bBoard: BTreeBlackBoard, callback: () -> Unit) {
             val subjectCount = 3
             val subjects: GdxArray<JokeSubjectData>
@@ -242,22 +233,37 @@ class JokeGameManager : IntervalSystem(),
 
                     val affectionDelta = affection.affectionSum
 
-                    if (affectionDelta == 0) {
-                        runnable {
-                            AudienceMemberHelper.animateJokeReactionNeut(world, audMemb.entity)
-                            AudienceMemberHelper.updateFaceEmotion(world, audMemb.entity)
+                    when {
+                        affectionDelta == 0 -> {
+                            // Neutral affection.
+                            runnable {
+                                AudienceMemberHelper.animateJokeReactionNeut(world, audMemb.entity)
+                                AudienceMemberHelper.updateFaceEmotion(world, audMemb.entity)
+                            }
+                            delay(0.5f)
                         }
-                        delay(0.5f)
-                        return@forEachIndexed
+                        else -> {
+                            // Positive/negative affection.
+                            runnable {
+                                changeAudMemberEmoLevel(world, audMemb, affectionDelta)
+                            }
+                            delay(1f)
+                        }
                     }
 
-                    if (affectionDelta != 0) {
-                        //                val emoLevel = MathUtils.clamp(audMemb.emoLevel + affectionDelta, -3, +3)
+                    // Show message reaction for the last affected audience member.
+                    if (index == affections.size - 1) {
                         runnable {
-                            changeAudMemberEmoLevel(world, audMemb, affectionDelta)
+                            val (x, y) = AudienceMemberHelper.getOverheadPos(world, audMemb.entity)
+                            val message = when {
+                                affection.affectionSum > 0 -> "[#544470]" + JokeGameDataHelper.audienceReactionsPositive.random()
+                                affection.affectionSum < 0 -> "[#733547]" + JokeGameDataHelper.audienceReactionsNegative.random()
+                                else -> JokeGameDataHelper.audienceReactionsNeutral.random()
+                            }
+                            SpeechBubbleHelper.createBubble(world, message, x, y + 10f * UPP, 3f)
                         }
+                        delay(1.0f)
                     }
-                    delay(1f)
                 }
             }
         }
@@ -374,14 +380,16 @@ class JokeGameManager : IntervalSystem(),
                 }
 
                 val text = "[#c8d7eb][#ffedd4]${data.subjectPre.text.replace('\n', ' ')}[] ${data.connector.text.replace('\n', ' ')} [#ffedd4]${data.subjectPost.text.replace('\n', ' ')}[]"
-                val actor = TypingLabel(text, font)
+                val actor = TypingLabel(text, font).let {
+                    TransformActorWrapper(it, autoLayout = true)
+                }
                 it += ActorContainer(actor)
                 it += DrawableRenderer(ActorEntityRenderer)
                 it += DrawableOrder(GameDrawOrder.COMPLETED_JOKE_VIEW)
                 it += DrawableTint()
                 it += DrawableVisibility()
-                it += DrawableDimensions().fromActorPixels(actor)
-                it += DrawableOrigin(Align.center)
+                it += DrawableDimensions(0f)
+                it += DrawableOrigin(Align.left)
             }
         }
 
@@ -395,13 +403,15 @@ class JokeGameManager : IntervalSystem(),
                     localPositionY = 64f * UPP
                 }
 
-                val actor = TextraLabel("", font)
+                val actor = TextraLabel("", font).let {
+                    TransformActorWrapper(it, autoLayout = false)
+                }
                 it += ActorContainer(actor)
                 it += DrawableRenderer(ActorEntityRenderer)
                 it += DrawableOrder(GameDrawOrder.UI_SCORE_LABEL)
                 it += DrawableTint()
                 it += DrawableVisibility(false)
-                it += DrawableDimensions().fromActorPixels(actor)
+                it += DrawableDimensions()
                 it += DrawableOrigin(Align.center)
 
                 it += SodInterpolation(6f, 0.6f, -0.5f)
@@ -410,7 +420,7 @@ class JokeGameManager : IntervalSystem(),
 
         fun updateScoreLabel(world: FleksWorld, eScoreLabel: Entity, scoreCount: Int) {
             with(world) {
-                val label = eScoreLabel[ActorContainer].actor as TextraLabel
+                val label = (eScoreLabel[ActorContainer].actor as TransformActorWrapper<TextraLabel>).actor
                 label.setText("[#95a4b6]Score: [#ffedd4][125%]${scoreCount}")
             }
         }

@@ -115,7 +115,7 @@ class App(val params: Params) : KtxGame<KtxScreen>() {
 
         assets.load<TextureAtlas>("atlases/ui.atlas")
         assets.load<TextureAtlas>("atlases/env.atlas")
-        assets.load<TextureAtlas>("skeletons/characters.atlas")
+        assets.load<TextureAtlas>("atlases/characters.atlas")
 
         assets.finishLoading()
 

@@ -11,7 +11,6 @@ import com.crashinvaders.common.toggle
 import com.crashinvaders.laughemout.App
 import com.crashinvaders.laughemout.game.controllers.GameOverHelper
 import com.crashinvaders.laughemout.game.controllers.SpeechBubbleHelper
-import com.crashinvaders.laughemout.game.controllers.SpeechBubbleSize
 import com.crashinvaders.laughemout.game.debug.controllers.DebugController
 import com.crashinvaders.laughemout.game.debug.controllers.FreeCameraDebugController
 import com.crashinvaders.laughemout.game.debug.controllers.tests.*
@@ -21,7 +20,6 @@ import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActi
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.*
 import com.crashinvaders.laughemout.game.engine.systems.postprocessing.PostProcessingSystem
 import com.crashinvaders.laughemout.game.hud.GameHudSystem
-import com.github.quillraven.fleks.Entity
 import ktx.app.KtxInputAdapter
 import ktx.collections.gdxMapOf
 import ktx.collections.set
@@ -149,7 +147,7 @@ class DebugInputProcessor(private val fleksWorld: FleksWorld) : KtxInputAdapter,
 
             Keys.A -> {
                 val (x, y) = mouseWorldPos()
-                SpeechBubbleHelper.createSpeechBubble(fleksWorld, "Pew pew\nshakalaka\n pew pew meow", x, y, SpeechBubbleSize.Large, 3f)
+                SpeechBubbleHelper.createBubble(fleksWorld, "Pew pew\nshakalaka\npew pew meow", x, y, 2.0f)
                 return true
             }
 

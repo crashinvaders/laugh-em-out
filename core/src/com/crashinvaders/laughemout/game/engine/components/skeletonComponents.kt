@@ -16,11 +16,9 @@ class SkeletonContainer(
 ) : Component<SkeletonContainer> {
 
     fun getBonePosition(boneName: String): Vector2 {
-        val boneOverheadAnchor = skeleton.findBone(boneName)
-        if (boneOverheadAnchor == null) {
-            gdxError("Cannot find a bone with the name \"$boneName\" in the skeleton \"${skeleton.data.name}\".")
-        }
-        return tmpVec2.set(boneOverheadAnchor.worldX, boneOverheadAnchor.worldY)
+        val bone = skeleton.findBone(boneName)
+            ?: gdxError("Cannot find a bone with the name \"$boneName\" in the skeleton \"${skeleton.data.name}\".")
+        return tmpVec2.set(bone.worldX, bone.worldY)
     }
 
     override fun type() = SkeletonContainer

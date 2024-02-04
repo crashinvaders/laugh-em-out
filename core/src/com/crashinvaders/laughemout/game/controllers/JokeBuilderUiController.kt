@@ -4,10 +4,9 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Button
-import com.badlogic.gdx.scenes.scene2d.ui.Image
+import com.badlogic.gdx.scenes.scene2d.ui.Container
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.Disposable
@@ -18,7 +17,7 @@ import com.crashinvaders.laughemout.game.GameInputOrder
 import com.crashinvaders.laughemout.game.UPP
 import com.crashinvaders.laughemout.game.common.DrawableUtils
 import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActorPixels
-import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActorUnits
+import com.crashinvaders.laughemout.game.common.DrawableUtils.fromDrawablePixels
 import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
 import com.crashinvaders.laughemout.game.common.camera.Sod3CameraProcessor
 import com.crashinvaders.laughemout.game.components.JokeSubjectCard
@@ -348,16 +347,16 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                     localPositionY = 22f * UPP
                 }
 
-                val actor = TypingLabel("[#8da8f2]JOKE ABOUT", font).apply {
-                    alignment = Align.center
-                    pack()
+                val actor = TypingLabel("[#8da8f2]JOKE ABOUT", font).let {
+                    TransformActorWrapper(it)
                 }
+
                 it += ActorContainer(actor)
                 it += DrawableRenderer(ActorEntityRenderer)
                 it += DrawableOrder(DRAW_ORDER_MISC)
                 it += DrawableTint()
                 it += DrawableVisibility(true)
-                it += DrawableDimensions().fromActorUnits(actor) //FIXME Actor has world size. Wrap it in transformational group.
+                it += DrawableDimensions().fromActorPixels(actor)
                 it += DrawableOrigin(Align.center)
 
                 it += SodInterpolation(6f, 0.6f, -0.5f).apply {
@@ -376,11 +375,12 @@ class JokeBuilderUiController : IteratingSystem(family { all(
 
                 val actor = Button(
                         TextureRegionDrawable(atlas.findRegion("btn-joke-it-up")),
-                        TextureRegionDrawable(atlas.findRegion("btn-joke-it-down"))).apply {
-                    isTransform = true
-                    touchable = Touchable.enabled
-                    onClick { onJokeItButtonClick() }
-                    pack()
+                        TextureRegionDrawable(atlas.findRegion("btn-joke-it-down"))).let {
+                    it.isTransform = true
+                    it.touchable = Touchable.enabled
+                    it.onClick { onJokeItButtonClick() }
+
+                    TransformActorWrapper(it)
                 }
                 it += ActorContainer(actor)
                 it += DrawableRenderer(ActorEntityRenderer)
@@ -404,17 +404,16 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                     localPositionY = 0f
                 }
 
-//                val actor = TypingLabel("drive\nbetter\nthan", font).apply {
-                val actor = TypingLabel("[#ffedd4]${data.connector.text}", font).apply {
-                    alignment = Align.center
-                    pack()
+                val actor = TypingLabel("[#ffedd4]${data.connector.text}", font).let {
+                    it.alignment = Align.center
+                    TransformActorWrapper(it)
                 }
                 it += ActorContainer(actor)
                 it += DrawableRenderer(ActorEntityRenderer)
                 it += DrawableOrder(DRAW_ORDER_MISC)
                 it += DrawableTint()
                 it += DrawableVisibility()
-                it += DrawableDimensions().fromActorUnits(actor) //FIXME Actor has world size. Wrap it in transformational group.
+                it += DrawableDimensions().fromActorPixels(actor)
                 it += DrawableOrigin(Align.center)
 
                 it += SodInterpolation(6f, 0.6f, -0.5f).apply {
@@ -432,13 +431,14 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                     localPositionY = 0f
                 }
 
-                val actor = Image(atlas.findRegion("joke-subj-placeholder"))
-                it += ActorContainer(actor)
-                it += DrawableRenderer(ActorEntityRenderer)
+                val drawable = TextureRegionDrawable(atlas.findRegion("joke-subj-placeholder"))
+
+                it += GdxDrawableContainer(drawable)
+                it += DrawableRenderer(GdxDrawableEntityRenderer)
                 it += DrawableOrder(DRAW_ORDER_PLACEHOLDER)
                 it += DrawableTint()
                 it += DrawableVisibility()
-                it += DrawableDimensions().fromActorPixels(actor)
+                it += DrawableDimensions().fromDrawablePixels(drawable)
                 it += DrawableOrigin(Align.center)
 
                 it += SodInterpolation(6f, 0.6f, -0.5f).apply {
@@ -456,13 +456,14 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                     localPositionY = 0f
                 }
 
-                val actor = Image(atlas.findRegion("joke-subj-placeholder"))
-                it += ActorContainer(actor)
-                it += DrawableRenderer(ActorEntityRenderer)
+                val drawable = TextureRegionDrawable(atlas.findRegion("joke-subj-placeholder"))
+
+                it += GdxDrawableContainer(drawable)
+                it += DrawableRenderer(GdxDrawableEntityRenderer)
                 it += DrawableOrder(DRAW_ORDER_PLACEHOLDER)
                 it += DrawableTint()
                 it += DrawableVisibility()
-                it += DrawableDimensions().fromActorPixels(actor)
+                it += DrawableDimensions().fromDrawablePixels(drawable)
                 it += DrawableOrigin(Align.center)
 
                 it += SodInterpolation(6f, 0.6f, -0.5f).apply {
@@ -494,34 +495,23 @@ class JokeBuilderUiController : IteratingSystem(family { all(
                         localPositionY = -48f * UPP
                     }
 
-                    val actor = let {
-                        val imgFrame = Image(atlas.findRegion("joke-subj-frame"))
-                        val frameWidth = imgFrame.prefWidth * UPP
-                        val frameHeight = imgFrame.prefHeight * UPP
-                        imgFrame.setSize(frameWidth, frameHeight)
+                    val actor = run {
+                        val label = TextraLabel("[SHAKE][#ffedd4]${subjectData.text}", font)
 
-                        val label = TextraLabel("[SHAKE][#ffedd4]${subjectData.text}", font).apply {
-                            alignment = Align.center
-                        }
+                        val container = Container(label)
+                        container.background = TextureRegionDrawable(atlas.findRegion("joke-subj-frame"))
+                        container.center()
+                        container.pack()
 
-                        Group().apply {
-                            width = frameWidth
-                            height = frameHeight
-                            isTransform = true
-
-                            addActor(imgFrame)
-                            addActor(label)
-
-                            val labelShiftY = 1f * UPP
-                            label.setPosition(getX(Align.center), getY(Align.center) + labelShiftY, Align.center)
-                        }
+                        TransformActorWrapper(container)
                     }
+
                     it += ActorContainer(actor)
                     it += DrawableRenderer(ActorEntityRenderer)
                     it += DrawableOrder(DRAW_ORDER_CARD_REGULAR)
                     it += DrawableTint()
                     it += DrawableVisibility()
-                    it += DrawableDimensions().fromActorUnits(actor)
+                    it += DrawableDimensions().fromActorPixels(actor)
                     it += DrawableOrigin(Align.center)
 
                     it += SodInterpolation(6f, 0.6f, -0.5f).apply {

@@ -1,7 +1,11 @@
 package com.crashinvaders.laughemout.game.engine.components.render;
 
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.crashinvaders.common.FleksWorld
+import com.crashinvaders.laughemout.game.UPP
 import com.crashinvaders.laughemout.game.engine.components.ActorContainer
 import com.crashinvaders.laughemout.game.engine.components.Transform
 import com.github.quillraven.fleks.Entity
@@ -57,7 +61,42 @@ object ActorEntityRenderer : EntityRenderer {
         actor.rotation = rotation
         actor.color = tint.color
 
-//        actor.act(deltaTime)
+        if (actor is TransformActorWrapper<*>) {
+            actor.layoutActor(origin.x, origin.y)
+        }
+
         actor.draw(batch, 1f)
+    }
+}
+
+class TransformActorWrapper<T : Actor>(val actor: T, val autoLayout: Boolean = true) : Group() {
+
+    init {
+        if (autoLayout && actor is Layout) {
+            actor.pack()
+        }
+        addActor(actor)
+        this.isTransform = true
+    }
+
+    override fun setScale(scaleX: Float, scaleY: Float) {
+        super.setScale(scaleX * UPP, scaleY * UPP)
+    }
+
+    override fun getWidth(): Float {
+        return actor.width
+    }
+
+    override fun getHeight(): Float {
+        return actor.height
+    }
+
+    fun layoutActor(originX: Float, originY: Float) {
+        if (autoLayout) {
+            actor.setPosition(
+                -originX * actor.width,
+                -originY * actor.height
+            )
+        }
     }
 }

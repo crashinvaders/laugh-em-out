@@ -56,15 +56,14 @@ object GameOverHelper {
         }
 
         world.entity {
-            it += Info("JokeConnector")
+            it += Info("FinalScore")
             it += Transform().apply {
                 localPositionX = 0f
                 localPositionY = 72f * UPP
             }
 
-            val actor = TypingLabel("[SICK][#7b86e8]FINAL SCORE IS [#c8d7eb][150%]$finalScore", font).apply {
-                alignment = Align.center
-                pack()
+            val actor = TypingLabel("[SICK][#7b86e8]FINAL SCORE IS [#c8d7eb][150%]$finalScore", font).let {
+                TransformActorWrapper(it)
             }
             it += ActorContainer(actor)
             it += DrawableRenderer(ActorEntityRenderer)
