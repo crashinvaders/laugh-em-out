@@ -1,6 +1,8 @@
 ui.png
 size:256,256
 repeat:none
+affection-ind-unknown
+bounds:244,171,8,8
 btn-joke-it-down
 bounds:132,123,55,21
 btn-joke-it-up
@@ -90,4 +92,4 @@ speech-bubble-frame-r
 bounds:127,99,40,22
 split:6,30,5,16
 white8
-bounds:244,171,8,8
+bounds:115,42,8,8

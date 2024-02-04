@@ -24,7 +24,7 @@ import ktx.scene2d.image
 import ktx.scene2d.scene2d
 import ktx.scene2d.stack
 
-object speechBubble {
+object SpeechBubbleHelper {
 
     private var cloudId = 0
 

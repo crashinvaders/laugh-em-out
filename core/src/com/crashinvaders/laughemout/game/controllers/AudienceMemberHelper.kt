@@ -3,9 +3,11 @@ package com.crashinvaders.laughemout.game.controllers
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.MathUtils.randomBoolean
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.laughemout.game.engine.components.render.*
@@ -14,17 +16,19 @@ import com.github.quillraven.fleks.Entity
 import com.crashinvaders.common.CommonUtils.random
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
+import com.crashinvaders.laughemout.game.common.DrawableUtils.fromDrawablePixels
 import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
 import com.crashinvaders.laughemout.game.components.AudienceMember
 import com.crashinvaders.laughemout.game.engine.components.*
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.DelayAction
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.RunnableAction
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.SequenceAction
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem.Companion.actions
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.*
+import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.transform.TransformSpace
 import ktx.app.gdxError
 import ktx.collections.gdxArrayOf
+import kotlin.sequences.sequence
 
-object audienceMember {
+object AudienceMemberHelper {
 
     private const val TRACK_GENERAL = 0
     private const val TRACK_HEIGHT_LEVEL = 100
@@ -233,6 +237,84 @@ object audienceMember {
         with(world) {
             return eAudMemb[SkeletonContainer].getBonePosition("overhead-anchor")
         }
+
+    fun setAffectionIndicator(
+        world: FleksWorld,
+        eAudMemb: Entity,
+        type: AudienceMember.AffectionIndicator.Type?) {
+
+        val cAudMemb = with(world) { eAudMemb[AudienceMember] }
+
+        val currentIndicator = when {
+            cAudMemb.cAffectionIndicator == null -> null
+            else -> cAudMemb.cAffectionIndicator!!.type
+        }
+        if (type == currentIndicator) {
+            return
+        }
+
+        destroyAffectionIndicator(world, cAudMemb)
+
+        if (type != null) {
+            createAffectionIndicator(world, cAudMemb, type)
+        }
+    }
+
+    private fun createAffectionIndicator(
+        world: FleksWorld,
+        cAudMemb: AudienceMember,
+        type: AudienceMember.AffectionIndicator.Type) {
+
+        val eIndicator = world.entity {
+            it += Info("AffectionIndicator")
+            it += Transform().apply {
+                parent = cAudMemb.entity[Transform]
+                localPositionX = 0f
+                localPositionY = -8f * UPP
+            }
+            it += AudienceMember.AffectionIndicator(type)
+
+            val atlas = world.inject<TextureAtlas>("ui")
+            val drawable = TextureRegionDrawable(atlas.findRegion(type.imgName))
+            it += GdxDrawableContainer(drawable)
+            it += DrawableRenderer(GdxDrawableEntityRenderer)
+            it += DrawableOrder(GameDrawOrder.UI_AFFECTION_INDICATOR - 5)
+            it += DrawableTint()
+            it += DrawableVisibility()
+            it += DrawableDimensions().fromDrawablePixels(drawable)
+            it += DrawableOrigin(Align.center)
+
+            cAudMemb.cAffectionIndicator = it[AudienceMember.AffectionIndicator]
+        }
+
+        with(world) {
+            eIndicator[Transform].apply { localScaleX = 2.0f; localScaleY = 2.0f }
+            actions(eIndicator) {
+                scaleTo(1.0f, 1.0f, 0.5f, Interpolation.elasticOut, TransformSpace.Local)
+            }
+        }
+    }
+
+    private fun destroyAffectionIndicator(
+        world: FleksWorld,
+        cAudMemb: AudienceMember) {
+
+        if (cAudMemb.cAffectionIndicator == null) {
+            return
+        }
+
+        val eIndicator = cAudMemb.cAffectionIndicator!!.entity
+        cAudMemb.cAffectionIndicator = null
+
+        with(world) {
+            actions(eIndicator) {
+                sequence {
+                    tintFadeOut(0.2f)
+                    removeEntity()
+                }
+            }
+        }
+    }
 
     enum class EmotionLevel(val imgSuffix: String) {
         Angry("-s0"),

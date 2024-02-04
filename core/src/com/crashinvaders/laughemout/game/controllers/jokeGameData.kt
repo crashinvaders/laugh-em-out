@@ -16,16 +16,16 @@ data class JokeBuilderData(
 
 data class JokeSubjectData(
     val text: String,
-    val race: audienceMember.Race? = null,
-    val gender: audienceMember.Gender? = null,
-    val hairStyle: audienceMember.HairStyle? = null,
-    val hairColor: audienceMember.HairColor? = null,
-    val heightLevel: audienceMember.HeightLevel? = null,
-    val bodyStyle: audienceMember.BodyStyle? = null,
-    val glasses: audienceMember.Glasses? = null,
-    val hat: audienceMember.Hat? = null,
-    val neck: audienceMember.Neck? = null,
-    val mouth: audienceMember.Mouth? = null,
+    val race: AudienceMemberHelper.Race? = null,
+    val gender: AudienceMemberHelper.Gender? = null,
+    val hairStyle: AudienceMemberHelper.HairStyle? = null,
+    val hairColor: AudienceMemberHelper.HairColor? = null,
+    val heightLevel: AudienceMemberHelper.HeightLevel? = null,
+    val bodyStyle: AudienceMemberHelper.BodyStyle? = null,
+    val glasses: AudienceMemberHelper.Glasses? = null,
+    val hat: AudienceMemberHelper.Hat? = null,
+    val neck: AudienceMemberHelper.Neck? = null,
+    val mouth: AudienceMemberHelper.Mouth? = null,
 
     val isFancyLooking: Boolean = false,
     val isWearingShades: Boolean = false,
@@ -45,28 +45,28 @@ data class JokeConnectorData(
 
 object JokeGameDataHelper {
     val jokeSubjects = gdxArrayOf<JokeSubjectData>(
-        JokeSubjectData("BLACK\nPEOPLE", race = audienceMember.Race.Black),
-        JokeSubjectData("WHITE\nPEOPLE", race = audienceMember.Race.White),
-        JokeSubjectData("ASIAN\nPEOPLE", race = audienceMember.Race.Asian),
+        JokeSubjectData("BLACK\nPEOPLE", race = AudienceMemberHelper.Race.Black),
+        JokeSubjectData("WHITE\nPEOPLE", race = AudienceMemberHelper.Race.White),
+        JokeSubjectData("ASIAN\nPEOPLE", race = AudienceMemberHelper.Race.Asian),
 
-        JokeSubjectData("BOYS", gender = audienceMember.Gender.Male),
-        JokeSubjectData("GIRLS", gender = audienceMember.Gender.Female),
+        JokeSubjectData("BOYS", gender = AudienceMemberHelper.Gender.Male),
+        JokeSubjectData("GIRLS", gender = AudienceMemberHelper.Gender.Female),
 
-        JokeSubjectData("BRUNETTES", hairColor = audienceMember.HairColor.Brunette),
-        JokeSubjectData("BLONDS", hairColor = audienceMember.HairColor.Blonde),
-        JokeSubjectData("GINGERS", hairColor = audienceMember.HairColor.Ginger),
-        JokeSubjectData("BLUE\nHEADS", hairColor = audienceMember.HairColor.Painted),
+        JokeSubjectData("BRUNETTES", hairColor = AudienceMemberHelper.HairColor.Brunette),
+        JokeSubjectData("BLONDS", hairColor = AudienceMemberHelper.HairColor.Blonde),
+        JokeSubjectData("GINGERS", hairColor = AudienceMemberHelper.HairColor.Ginger),
+        JokeSubjectData("BLUE\nHEADS", hairColor = AudienceMemberHelper.HairColor.Painted),
         JokeSubjectData("BALD\nPEOPLE", isBald = true),
 
-        JokeSubjectData("TALL\nPEOPLE", heightLevel = audienceMember.HeightLevel.Tall),
-        JokeSubjectData("SHORT\nPEOPLE", heightLevel = audienceMember.HeightLevel.Short),
+        JokeSubjectData("TALL\nPEOPLE", heightLevel = AudienceMemberHelper.HeightLevel.Tall),
+        JokeSubjectData("SHORT\nPEOPLE", heightLevel = AudienceMemberHelper.HeightLevel.Short),
 
         JokeSubjectData("SMILING\nPEOPLE", isSmiling = true),
         JokeSubjectData("FROWNING\nPEOPLE", isFrowning = false),
 
         JokeSubjectData("PEOPLE\nIN HATS", isWearingHat = true),
 
-        JokeSubjectData("MASKED\nPEOPLE", mouth = audienceMember.Mouth.FaceMask0),
+        JokeSubjectData("MASKED\nPEOPLE", mouth = AudienceMemberHelper.Mouth.FaceMask0),
         JokeSubjectData("BEARDED\nPEOPLE", hasFacialHair = true),
 
         JokeSubjectData("PEOPLE IN\nGLASSES", isWearingGlasses = true),
@@ -212,23 +212,24 @@ object JokeGameDataHelper {
         "Laughing nonstop!",
         "Comic relief!",
         "Joke of the day!",
+        "True story!",
     )
 
     val audienceReactionsEmojiPositive = gdxArrayOf(
-        speechBubble.Emoji.Laugh,
-        speechBubble.Emoji.Smile,
-        speechBubble.Emoji.Rofl,
+        SpeechBubbleHelper.Emoji.Laugh,
+        SpeechBubbleHelper.Emoji.Smile,
+        SpeechBubbleHelper.Emoji.Rofl,
     )
 
     val audienceReactionsEmojiNegative = gdxArrayOf(
-        speechBubble.Emoji.Angry,
-        speechBubble.Emoji.Scared,
-        speechBubble.Emoji.Disappointment,
-        speechBubble.Emoji.Dislike,
+        SpeechBubbleHelper.Emoji.Angry,
+        SpeechBubbleHelper.Emoji.Scared,
+        SpeechBubbleHelper.Emoji.Disappointment,
+        SpeechBubbleHelper.Emoji.Dislike,
     )
 
     val audienceReactionsEmojiNeutral = gdxArrayOf(
-        speechBubble.Emoji.Surprise,
-        speechBubble.Emoji.Neutral,
+        SpeechBubbleHelper.Emoji.Surprise,
+        SpeechBubbleHelper.Emoji.Neutral,
     )
 }

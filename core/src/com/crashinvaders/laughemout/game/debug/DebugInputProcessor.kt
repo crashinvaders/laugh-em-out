@@ -9,8 +9,8 @@ import com.crashinvaders.common.FleksWorld
 import com.crashinvaders.common.TimeManager
 import com.crashinvaders.common.toggle
 import com.crashinvaders.laughemout.App
-import com.crashinvaders.laughemout.game.controllers.gameOver
-import com.crashinvaders.laughemout.game.controllers.speechBubble
+import com.crashinvaders.laughemout.game.controllers.GameOverHelper
+import com.crashinvaders.laughemout.game.controllers.SpeechBubbleHelper
 import com.crashinvaders.laughemout.game.debug.controllers.DebugController
 import com.crashinvaders.laughemout.game.debug.controllers.FreeCameraDebugController
 import com.crashinvaders.laughemout.game.debug.controllers.tests.*
@@ -147,12 +147,12 @@ class DebugInputProcessor(private val fleksWorld: FleksWorld) : KtxInputAdapter,
 
             Keys.N -> {
                 val (x, y) = mouseWorldPos()
-                speechBubble.createBubble(fleksWorld, "Pew pew\nshakalaka\npew pew meow", x, y, 2.0f)
+                SpeechBubbleHelper.createBubble(fleksWorld, "Pew pew\nshakalaka\npew pew meow", x, y, 2.0f)
                 return true
             }
 
             Keys.M -> {
-                gameOver.showGameOver(fleksWorld, MathUtils.random(0, 11)) {
+                GameOverHelper.showGameOver(fleksWorld, MathUtils.random(0, 11)) {
                     App.Inst.restart()
                 }
                 return true

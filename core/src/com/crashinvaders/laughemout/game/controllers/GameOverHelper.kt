@@ -21,7 +21,7 @@ import com.github.quillraven.fleks.Entity
 import com.github.tommyettinger.textra.Font
 import com.github.tommyettinger.textra.TypingLabel
 
-object gameOver {
+object GameOverHelper {
 
     fun showGameOver(world: FleksWorld, finalScore: Int, onComplete: () -> Unit): Entity {
         val skelRenderer = world.inject<SkeletonRenderer>()

@@ -20,8 +20,10 @@ object GameDrawOrder {
     const val UI_EMO_METER = -50
 
     const val COMEDIAN = 0
+
     const val AUDIENCE_BACK_ROW = 10
     const val AUDIENCE_FRONT_ROW = 11
+    const val UI_AFFECTION_INDICATOR = 15
 
     const val UI_SCORE_LABEL = 40
 

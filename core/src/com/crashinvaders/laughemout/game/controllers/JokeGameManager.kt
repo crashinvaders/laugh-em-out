@@ -43,13 +43,13 @@ class JokeGameManager : IntervalSystem(),
         y = 10f * UPP
     }
 
-    private val bBoard = BTreeBlackBoard(world, 3)
-    private val bTree: BehaviorTree<BTreeBlackBoard> = BehaviorTree()
+    private val bBoard = SessionBlackBoard(world, 3)
+    private val bTree: BehaviorTree<SessionBlackBoard> = BehaviorTree()
 
     override fun onWorldInitialized() {
         super.onInit()
 
-        screenFade.createFadeInEffect(world, 0.5f)
+        ScreenFadeHelper.createFadeInEffect(world, 0.5f)
 
         EnvironmentHelper.createObjects(world)
         bBoard.eScoreLabel = createScoreLabel(world)
@@ -73,12 +73,12 @@ class JokeGameManager : IntervalSystem(),
                     sequence {
                         runnable {
                             bBoard.maxAudienceCount = when {
-                                bBoard.jokeCount < 1 -> 3
-                                bBoard.jokeCount < 3 -> 4
+                                bBoard.jokeCount < 2 -> 3
+                                bBoard.jokeCount < 5 -> 4
                                 else -> 5
                             }
-                            bBoard.maxAudienceCount += bBoard.maxAudienceCountDev
-                            bBoard.maxAudienceCountDev = 0
+                            bBoard.maxAudienceCount += bBoard.maxAudienceCountDelta
+                            bBoard.maxAudienceCountDelta = 0
                         }
                         waitLeaf(1f)
 
@@ -88,7 +88,9 @@ class JokeGameManager : IntervalSystem(),
 
                         parallelPatched(Parallel.Policy.Selector, Parallel.Orchestrator.Join) {
                             awaitCompletion { bBoard, callback -> showAndAwaitJokeBuilder(bBoard, callback) }
-                            alwaysFail { add(JokeTimerTask()) } // Always fail is to always wait for the joke builder.
+                            // Always fail is to always wait for the joke builder.
+                            alwaysFail { add(JokeTimerTask()) }
+                            alwaysFail { add(AudienceAffectionIndicatorsTask()) }
                         }
 
                         runnable { bBoard ->
@@ -96,7 +98,7 @@ class JokeGameManager : IntervalSystem(),
 
                             bBoard.completedJokeView = createResultJokeView(world, completedJoke)
 
-                            speechBubble.createBubble(
+                            SpeechBubbleHelper.createBubble(
                                 world, "...",
                                 bBoard.eComedian[Transform].worldPositionX,
                                 bBoard.eComedian[Transform].worldPositionY + 56f * UPP,
@@ -127,7 +129,7 @@ class JokeGameManager : IntervalSystem(),
                             if (isGameOver) {
                                 bBoard.isGameOver = true
                                 bBoard.eScoreLabel[DrawableVisibility].isVisible = false
-                                gameOver.showGameOver(world, bBoard.scoreCount) { App.Inst.restart() }
+                                GameOverHelper.showGameOver(world, bBoard.scoreCount) { App.Inst.restart() }
                             }
                         }
                         waitUntil { bBoard -> !bBoard.isGameOver } // Stuck the tree at this node if the game is over.
@@ -168,7 +170,7 @@ class JokeGameManager : IntervalSystem(),
 
     companion object {
 
-        private fun showAndAwaitJokeBuilder(bBoard: BTreeBlackBoard, callback: () -> Unit) {
+        private fun showAndAwaitJokeBuilder(bBoard: SessionBlackBoard, callback: () -> Unit) {
             val subjectCount = 3
             val subjects: GdxArray<JokeSubjectData>
             val world = bBoard.world
@@ -208,7 +210,7 @@ class JokeGameManager : IntervalSystem(),
             }
         }
 
-        private fun ParentAction.createSpawnAudienceAction(bBoard: BTreeBlackBoard) {
+        private fun ParentAction.createSpawnAudienceAction(bBoard: SessionBlackBoard) {
             val membersToSpawn = bBoard.maxAudienceCount - bBoard.audienceMembers.size
             if (membersToSpawn <= 0) {
                 return
@@ -218,8 +220,8 @@ class JokeGameManager : IntervalSystem(),
                 for (i in 0 until membersToSpawn) {
                     runnable {
                         val index = nextAvailableAudiencePlacementIndex(world, bBoard.audienceMembers)
-                        val (x, y) = audienceMember.evalSpawnPosition(index)
-                        val entity = audienceMember.create(world, x, y, index)
+                        val (x, y) = AudienceMemberHelper.evalSpawnPosition(index)
+                        val entity = AudienceMemberHelper.create(world, x, y, index)
                         bBoard.audienceMembers.add(entity)
                     }
                     delay(0.5f)
@@ -228,7 +230,7 @@ class JokeGameManager : IntervalSystem(),
         }
 
         @Suppress("GDXKotlinUnsafeIterator")
-        private fun ParentAction.createAffectAudienceAction(bBoard: BTreeBlackBoard) {
+        private fun ParentAction.createAffectAudienceAction(bBoard: SessionBlackBoard) {
             sequence {
                 val affections = bBoard.jokeAffections.values().toGdxArray()
                 affections.shuffle()
@@ -239,8 +241,8 @@ class JokeGameManager : IntervalSystem(),
                         affectionDelta == 0 -> {
                             // Neutral affection.
                             runnable {
-                                audienceMember.animateJokeReactionNeut(world, audMemb.entity)
-                                audienceMember.updateFaceEmotion(world, audMemb.entity)
+                                AudienceMemberHelper.animateJokeReactionNeut(world, audMemb.entity)
+                                AudienceMemberHelper.updateFaceEmotion(world, audMemb.entity)
                             }
                             delay(0.5f)
                         }
@@ -256,7 +258,7 @@ class JokeGameManager : IntervalSystem(),
             }
         }
 
-        private fun ParentAction.createAudienceJokeReactionAction(bBoard: BTreeBlackBoard) {
+        private fun ParentAction.createAudienceJokeReactionAction(bBoard: SessionBlackBoard) {
             val world = bBoard.world
             val affections = bBoard.jokeAffections.values().toGdxArray()
 
@@ -271,14 +273,14 @@ class JokeGameManager : IntervalSystem(),
                 }
                 sequence {
                     runnable {
-                        val (x, y) = audienceMember.getOverheadPos(world, affection.audMemb.entity)
-                        speechBubble.createBubble(
+                        val (x, y) = AudienceMemberHelper.getOverheadPos(world, affection.audMemb.entity)
+                        SpeechBubbleHelper.createBubble(
                             world,
                             "{SHAKE}[#733547]" + JokeGameDataHelper.audienceReactionsNegative.random(), //TODO We need a very specific reaction here.
                             x,
                             y + 10f * UPP,
                             duration = 3f,
-                            affection = speechBubble.Affection.Negative
+                            affection = SpeechBubbleHelper.Affection.Negative
                         )
                     }
                     delay(1f)
@@ -293,14 +295,14 @@ class JokeGameManager : IntervalSystem(),
                 }
                 sequence {
                     runnable {
-                        val (x, y) = audienceMember.getOverheadPos(world, affection.audMemb.entity)
-                        speechBubble.createBubble(
+                        val (x, y) = AudienceMemberHelper.getOverheadPos(world, affection.audMemb.entity)
+                        SpeechBubbleHelper.createBubble(
                             world,
                             "{RAINBOW}[#544470]" + JokeGameDataHelper.audienceReactionsPositive.random(), //TODO We need a very specific reaction here.
                             x,
                             y + 10f * UPP,
                             duration = 3f,
-                            affection = speechBubble.Affection.Positive
+                            affection = SpeechBubbleHelper.Affection.Positive
                         )
                     }
                     delay(1f)
@@ -314,19 +316,19 @@ class JokeGameManager : IntervalSystem(),
                     runnable {
                         if (MathUtils.randomBoolean(0.75f)) {
                             // Create text reaction.
-                            val (x, y) = audienceMember.getOverheadPos(world, affection.audMemb.entity)
+                            val (x, y) = AudienceMemberHelper.getOverheadPos(world, affection.audMemb.entity)
                             val affectionSum = affection.affectionSum
                             val message: String = when {
                                 affectionSum > 0 -> "[#544470]" + JokeGameDataHelper.audienceReactionsPositive.random()
                                 affectionSum < 0 -> "[#733547]" + JokeGameDataHelper.audienceReactionsNegative.random()
                                 else -> JokeGameDataHelper.audienceReactionsNeutral.random()
                             }
-                            val bubbleAffection: speechBubble.Affection = when {
-                                affectionSum > 0 -> speechBubble.Affection.Positive
-                                affectionSum < 0 -> speechBubble.Affection.Negative
-                                else -> speechBubble.Affection.Neutral
+                            val bubbleAffection: SpeechBubbleHelper.Affection = when {
+                                affectionSum > 0 -> SpeechBubbleHelper.Affection.Positive
+                                affectionSum < 0 -> SpeechBubbleHelper.Affection.Negative
+                                else -> SpeechBubbleHelper.Affection.Neutral
                             }
-                            speechBubble.createBubble(
+                            SpeechBubbleHelper.createBubble(
                                 world,
                                 message,
                                 x,
@@ -336,19 +338,19 @@ class JokeGameManager : IntervalSystem(),
                             )
                         } else {
                             // Create emoji-only reaction.
-                            val (x, y) = audienceMember.getOverheadPos(world, affection.audMemb.entity)
+                            val (x, y) = AudienceMemberHelper.getOverheadPos(world, affection.audMemb.entity)
                             val affectionSum = affection.affectionSum
-                            val emoji: speechBubble.Emoji = when {
+                            val emoji: SpeechBubbleHelper.Emoji = when {
                                 affectionSum > 0 -> JokeGameDataHelper.audienceReactionsEmojiPositive.random()
                                 affectionSum < 0 -> JokeGameDataHelper.audienceReactionsEmojiNegative.random()
                                 else -> JokeGameDataHelper.audienceReactionsEmojiNeutral.random()
                             }
-                            val bubbleAffection: speechBubble.Affection = when {
-                                affectionSum > 0 -> speechBubble.Affection.Positive
-                                affectionSum < 0 -> speechBubble.Affection.Negative
-                                else -> speechBubble.Affection.Neutral
+                            val bubbleAffection: SpeechBubbleHelper.Affection = when {
+                                affectionSum > 0 -> SpeechBubbleHelper.Affection.Positive
+                                affectionSum < 0 -> SpeechBubbleHelper.Affection.Negative
+                                else -> SpeechBubbleHelper.Affection.Neutral
                             }
-                            speechBubble.createEmojiBubble(
+                            SpeechBubbleHelper.createEmojiBubble(
                                 world,
                                 emoji,
                                 x,
@@ -364,7 +366,7 @@ class JokeGameManager : IntervalSystem(),
             }
         }
 
-        private fun ParentAction.createAudienceRotationAction(bBoard: BTreeBlackBoard) {
+        private fun ParentAction.createAudienceRotationAction(bBoard: SessionBlackBoard) {
             sequence {
                 val removedPlacementIndices = GdxIntArray()
 
@@ -375,7 +377,7 @@ class JokeGameManager : IntervalSystem(),
                         removedPlacementIndices.add(eAudMemb[AudienceMember].placementIndex)
 
                         // Do not spawn a new aud member next turn.
-                        bBoard.maxAudienceCountDev--
+                        bBoard.maxAudienceCountDelta--
 
                         runnable {
                             bBoard.audienceMembers.removeValue(eAudMemb, true)
@@ -383,7 +385,7 @@ class JokeGameManager : IntervalSystem(),
                             updateScoreLabel(world, bBoard.eScoreLabel, bBoard.scoreCount)
                             animateScoreLabelPulse(world, bBoard.eScoreLabel)
 
-                            audienceMember.animateDisappearAndDestroy(world, eAudMemb)
+                            AudienceMemberHelper.animateDisappearAndDestroy(world, eAudMemb)
                         }
                         delay(1f)
                     }
@@ -391,7 +393,7 @@ class JokeGameManager : IntervalSystem(),
             }
         }
 
-        private fun evalJokeAffections(world: FleksWorld, bBoard: BTreeBlackBoard) {
+        private fun evalJokeAffections(world: FleksWorld, bBoard: SessionBlackBoard) {
             val joke = bBoard.completedJoke!!
             val audienceMembers = bBoard.audienceMembers
 
@@ -462,11 +464,11 @@ class JokeGameManager : IntervalSystem(),
                 )
             }
             if (emoLevelDelta > 0) {
-                audienceMember.animateJokeReactionPos(world, audMemb.entity)
+                AudienceMemberHelper.animateJokeReactionPos(world, audMemb.entity)
             } else {
-                audienceMember.animateJokeReactionNeg(world, audMemb.entity)
+                AudienceMemberHelper.animateJokeReactionNeg(world, audMemb.entity)
             }
-            audienceMember.updateFaceEmotion(world, audMemb.entity)
+            AudienceMemberHelper.updateFaceEmotion(world, audMemb.entity)
         }
 
         fun createResultJokeView(world: FleksWorld, data: JokeStructureData): Entity {
@@ -554,11 +556,11 @@ class JokeGameManager : IntervalSystem(),
         }
     }
 
-    private class JokeTimerTask : LeafTask<BTreeBlackBoard>() {
+    private class JokeTimerTask : LeafTask<SessionBlackBoard>() {
 
         private var isTimeUp = false
 
-        private val bBoard: BTreeBlackBoard; get() = `object`
+        private val bBoard: SessionBlackBoard; get() = `object`
 
         override fun start() {
             super.start()
@@ -635,7 +637,70 @@ class JokeGameManager : IntervalSystem(),
         override fun execute(): Status =
             if (isTimeUp) Status.SUCCEEDED else Status.RUNNING
 
-        override fun copyTo(task: Task<BTreeBlackBoard>?): Task<BTreeBlackBoard> {
+        override fun copyTo(task: Task<SessionBlackBoard>?): Task<SessionBlackBoard> {
+            TODO("Not yet implemented")
+        }
+    }
+
+    private class AudienceAffectionIndicatorsTask : LeafTask<SessionBlackBoard>() {
+
+        private val onJokeStateChangeHandler: (JokeBuilderUiController.JokeIntermediaryStructure) -> Unit = { joke ->
+            val bBoard = `object`
+            val world = bBoard.world
+
+            val affectionPre = joke.connector.affectionPre
+            val affectionPost = joke.connector.affectionPost
+            val subjectPre = joke.subjectPre
+            val subjectPost = joke.subjectPost
+
+            bBoard.audienceMembers.forEach { eAudMemb ->
+                val cAudMemb = with (world) { eAudMemb[AudienceMember] }
+                var affectionDelta = 0
+                var isAffected = false
+                if (affectionPre != 0 && subjectPre != null && checkSubjectIntersection(cAudMemb, subjectPre)) {
+                    affectionDelta += affectionPre
+                    isAffected = true
+                }
+                if (affectionPost != 0 && subjectPost != null && checkSubjectIntersection(cAudMemb, subjectPost)) {
+                    affectionDelta += affectionPost
+                    isAffected = true
+                }
+
+                val affectionIndicatorType = when {
+                    //TODO Add more indicators if needed.
+                    isAffected -> AudienceMember.AffectionIndicator.Type.Unknown
+                    else -> null
+                }
+                AudienceMemberHelper.setAffectionIndicator(world, eAudMemb, affectionIndicatorType)
+            }
+        }
+
+        override fun start() {
+            super.start()
+
+            val bBoard = `object`
+            val jokeBuilder = bBoard.world.system<JokeBuilderUiController>()
+            jokeBuilder.onJokeStateChange += onJokeStateChangeHandler
+        }
+
+        override fun end() {
+            super.end()
+
+            val bBoard = `object`
+            val world = bBoard.world
+
+            val jokeBuilder = bBoard.world.system<JokeBuilderUiController>()
+            jokeBuilder.onJokeStateChange -= onJokeStateChangeHandler
+
+            // Reset indicators.
+            bBoard.audienceMembers.forEach { eAudMemb ->
+                AudienceMemberHelper.setAffectionIndicator(world, eAudMemb, null)
+            }
+        }
+
+        override fun execute(): Status = Status.RUNNING // Never ending task.
+
+        override fun copyTo(task: Task<SessionBlackBoard>?): Task<SessionBlackBoard> {
             TODO("Not yet implemented")
         }
     }
@@ -647,7 +712,7 @@ class JokeGameManager : IntervalSystem(),
         var affectionSum: Int = 0
     }
 
-    private class BTreeBlackBoard(val world: FleksWorld, maxAudienceCount: Int) {
+    private class SessionBlackBoard(val world: FleksWorld, maxAudienceCount: Int) {
 
         // Permanent fields, available thought the entire game.
         val audienceMembers = GdxArray<Entity>()
@@ -656,7 +721,7 @@ class JokeGameManager : IntervalSystem(),
         var jokeCount = 0
         var scoreCount = 0
         var maxAudienceCount: Int = maxAudienceCount
-        var maxAudienceCountDev: Int = 0
+        var maxAudienceCountDelta: Int = 0
         var isGameOver = false
 
         // These fields get reset every round.

@@ -73,6 +73,8 @@ class JokeBuilderUiController : IteratingSystem(family { all(
     private var lastTouchScreenX: Int = 0
     private var lastTouchScreenY: Int = 0
 
+    var onJokeStateChange = Signal<JokeIntermediaryStructure>()
+
     override fun onInit() {
         super.onInit()
 
@@ -301,6 +303,14 @@ class JokeBuilderUiController : IteratingSystem(family { all(
             eTitle[SodInterpolation].kickVisually()
             eJokeItButton[DrawableVisibility].isVisible = isJokeReady
             eJokeItButton[SodInterpolation].kickVisually()
+        }
+
+        onJokeStateChange.invoke {
+            JokeIntermediaryStructure(
+                subjectPre = uiController!!.ePlaceholderL[JokeSubjectCardPlaceholder].attachedCard?.data,
+                subjectPost = uiController!!.ePlaceholderR[JokeSubjectCardPlaceholder].attachedCard?.data,
+                connector = uiController!!.data.connector
+            )
         }
     }
 
@@ -581,4 +591,10 @@ class JokeBuilderUiController : IteratingSystem(family { all(
         private const val CAM_Y_JOKE = -65f * UPP
         private const val CAM_Y_STAGE = -25f * UPP
     }
+
+    data class JokeIntermediaryStructure(
+        val subjectPre: JokeSubjectData?,
+        val subjectPost: JokeSubjectData?,
+        val connector: JokeConnectorData,
+    )
 }
