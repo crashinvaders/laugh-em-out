@@ -2,6 +2,7 @@ package com.crashinvaders.laughemout.teavm
 
 import com.github.xpenatan.gdx.backends.teavm.config.TeaBuildConfiguration
 import com.github.xpenatan.gdx.backends.teavm.config.TeaBuilder
+import com.github.xpenatan.gdx.backends.teavm.config.plugins.TeaReflectionSupplier
 import com.github.xpenatan.gdx.backends.teavm.gen.SkipClass
 import java.io.File
 
@@ -17,7 +18,8 @@ object TeaVMBuilder {
         }
 
         // Register any classes or packages that require reflection here:
-        // TeaReflectionSupplier.addReflectionClass("com.crashinvaders.laughemout.reflect")
+         TeaReflectionSupplier.addReflectionClass("com.crashinvaders.laughemout.game.engine.systems.entityactions.actions")
+         TeaReflectionSupplier.addReflectionClass("com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.transform")
 
         val tool = TeaBuilder.config(teaBuildConfiguration)
         tool.mainClass = "com.crashinvaders.laughemout.teavm.TeaVMLauncher"
