@@ -274,10 +274,10 @@ object AudienceMemberHelper {
     }
 
     enum class Hat(val imgName: String, val isFancy: Boolean = false) {
+        Crown0("hat-crown0", isFancy = true),
         Blinder0("hat-blinder0"),
         Cap0Bw("hat-cap0-bw"),
         Cap0Fw("hat-cap0-fw"),
-        Crown0("hat-crown0"),
         Pot0("hat-pot0"),
     }
 

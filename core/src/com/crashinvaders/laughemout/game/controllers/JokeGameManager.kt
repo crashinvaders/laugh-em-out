@@ -82,6 +82,8 @@ class JokeGameManager : IntervalSystem(),
                                 bBoard.jokeCount < 3 -> 4
                                 else -> 5
                             }
+                            bBoard.maxAudienceCount += bBoard.maxAudienceCountDev
+                            bBoard.maxAudienceCountDev = 0
                         }
                         waitLeaf(1f)
 
@@ -237,9 +239,7 @@ class JokeGameManager : IntervalSystem(),
                 affections.shuffle()
                 affections.forEachIndexed { index, affection ->
                     val audMemb = affection.audMemb
-
                     val affectionDelta = affection.affectionSum
-
                     when {
                         affectionDelta == 0 -> {
                             // Neutral affection.
@@ -378,6 +378,9 @@ class JokeGameManager : IntervalSystem(),
                         bBoard.audienceMembers.filter { it[AudienceMember].emoLevel == 3 }.toGdxArray()
                     completedMembers.forEach { eAudMemb ->
                         removedPlacementIndices.add(eAudMemb[AudienceMember].placementIndex)
+
+                        // Do not spawn a new aud member next turn.
+                        bBoard.maxAudienceCountDev--
 
                         runnable {
                             bBoard.audienceMembers.removeValue(eAudMemb, true)
@@ -658,20 +661,20 @@ class JokeGameManager : IntervalSystem(),
         var jokeCount = 0
         var scoreCount = 0
         var maxAudienceCount: Int = maxAudienceCount
+        var maxAudienceCountDev: Int = 0
         var isGameOver = false
 
         // These fields get reset every round.
+        val jokeAffections = GdxMap<AudienceMember, AudienceJokeAffectionEntry>()
         var eJokeTimer: Entity? = null
         var completedJoke: JokeStructureData? = null
         var completedJokeView: Entity? = null
-        val jokeAffections = GdxMap<AudienceMember, AudienceJokeAffectionEntry>()
 
         fun resetRound() {
+            jokeAffections.clear()
             eJokeTimer = null
             completedJoke = null
             completedJokeView = null
-
-            jokeAffections.clear()
         }
     }
 }
