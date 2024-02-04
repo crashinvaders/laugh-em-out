@@ -17,7 +17,7 @@ import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.ru
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.sequence
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.tintTo
 
-object ScreenFadeHelper {
+object screenFade {
 
     fun createFadeInEffect(world: FleksWorld, duration: Float) {
         val eFade = world.entity {

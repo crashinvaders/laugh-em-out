@@ -4,17 +4,13 @@ import com.badlogic.gdx.ai.btree.BehaviorTree
 import com.badlogic.gdx.ai.btree.LeafTask
 import com.badlogic.gdx.ai.btree.Task
 import com.badlogic.gdx.ai.btree.branch.Parallel
-import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.MathUtils
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.crashinvaders.common.*
 import com.crashinvaders.laughemout.App
 import com.crashinvaders.laughemout.game.CameraProcessorOrder
 import com.crashinvaders.laughemout.game.GameDrawOrder
 import com.crashinvaders.laughemout.game.UPP
-import com.crashinvaders.laughemout.game.common.DrawableUtils.fromDrawablePixels
 import com.crashinvaders.laughemout.game.common.SodUtils.kickVisually
 import com.crashinvaders.laughemout.game.common.camera.Sod3CameraProcessor
 import com.crashinvaders.laughemout.game.components.AudienceMember
@@ -22,7 +18,6 @@ import com.crashinvaders.laughemout.game.engine.components.*
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
 import com.crashinvaders.laughemout.game.engine.systems.OnWorldInitializedHandler
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem.Companion.actions
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.ParentAction
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.*
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.extensions.entityAction
@@ -54,7 +49,7 @@ class JokeGameManager : IntervalSystem(),
     override fun onWorldInitialized() {
         super.onInit()
 
-        ScreenFadeHelper.createFadeInEffect(world, 0.5f)
+        screenFade.createFadeInEffect(world, 0.5f)
 
         EnvironmentHelper.createObjects(world)
         bBoard.eScoreLabel = createScoreLabel(world)
@@ -101,7 +96,7 @@ class JokeGameManager : IntervalSystem(),
 
                             bBoard.completedJokeView = createResultJokeView(world, completedJoke)
 
-                            SpeechBubbleHelper.createBubble(
+                            speechBubble.createBubble(
                                 world, "...",
                                 bBoard.eComedian[Transform].worldPositionX,
                                 bBoard.eComedian[Transform].worldPositionY + 56f * UPP,
@@ -132,7 +127,7 @@ class JokeGameManager : IntervalSystem(),
                             if (isGameOver) {
                                 bBoard.isGameOver = true
                                 bBoard.eScoreLabel[DrawableVisibility].isVisible = false
-                                GameOverHelper.showGameOver(world, bBoard.scoreCount) { App.Inst.restart() }
+                                gameOver.showGameOver(world, bBoard.scoreCount) { App.Inst.restart() }
                             }
                         }
                         waitUntil { bBoard -> !bBoard.isGameOver } // Stuck the tree at this node if the game is over.
@@ -223,8 +218,8 @@ class JokeGameManager : IntervalSystem(),
                 for (i in 0 until membersToSpawn) {
                     runnable {
                         val index = nextAvailableAudiencePlacementIndex(world, bBoard.audienceMembers)
-                        val (x, y) = AudienceMemberHelper.evalSpawnPosition(index)
-                        val entity = AudienceMemberHelper.create(world, x, y, index)
+                        val (x, y) = audienceMember.evalSpawnPosition(index)
+                        val entity = audienceMember.create(world, x, y, index)
                         bBoard.audienceMembers.add(entity)
                     }
                     delay(0.5f)
@@ -244,8 +239,8 @@ class JokeGameManager : IntervalSystem(),
                         affectionDelta == 0 -> {
                             // Neutral affection.
                             runnable {
-                                AudienceMemberHelper.animateJokeReactionNeut(world, audMemb.entity)
-                                AudienceMemberHelper.updateFaceEmotion(world, audMemb.entity)
+                                audienceMember.animateJokeReactionNeut(world, audMemb.entity)
+                                audienceMember.updateFaceEmotion(world, audMemb.entity)
                             }
                             delay(0.5f)
                         }
@@ -276,14 +271,14 @@ class JokeGameManager : IntervalSystem(),
                 }
                 sequence {
                     runnable {
-                        val (x, y) = AudienceMemberHelper.getOverheadPos(world, affection.audMemb.entity)
-                        SpeechBubbleHelper.createBubble(
+                        val (x, y) = audienceMember.getOverheadPos(world, affection.audMemb.entity)
+                        speechBubble.createBubble(
                             world,
                             "{SHAKE}[#733547]" + JokeGameDataHelper.audienceReactionsNegative.random(), //TODO We need a very specific reaction here.
                             x,
                             y + 10f * UPP,
                             duration = 3f,
-                            affection = SpeechBubbleHelper.Affection.Negative
+                            affection = speechBubble.Affection.Negative
                         )
                     }
                     delay(1f)
@@ -298,14 +293,14 @@ class JokeGameManager : IntervalSystem(),
                 }
                 sequence {
                     runnable {
-                        val (x, y) = AudienceMemberHelper.getOverheadPos(world, affection.audMemb.entity)
-                        SpeechBubbleHelper.createBubble(
+                        val (x, y) = audienceMember.getOverheadPos(world, affection.audMemb.entity)
+                        speechBubble.createBubble(
                             world,
                             "{RAINBOW}[#544470]" + JokeGameDataHelper.audienceReactionsPositive.random(), //TODO We need a very specific reaction here.
                             x,
                             y + 10f * UPP,
                             duration = 3f,
-                            affection = SpeechBubbleHelper.Affection.Positive
+                            affection = speechBubble.Affection.Positive
                         )
                     }
                     delay(1f)
@@ -319,19 +314,19 @@ class JokeGameManager : IntervalSystem(),
                     runnable {
                         if (MathUtils.randomBoolean(0.75f)) {
                             // Create text reaction.
-                            val (x, y) = AudienceMemberHelper.getOverheadPos(world, affection.audMemb.entity)
+                            val (x, y) = audienceMember.getOverheadPos(world, affection.audMemb.entity)
                             val affectionSum = affection.affectionSum
                             val message: String = when {
                                 affectionSum > 0 -> "[#544470]" + JokeGameDataHelper.audienceReactionsPositive.random()
                                 affectionSum < 0 -> "[#733547]" + JokeGameDataHelper.audienceReactionsNegative.random()
                                 else -> JokeGameDataHelper.audienceReactionsNeutral.random()
                             }
-                            val bubbleAffection: SpeechBubbleHelper.Affection = when {
-                                affectionSum > 0 -> SpeechBubbleHelper.Affection.Positive
-                                affectionSum < 0 -> SpeechBubbleHelper.Affection.Negative
-                                else -> SpeechBubbleHelper.Affection.Neutral
+                            val bubbleAffection: speechBubble.Affection = when {
+                                affectionSum > 0 -> speechBubble.Affection.Positive
+                                affectionSum < 0 -> speechBubble.Affection.Negative
+                                else -> speechBubble.Affection.Neutral
                             }
-                            SpeechBubbleHelper.createBubble(
+                            speechBubble.createBubble(
                                 world,
                                 message,
                                 x,
@@ -341,19 +336,19 @@ class JokeGameManager : IntervalSystem(),
                             )
                         } else {
                             // Create emoji-only reaction.
-                            val (x, y) = AudienceMemberHelper.getOverheadPos(world, affection.audMemb.entity)
+                            val (x, y) = audienceMember.getOverheadPos(world, affection.audMemb.entity)
                             val affectionSum = affection.affectionSum
-                            val emoji: SpeechBubbleHelper.Emoji = when {
+                            val emoji: speechBubble.Emoji = when {
                                 affectionSum > 0 -> JokeGameDataHelper.audienceReactionsEmojiPositive.random()
                                 affectionSum < 0 -> JokeGameDataHelper.audienceReactionsEmojiNegative.random()
                                 else -> JokeGameDataHelper.audienceReactionsEmojiNeutral.random()
                             }
-                            val bubbleAffection: SpeechBubbleHelper.Affection = when {
-                                affectionSum > 0 -> SpeechBubbleHelper.Affection.Positive
-                                affectionSum < 0 -> SpeechBubbleHelper.Affection.Negative
-                                else -> SpeechBubbleHelper.Affection.Neutral
+                            val bubbleAffection: speechBubble.Affection = when {
+                                affectionSum > 0 -> speechBubble.Affection.Positive
+                                affectionSum < 0 -> speechBubble.Affection.Negative
+                                else -> speechBubble.Affection.Neutral
                             }
-                            SpeechBubbleHelper.createEmojiBubble(
+                            speechBubble.createEmojiBubble(
                                 world,
                                 emoji,
                                 x,
@@ -388,7 +383,7 @@ class JokeGameManager : IntervalSystem(),
                             updateScoreLabel(world, bBoard.eScoreLabel, bBoard.scoreCount)
                             animateScoreLabelPulse(world, bBoard.eScoreLabel)
 
-                            AudienceMemberHelper.animateDisappearAndDestroy(world, eAudMemb)
+                            audienceMember.animateDisappearAndDestroy(world, eAudMemb)
                         }
                         delay(1f)
                     }
@@ -467,11 +462,11 @@ class JokeGameManager : IntervalSystem(),
                 )
             }
             if (emoLevelDelta > 0) {
-                AudienceMemberHelper.animateJokeReactionPos(world, audMemb.entity)
+                audienceMember.animateJokeReactionPos(world, audMemb.entity)
             } else {
-                AudienceMemberHelper.animateJokeReactionNeg(world, audMemb.entity)
+                audienceMember.animateJokeReactionNeg(world, audMemb.entity)
             }
-            AudienceMemberHelper.updateFaceEmotion(world, audMemb.entity)
+            audienceMember.updateFaceEmotion(world, audMemb.entity)
         }
 
         fun createResultJokeView(world: FleksWorld, data: JokeStructureData): Entity {

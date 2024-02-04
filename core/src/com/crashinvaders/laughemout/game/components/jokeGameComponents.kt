@@ -1,7 +1,7 @@
 package com.crashinvaders.laughemout.game.components
 
 import com.crashinvaders.common.EntityComponent
-import com.crashinvaders.laughemout.game.controllers.AudienceMemberHelper
+import com.crashinvaders.laughemout.game.controllers.audienceMember
 import com.crashinvaders.laughemout.game.controllers.EmoMeter
 import com.github.quillraven.fleks.ComponentType
 
@@ -13,16 +13,16 @@ class Comedian : EntityComponent<Comedian>() {
 
 class AudienceMember(
     val placementIndex: Int,
-    val race: AudienceMemberHelper.Race,
-    val gender: AudienceMemberHelper.Gender,
-    val hairStyle: AudienceMemberHelper.HairStyle?,
-    val hairColor: AudienceMemberHelper.HairColor,
-    val heightLevel: AudienceMemberHelper.HeightLevel,
-    val bodyStyle: AudienceMemberHelper.BodyStyle,
-    val glasses: AudienceMemberHelper.Glasses?,
-    val hat: AudienceMemberHelper.Hat?,
-    val neck: AudienceMemberHelper.Neck?,
-    val mouth: AudienceMemberHelper.Mouth?,
+    val race: audienceMember.Race,
+    val gender: audienceMember.Gender,
+    val hairStyle: audienceMember.HairStyle?,
+    val hairColor: audienceMember.HairColor,
+    val heightLevel: audienceMember.HeightLevel,
+    val bodyStyle: audienceMember.BodyStyle,
+    val glasses: audienceMember.Glasses?,
+    val hat: audienceMember.Hat?,
+    val neck: audienceMember.Neck?,
+    val mouth: audienceMember.Mouth?,
 
     ) : EntityComponent<AudienceMember>() {
 

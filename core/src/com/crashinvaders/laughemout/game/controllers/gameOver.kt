@@ -17,12 +17,11 @@ import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.De
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.RunnableAction
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.SequenceAction
 import com.esotericsoftware.spine.*
-import com.esotericsoftware.spine.utils.SkeletonActor
 import com.github.quillraven.fleks.Entity
 import com.github.tommyettinger.textra.Font
 import com.github.tommyettinger.textra.TypingLabel
 
-object GameOverHelper {
+object gameOver {
 
     fun showGameOver(world: FleksWorld, finalScore: Int, onComplete: () -> Unit): Entity {
         val skelRenderer = world.inject<SkeletonRenderer>()

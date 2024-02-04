@@ -3,9 +3,7 @@ package com.crashinvaders.laughemout.game.controllers
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Container
-import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.Scaling
 import com.crashinvaders.common.FleksWorld
@@ -15,20 +13,18 @@ import com.crashinvaders.laughemout.game.common.DrawableUtils.fromActorPixels
 import com.crashinvaders.laughemout.game.engine.components.*
 import com.crashinvaders.laughemout.game.engine.components.render.*
 import com.crashinvaders.laughemout.game.engine.systems.MainCameraStateSystem
-import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.EntityActionSystem.Companion.actions
 import com.crashinvaders.laughemout.game.engine.systems.entityactions.actions.*
 import com.github.quillraven.fleks.Entity
 import com.github.tommyettinger.textra.Font
 import com.github.tommyettinger.textra.TypingLabel
-import ktx.actors.centerPosition
 import ktx.app.gdxError
 import ktx.scene2d.container
 import ktx.scene2d.image
 import ktx.scene2d.scene2d
 import ktx.scene2d.stack
 
-object SpeechBubbleHelper {
+object speechBubble {
 
     private var cloudId = 0
 
