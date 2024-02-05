@@ -20,8 +20,8 @@ object EnvironmentHelper {
         world.entity {
             it += Info("ComedyStage")
             it += Transform().apply {
-                localPositionX = -55f * UPP
-                localPositionY = -25f * UPP
+                localPositionX = -58f * UPP
+                localPositionY = -29f * UPP
             }
 
             val drawable = TextureRegionDrawable(atlasEnv.findRegion("stage0"))
@@ -54,8 +54,8 @@ object EnvironmentHelper {
         world.entity {
             it += Info("CrowdGround")
             it += Transform().apply {
-                localPositionX = -73f * UPP
-                localPositionY = -46f * UPP
+                localPositionX = -46f * UPP
+                localPositionY = -52f * UPP
             }
 
             val drawable = TextureRegionDrawable(atlasEnv.findRegion("ground0"))
